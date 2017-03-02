@@ -53,9 +53,9 @@ func scraper() <-chan dbRow {
 						sText := s.Children().First().Text()
 						if strings.Contains(sText, "Used:") {
 							if strings.Contains(sText, "Set") {
-								row.ballSet, _ = strconv.Atoi(strings.Split(sText, ": ")[1])
+								row.set, _ = strconv.Atoi(strings.Split(sText, ": ")[1])
 							} else {
-								row.ballMachine = strings.Split(sText, ": ")[1]
+								row.machine = strings.Split(sText, ": ")[1]
 							}
 						}
 					})
@@ -66,7 +66,7 @@ func scraper() <-chan dbRow {
 						row.num = append(row.num, num)
 					})
 
-					log.Println(row.date, row.num, row.ballMachine, row.ballSet)
+					log.Println(row.date, row.num, row.machine, row.set)
 					c <- row
 				}
 			})

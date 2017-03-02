@@ -15,8 +15,8 @@ var (
 	CREATE TABLE IF NOT EXISTS results 
 	(id INTEGER PRIMARY KEY AUTOINCREMENT, 
 	date DATETIME,
-	ball_set INT,
-	ball_machine TEXT,
+	bset INT,
+	bmachine TEXT,
 	num_1 INT, 
 	num_2 INT, 
 	num_3 INT, 
@@ -32,10 +32,10 @@ type AppDB struct {
 }
 
 type dbRow struct {
-	date        time.Time
-	ballMachine string
-	ballSet     int
-	num         []int
+	date    time.Time
+	machine string
+	set     int
+	num     []int
 }
 
 func connectDB(path string) *AppDB {
@@ -85,9 +85,9 @@ func (db *AppDB) getMachineList() ([]string, error) {
 	var (
 		result []string
 		q      = ql.NewQuery().
-			Select("DISTINCT(ball_machine)").
+			Select("DISTINCT(bmachine)").
 			From("results").
-			Order("ball_machine")
+			Order("bmachine")
 	)
 
 	rows, err := db.Query(q.SQL)
@@ -108,9 +108,9 @@ func (db *AppDB) getSetList() ([]int, error) {
 	var (
 		result []int
 		q      = ql.NewQuery().
-			Select("DISTINCT(ball_set)").
+			Select("DISTINCT(bset)").
 			From("results").
-			Order("ball_set")
+			Order("bset")
 	)
 
 	rows, err := db.Query(q.SQL)
@@ -129,7 +129,8 @@ func (db *AppDB) getSetList() ([]int, error) {
 
 func (db *AppDB) populateDB() error {
 	// Prepare statement
-	q, err := db.Prepare(ql.NewQuery().Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
+	q, err := db.Prepare(ql.NewQuery().
+		Insert("results", "date", "bset", "bmachine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
 	if err != nil {
 		return err
 	}
@@ -142,7 +143,7 @@ func (db *AppDB) populateDB() error {
 
 	// Iterate scrape data
 	for d := range scraper() {
-		if _, err := tx.Stmt(q).Exec(d.date, d.ballSet, d.ballMachine, d.num[0], d.num[1], d.num[2], d.num[3], d.num[4], d.num[5], d.num[6]); err != nil {
+		if _, err := tx.Stmt(q).Exec(d.date, d.set, d.machine, d.num[0], d.num[1], d.num[2], d.num[3], d.num[4], d.num[5], d.num[6]); err != nil {
 			tx.Rollback()
 			return err
 		}
