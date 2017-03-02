@@ -62,6 +62,7 @@ func scraper() <-chan dbRow {
 						row.num = append(row.num, num)
 					})
 
+					log.Println(row.date, row.num, row.ballMachine, row.ballSet)
 					c <- row
 				}
 			})
