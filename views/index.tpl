@@ -21,6 +21,7 @@
       </label>
       <label for="gq-submit"><input type="button" id="gq-submit" value="Show Data" /></label>
     </div>
+    <canvas id="graph-canvas"></canvas>
   </div>
 {{ template "includes/footer" }}
 

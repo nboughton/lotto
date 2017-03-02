@@ -3,7 +3,18 @@
   height: 2.5em;
 }
 
+#graph-query {
+  display: flex;
+}
 
+#graph-canvas {
+  width: 400px;
+  height: 400px;
+}
+
+footer {
+  text-align: center;
+}
 /*
 .picker__header {
   line-height: 5em;
