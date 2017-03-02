@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	//"fmt"
 	"log"
 	"time"
 
@@ -60,48 +59,49 @@ func connectDB(path string) *AppDB {
 		log.Fatal(err)
 	}
 
-	// Check if we have any data yet
-	var rows int
-	row := db.QueryRow(ql.NewQuery().Select("COUNT(*)").From("results").SQL)
-	row.Scan(&rows)
+	aDB := &AppDB{db}
 
-	if rows == 0 {
+	// Check if we have any data yet, otherwise populate the db
+	if rows, _ := aDB.getRowCount(); rows == 0 {
 		log.Println("No data, scraping site")
-		if err := populateDB(db); err != nil {
+		if err := aDB.populateDB(); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
 
-	return &AppDB{db}
+	return aDB
 }
 
-func populateDB(db *sql.DB) error {
+func (db *AppDB) getRowCount() (int, error) {
+	var rows int
+	if err := db.QueryRow(ql.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&rows); err != nil {
+		return rows, err
+	}
+
+	return rows, nil
+}
+
+func (db *AppDB) populateDB() error {
+	// Prepare statement
+	q, err := db.Prepare(ql.NewQuery().Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
+	if err != nil {
+		return err
+	}
+
 	// Begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
-	// Prepare statement
-	q, err := tx.Prepare(ql.NewQuery().Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
-	if err != nil {
-		return err
-	}
-
 	// Iterate scrape data
 	for d := range scraper() {
-		if _, err := q.Exec(d.date, d.ballSet, d.ballMachine, d.num[0], d.num[1], d.num[2], d.num[3], d.num[4], d.num[5], d.num[6]); err != nil {
-			if err := tx.Rollback(); err != nil {
-				return err
-			}
+		if _, err := tx.Stmt(q).Exec(d.date, d.ballSet, d.ballMachine, d.num[0], d.num[1], d.num[2], d.num[3], d.num[4], d.num[5], d.num[6]); err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
-
-	// Finalise commit
-	if err := tx.Commit(); err != nil {
-		return err
-	}
+	tx.Commit()
 
 	return nil
 }

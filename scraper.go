@@ -71,6 +71,7 @@ func scraper() <-chan dbRow {
 				}
 			})
 		}
+		close(c)
 	}()
 
 	return c
