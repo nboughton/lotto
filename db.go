@@ -42,7 +42,7 @@ func connectDB(path string) *AppDB {
 	// Connect to the database
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	// Disable connection pooling
@@ -51,12 +51,12 @@ func connectDB(path string) *AppDB {
 
 	// Create DB schema if it doesn't exist
 	if _, err := db.Exec(sqlSchema); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	// Set PRAGMAs
 	if _, err := db.Exec(sqlPragmas); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	aDB := &AppDB{db}
@@ -79,6 +79,52 @@ func (db *AppDB) getRowCount() (int, error) {
 	}
 
 	return rows, nil
+}
+
+func (db *AppDB) getMachineList() ([]string, error) {
+	var (
+		result []string
+		q      = ql.NewQuery().
+			Select("DISTINCT(ball_machine)").
+			From("results").
+			Order("ball_machine")
+	)
+
+	rows, err := db.Query(q.SQL)
+	if err != nil {
+		return result, err
+	}
+
+	for rows.Next() {
+		var m string
+		rows.Scan(&m)
+		result = append(result, m)
+	}
+
+	return result, nil
+}
+
+func (db *AppDB) getSetList() ([]int, error) {
+	var (
+		result []int
+		q      = ql.NewQuery().
+			Select("DISTINCT(ball_set)").
+			From("results").
+			Order("ball_set")
+	)
+
+	rows, err := db.Query(q.SQL)
+	if err != nil {
+		return result, err
+	}
+
+	for rows.Next() {
+		var s int
+		rows.Scan(&s)
+		result = append(result, s)
+	}
+
+	return result, nil
 }
 
 func (db *AppDB) populateDB() error {

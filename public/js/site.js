@@ -14,7 +14,7 @@ $(function () {
     "selectMonths": true
   }
 
-  $(".form-date").pickadate(pickerOpts)
+  $(".gq-date").pickadate(pickerOpts)
 
   /// Chart.JS
 
