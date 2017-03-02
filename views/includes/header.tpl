@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Traffic example</title>
+  <title>Lotto Silliness</title>
+  <link rel="stylesheet" type="text/css" href="/css/picker.classic.css" />
+  <link rel="stylesheet" type="text/css" href="/css/picker.classic.date.css" />
+  <link rel="stylesheet" type="text/css" href="/css/site.min.css" />
 </head>
 <body>
-  <h1>Header (views/includes/header.tpl)</h1>
+  <h1>Lotto Results Analysis</h1>
 

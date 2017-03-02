@@ -1,4 +1,6 @@
 {{ template "includes/header" }}
-  {{ .Message }} (views/index.tpl)
+  <div id="App-container">
+
+  </div>
 {{ template "includes/footer" }}
 
