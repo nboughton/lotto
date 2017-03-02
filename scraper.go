@@ -16,14 +16,18 @@ var (
 	start      = 1994
 )
 
+// scraper is a special kind of evil. It will return a stream of data as it
+// pulls all lotto result data from 1994 onwards including ball machine and
+// ball set used.
 func scraper() <-chan dbRow {
 	var c = make(chan dbRow)
 
 	go func() {
+		// Iterate each year of the archives from start
 		for y := start; y <= time.Now().Year(); y++ {
 			doc, err := goquery.NewDocument(fmt.Sprintf(archiveURL, baseURL, y))
 			if err != nil {
-				log.Println(err.Error())
+				log.Fatal(err.Error())
 				break
 			}
 
