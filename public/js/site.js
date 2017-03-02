@@ -13,8 +13,8 @@ $(function () {
       "format": "yyyy-mm-dd",
       "selectYears": true,
       "selectMonths": true,
-      "min": data.first,
-      "max": data.last
+      "min": new Date(data.first*1000),
+      "max": new Date(data.last*1000)
     }
 
     $(".gq-date").pickadate(pickerOpts)

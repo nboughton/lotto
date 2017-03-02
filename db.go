@@ -24,6 +24,7 @@ var (
 	num_5 INT, 
 	num_6 INT, 
 	bonus INT)`
+	sqliteDateFormat = "2006-01-02 15:04:05-07:00"
 )
 
 // AppDB is a wrapper for *sql.DB so we can extend it by adding our own methods
@@ -83,18 +84,20 @@ func (db *AppDB) getRowCount() (int, error) {
 
 func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 	var (
-		first time.Time
-		last  time.Time
+		first string
+		last  string
 		q     = ql.NewQuery().
 			Select("MIN(date)", "MAX(date)").
 			From("results")
 	)
 
 	if err := db.QueryRow(q.SQL).Scan(&first, &last); err != nil {
-		return first, last, err
+		return time.Now(), time.Now(), err
 	}
 
-	return first, last, nil
+	f, _ := time.Parse(sqliteDateFormat, first)
+	l, _ := time.Parse(sqliteDateFormat, last)
+	return f, l, nil
 }
 
 func (db *AppDB) getMachineList() ([]string, error) {
