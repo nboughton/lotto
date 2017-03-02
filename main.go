@@ -1,16 +1,26 @@
 package main
 
 import (
-  "github.com/pilu/traffic"
+	"flag"
+
+	"github.com/pilu/traffic"
 )
 
-var router *traffic.Router
+var (
+	router *traffic.Router
+	db     = connectDB("results.db")
+)
 
 func init() {
-  router = traffic.New()
-  router.Get("/", RootHandler)
+	p := flag.Int("p", 3002, "Set the port the application listens on")
+	flag.Parse()
+
+	traffic.SetPort(*p)
+
+	router = traffic.New()
+	router.Get("/", handlerRoot)
 }
 
 func main() {
-  router.Run()
+	router.Run()
 }

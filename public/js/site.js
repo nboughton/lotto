@@ -16,5 +16,6 @@ $(function () {
 
   $(".form-date").pickadate(pickerOpts)
 
+  /// Chart.JS
 
 })
