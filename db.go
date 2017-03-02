@@ -81,6 +81,22 @@ func (db *AppDB) getRowCount() (int, error) {
 	return rows, nil
 }
 
+func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
+	var (
+		first time.Time
+		last  time.Time
+		q     = ql.NewQuery().
+			Select("MIN(date)", "MAX(date)").
+			From("results")
+	)
+
+	if err := db.QueryRow(q.SQL).Scan(&first, &last); err != nil {
+		return first, last, err
+	}
+
+	return first, last, nil
+}
+
 func (db *AppDB) getMachineList() ([]string, error) {
 	var (
 		result []string

@@ -19,6 +19,7 @@ func init() {
 
 	router = traffic.New()
 	router.Get("/", handlerRoot)
+	router.Get("/api/range", handlerDataRange)
 }
 
 func main() {

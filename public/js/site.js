@@ -8,13 +8,18 @@ $(function () {
   }
 
   /// Pickadate.js
-  var pickerOpts = {
-    "format": "yyyy-mm-dd",
-    "selectYears": true,
-    "selectMonths": true
-  }
+  $.getJSON("/api/range", function (data) {
+    var pickerOpts = {
+      "format": "yyyy-mm-dd",
+      "selectYears": true,
+      "selectMonths": true,
+      "min": data.first,
+      "max": data.last
+    }
 
-  $(".gq-date").pickadate(pickerOpts)
+    $(".gq-date").pickadate(pickerOpts)
+  })
+
 
   /// Chart.JS
 
