@@ -22,7 +22,7 @@ func init() {
 	router.Get("/api/range", handlerDataRange)
 	router.Get("/api/average", handlerAverageNumbers)
 	router.Get("/api/sets", handlerListSets)
-	router.Get("/api/machines", handlerListMachines)
+	//router.Get("/api/machines", handlerListMachines) // Not currently in use
 }
 
 func main() {

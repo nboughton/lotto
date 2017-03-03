@@ -31,14 +31,12 @@ $(function () {
     $(defs.dateClass).pickadate(pickerOpts)
   })
 
-  /// Rewrite option lists so that only valid combinations are allowed
+  /// Redraw options list for Sets depending on Machine selection
   $(defs.machineSelect).change(function (e) {
-    // Redraw options list for Sets depending on Machine selection
     var params = {
       machine: $(defs.machineSelect).val()
     }
     $.getJSON("/api/sets", params, function (data) {
-
       var el = $(defs.setSelect)
       el.empty()
       el.append('<option value="0">All</option>')
@@ -47,23 +45,6 @@ $(function () {
       })
     })
   })
-
-  /* We don't really need this
-    $(defs.setSelect).change(function (e) {
-      // Redraw options list for Machines on Set selection
-      var params = {
-        set: $(defs.setSelect).val()
-      }
-      $.getJSON("/api/machines", params, function (data) {
-        var el = $(defs.machineSelect)
-        el.empty()
-        el.append('<option value="all">All</option>')
-        $.each(data, function (i, n) {
-          el.append('<option value="' + n + '">' + n + '</option>')
-        })
-      })
-    })
-    */
 
   /// Query Exec
   $("#gq-submit").click(function (e) {
