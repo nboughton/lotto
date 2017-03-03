@@ -15,8 +15,8 @@ var (
 	CREATE TABLE IF NOT EXISTS results 
 	(id INTEGER PRIMARY KEY AUTOINCREMENT, 
 	date DATETIME,
-	bset INT,
-	bmachine TEXT,
+	ball_set INT,
+	ball_machine TEXT,
 	num_1 INT, 
 	num_2 INT, 
 	num_3 INT, 
@@ -40,11 +40,9 @@ type dbRow struct {
 }
 
 type queryParams struct {
-	Type    string
-	Start   time.Time
-	End     time.Time
-	Machine string
-	Set     int
+	Type, Machine string
+	Set           int
+	Start, End    string
 }
 
 func connectDB(path string) *AppDB {
@@ -83,8 +81,7 @@ func connectDB(path string) *AppDB {
 
 func (db *AppDB) getAverageNumbers(p queryParams) ([]int, error) {
 	var (
-		results = make([]int, 7)
-		//values  []interface{}
+		r = make([]int, 7)
 		q = ql.NewQuery().
 			Select("SUM(num_1)/COUNT(num_1)",
 				"SUM(num_2)/COUNT(num_2)",
@@ -96,32 +93,44 @@ func (db *AppDB) getAverageNumbers(p queryParams) ([]int, error) {
 			From("results")
 	)
 
-	log.Println("getAverageNumbers: ", p)
-
-	cond := ql.CondMap{}
+	c := ql.NewFilterSet()
+	c.Add(ql.Between, "date:DATE")
 	if p.Machine != "all" && p.Set != 0 {
-		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bmachine"})
-		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bset"})
-		if err := db.QueryRow(q.Where(cond).SQL, p.Machine, p.Set).Scan(&results); err != nil {
-			return results, err
+		c.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")
+		log.Println(q.Where(c).SQL, p.Machine, p.Set, p.Start, p.End)
+
+		if err := db.QueryRow(q.Where(c).SQL, p.Machine, p.Set, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+			log.Println(err)
+			return r, err
 		}
 	} else if p.Machine != "all" && p.Set == 0 {
-		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bmachine"})
-		if err := db.QueryRow(q.Where(cond).SQL, p.Machine).Scan(&results); err != nil {
-			return results, err
+		c.Add(ql.Eq, "ball_machine")
+		log.Println(q.Where(c).SQL, p.Machine, p.Start, p.End)
+		if err := db.QueryRow(q.Where(c).SQL, p.Machine, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+			log.Println(err)
+			return r, err
 		}
 	} else if p.Machine == "all" && p.Set != 0 {
-		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bset"})
-		if err := db.QueryRow(q.Where(cond).SQL, p.Set).Scan(&results); err != nil {
-			return results, err
+		c.Add(ql.Eq, "ball_set")
+		log.Println(q.Where(c).SQL, p.Set, p.Start, p.End)
+		if err := db.QueryRow(q.Where(c).SQL, p.Set, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+			log.Println(err)
+			return r, err
 		}
 	} else {
-		if err := db.QueryRow(q.Where(cond).SQL).Scan(&results); err != nil {
-			return results, err
+		qu := "SELECT SUM(num_1)/COUNT(num_1), SUM(num_2)/COUNT(num_2), SUM(num_3)/COUNT(num_3), SUM(num_4)/COUNT(num_4), SUM(num_5)/COUNT(num_5), SUM(num_6)/COUNT(num_6), SUM(bonus)/COUNT(bonus) FROM results WHERE DATE(date) BETWEEN DATE(?) AND DATE(?)"
+		if qu == q.Where(c).SQL {
+			log.Println("THEY FUCKING MATCH")
+			qu = q.Where(c).SQL
+		}
+
+		if err := db.QueryRow(qu, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+			log.Println(err)
+			return r, err
 		}
 	}
 
-	return results, nil
+	return r, nil
 }
 
 func (db *AppDB) getRowCount() (int, error) {
@@ -151,16 +160,23 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 	return f, l, nil
 }
 
-func (db *AppDB) getMachineList() ([]string, error) {
+func (db *AppDB) getMachineList(bySet int) ([]string, error) {
 	var (
 		result []string
 		q      = ql.NewQuery().
-			Select("DISTINCT(bmachine)").
-			From("results").
-			Order("bmachine")
+			Select("DISTINCT(ball_machine)").
+			From("results")
+		rows *sql.Rows
+		err  error
 	)
 
-	rows, err := db.Query(q.SQL)
+	if bySet != 0 {
+		c := ql.NewFilterSet().Add(ql.Eq, "ball_set")
+		q.Where(c).Order("ball_machine")
+		rows, err = db.Query(q.SQL, bySet)
+	} else {
+		rows, err = db.Query(q.Order("ball_machine").SQL)
+	}
 	if err != nil {
 		return result, err
 	}
@@ -174,16 +190,24 @@ func (db *AppDB) getMachineList() ([]string, error) {
 	return result, nil
 }
 
-func (db *AppDB) getSetList() ([]int, error) {
+func (db *AppDB) getSetList(byMachine string) ([]int, error) {
 	var (
 		result []int
 		q      = ql.NewQuery().
-			Select("DISTINCT(bset)").
-			From("results").
-			Order("bset")
+			Select("DISTINCT(ball_set)").
+			From("results")
+		rows *sql.Rows
+		err  error
+		//Order("ball_set")
 	)
 
-	rows, err := db.Query(q.SQL)
+	if byMachine != "all" {
+		c := ql.NewFilterSet().Add(ql.Eq, "ball_machine")
+		q.Where(c).Order("ball_set")
+		rows, err = db.Query(q.SQL, byMachine)
+	} else {
+		rows, err = db.Query(q.Order("ball_set").SQL)
+	}
 	if err != nil {
 		return result, err
 	}
@@ -200,7 +224,7 @@ func (db *AppDB) getSetList() ([]int, error) {
 func (db *AppDB) populateDB() error {
 	// Prepare statement
 	q, err := db.Prepare(ql.NewQuery().
-		Insert("results", "date", "bset", "bmachine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
+		Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
 	if err != nil {
 		return err
 	}

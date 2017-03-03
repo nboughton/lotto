@@ -5,7 +5,6 @@ import (
 	//"time"
 
 	"github.com/pilu/traffic"
-	"log"
 )
 
 var (
@@ -13,13 +12,17 @@ var (
 )
 
 func handlerAverageNumbers(w traffic.ResponseWriter, r *traffic.Request) {
-	var (
-		p       queryParams
-		start   = r.Param("start")
-		end     = r.Param("end")
-		set, _  = strconv.Atoi(r.Param("set"))
-		machine = r.Param("machine")
-	)
+	var p queryParams
+	p.Start = r.Param("start")
+	p.End = r.Param("end")
+	p.Set, _ = strconv.Atoi(r.Param("set"))
+	p.Machine = r.Param("machine")
 
-	log.Println(p, start, end, set, machine)
+	res, err := db.getAverageNumbers(p)
+	if err != nil {
+		//w.WriteJSON("Invalid machine/set combination")
+		w.WriteJSON(err.Error())
+	} else {
+		w.WriteJSON(res)
+	}
 }

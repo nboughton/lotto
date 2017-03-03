@@ -21,19 +21,24 @@ $(function () {
   })
 
   /// Query Exec
-  $("gq-submit").on("click", function (e) {
-    var qType = $("gq-query-type").val()
+  $("#gq-submit").click(function (e) {
     var params = {
-      start: $("gq-start-date").val(),
-      end: $("gq-end-date").val(),
-      set: $("gq-set-filter").val(),
-      machine: $("gq-machine-filter").val()
+      start: $("#gq-start-date").val(),
+      end: $("#gq-end-date").val(),
+      set: $("#gq-set-filter").val(),
+      machine: $("#gq-machine-filter").val()
     }
-
-    $.getJSON("/api/average", params, function (data) {
-      console.log(data)
-    })
-
+    switch ($("#gq-query-type").val()) {
+      case "average":
+        $.getJSON("/api/average", params, function (data) {
+          $("#gq-query-results").empty()
+          $("#gq-query-results").append('<h1 id="gq-average-num-res" class="centered"></h1>')
+          for (i = 0; i < data.length; i++) {
+            $("#gq-average-num-res").append("<span class='num'>" + data[i] + "</span>")
+          }
+          console.log(data)
+        })
+    }
   })
   /// Chart.JS
 
