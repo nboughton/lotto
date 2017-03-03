@@ -5,6 +5,7 @@
 
 #graph-query {
   display: flex;
+  flex-flow: column;
 }
 
 #graph-canvas {
