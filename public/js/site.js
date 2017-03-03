@@ -1,4 +1,15 @@
 $(function () {
+  // Define a map for key ids/classes in case I decide to change them later
+  var defs = {
+    machineSelect: "#gq-machine-filter",
+    setSelect: "#gq-set-filter",
+    dateClass: ".gq-date",
+    dateStart: "#gq-start-date",
+    dateEnd: "#gq-end-date",
+    results: "#gq-query-results",
+    resultsAvg: "#gq-average-num-res"
+  }
+
   /// Utility Functions
   // Return a unix timestamp for n number of days ago
   function nDaysAgo(n) {
@@ -17,39 +28,62 @@ $(function () {
       "max": new Date(data.last * 1000)
     }
 
-    $(".gq-date").pickadate(pickerOpts)
+    $(defs.dateClass).pickadate(pickerOpts)
   })
 
   /// Rewrite option lists so that only valid combinations are allowed
-  $("#gq-machine-filter").change(function (e) {
+  $(defs.machineSelect).change(function (e) {
     // Redraw options list for Sets depending on Machine selection
     var params = {
-      machine: $("#gq-machine-filter").val()
+      machine: $(defs.machineSelect).val()
     }
     $.getJSON("/api/sets", params, function (data) {
 
+      var el = $(defs.setSelect)
+      el.empty()
+      el.append('<option value="0">All</option>')
+      $.each(data, function (i, n) {
+        el.append('<option value="' + n + '">' + n + '</option>')
+      })
     })
   })
+
+  /* We don't really need this
+    $(defs.setSelect).change(function (e) {
+      // Redraw options list for Machines on Set selection
+      var params = {
+        set: $(defs.setSelect).val()
+      }
+      $.getJSON("/api/machines", params, function (data) {
+        var el = $(defs.machineSelect)
+        el.empty()
+        el.append('<option value="all">All</option>')
+        $.each(data, function (i, n) {
+          el.append('<option value="' + n + '">' + n + '</option>')
+        })
+      })
+    })
+    */
 
   /// Query Exec
   $("#gq-submit").click(function (e) {
     var params = {
-      start: $("#gq-start-date").val(),
-      end: $("#gq-end-date").val(),
-      set: $("#gq-set-filter").val(),
-      machine: $("#gq-machine-filter").val()
+      start: $(defs.dateStart).val(),
+      end: $(defs.dateEnd).val(),
+      set: $(defs.setSelect).val(),
+      machine: $(defs.machineSelect).val()
     }
     switch ($("#gq-query-type").val()) {
       case "average":
         $.getJSON("/api/average", params, function (data) {
-          $("#gq-query-results").empty()
-          $("#gq-query-results").append('<h1 id="gq-average-num-res" class="centered"></h1>')
+          $(defs.results).empty()
+          $(defs.results).append('<h1 id="gq-average-num-res" class="centered"></h1>')
           for (i = 0; i < data.length; i++) {
-            $("#gq-average-num-res").append("<span class='num'>" + data[i] + "</span>")
+            $(defs.resultsAvg).append("<span class='num'>" + data[i] + "</span>")
           }
         })
     }
   })
-  /// Chart.JS
 
+  /// Chart.JS
 })

@@ -21,6 +21,8 @@ func init() {
 	router.Get("/", handlerRoot)
 	router.Get("/api/range", handlerDataRange)
 	router.Get("/api/average", handlerAverageNumbers)
+	router.Get("/api/sets", handlerListSets)
+	router.Get("/api/machines", handlerListMachines)
 }
 
 func main() {
