@@ -39,6 +39,14 @@ type dbRow struct {
 	num     []int
 }
 
+type queryParams struct {
+	Type    string
+	Start   time.Time
+	End     time.Time
+	Machine string
+	Set     int
+}
+
 func connectDB(path string) *AppDB {
 	// Connect to the database
 	db, err := sql.Open("sqlite3", path)
@@ -71,6 +79,49 @@ func connectDB(path string) *AppDB {
 	}
 
 	return aDB
+}
+
+func (db *AppDB) getAverageNumbers(p queryParams) ([]int, error) {
+	var (
+		results = make([]int, 7)
+		//values  []interface{}
+		q = ql.NewQuery().
+			Select("SUM(num_1)/COUNT(num_1)",
+				"SUM(num_2)/COUNT(num_2)",
+				"SUM(num_3)/COUNT(num_3)",
+				"SUM(num_4)/COUNT(num_4)",
+				"SUM(num_5)/COUNT(num_5)",
+				"SUM(num_6)/COUNT(num_6)",
+				"SUM(bonus)/COUNT(bonus)").
+			From("results")
+	)
+
+	log.Println("getAverageNumbers: ", p)
+
+	cond := ql.CondMap{}
+	if p.Machine != "all" && p.Set != 0 {
+		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bmachine"})
+		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bset"})
+		if err := db.QueryRow(q.Where(cond).SQL, p.Machine, p.Set).Scan(&results); err != nil {
+			return results, err
+		}
+	} else if p.Machine != "all" && p.Set == 0 {
+		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bmachine"})
+		if err := db.QueryRow(q.Where(cond).SQL, p.Machine).Scan(&results); err != nil {
+			return results, err
+		}
+	} else if p.Machine == "all" && p.Set != 0 {
+		cond = append(cond, ql.CondStruct{Op: ql.Eq, Field: "bset"})
+		if err := db.QueryRow(q.Where(cond).SQL, p.Set).Scan(&results); err != nil {
+			return results, err
+		}
+	} else {
+		if err := db.QueryRow(q.Where(cond).SQL).Scan(&results); err != nil {
+			return results, err
+		}
+	}
+
+	return results, nil
 }
 
 func (db *AppDB) getRowCount() (int, error) {

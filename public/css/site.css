@@ -3,12 +3,32 @@
   height: 2.5em;
 }
 
+#app-container {
+  display: flex;
+  flex-flow: row;
+}
+
 #graph-query {
   display: flex;
   flex-flow: column;
 }
 
-#graph-canvas {
+.gq-input {
+  width: 100%;
+  padding: 3px;
+}
+
+.gq-input label {
+  align-self: flex-start;
+}
+
+.gq-input input, .gq-input select {
+  align-self: flex-end;
+  margin-left: auto;
+  float: right;
+}
+
+.graph-canvas {
   width: 400px;
   height: 400px;
 }

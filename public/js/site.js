@@ -13,14 +13,28 @@ $(function () {
       "format": "yyyy-mm-dd",
       "selectYears": true,
       "selectMonths": true,
-      "min": new Date(data.first*1000),
-      "max": new Date(data.last*1000)
+      "min": new Date(data.first * 1000),
+      "max": new Date(data.last * 1000)
     }
 
     $(".gq-date").pickadate(pickerOpts)
   })
 
+  /// Query Exec
+  $("gq-submit").on("click", function (e) {
+    var qType = $("gq-query-type").val()
+    var params = {
+      start: $("gq-start-date").val(),
+      end: $("gq-end-date").val(),
+      set: $("gq-set-filter").val(),
+      machine: $("gq-machine-filter").val()
+    }
 
+    $.getJSON("/api/average", params, function (data) {
+      console.log(data)
+    })
+
+  })
   /// Chart.JS
 
 })
