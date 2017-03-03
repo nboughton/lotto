@@ -35,7 +35,7 @@ type AppDB struct {
 type dbRow struct {
 	Date    time.Time `json:"date"`
 	Machine string    `json:"machine"`
-	Set     int       `json:"machine"`
+	Set     int       `json:"set"`
 	Num     []int     `json:"num"`
 }
 
@@ -79,10 +79,55 @@ func connectDB(path string) *AppDB {
 	return aDB
 }
 
-func (db *AppDB) getResults(p queryParams) ([]dbRow, error) {
-	var r []dbRow
+func (db *AppDB) getResults(p queryParams) <-chan dbRow {
+	var c = make(chan dbRow)
 
-	return r, nil
+	go func() {
+		var (
+			rows *sql.Rows
+			err  error
+			q    = ql.NewQuery().
+				Select("date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
+				From("results")
+		)
+
+		f := ql.NewFilterSet().Add(ql.Between, "date:DATE")
+		if p.Machine != "all" && p.Set != 0 {
+			qu := q.Where(f.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")).SQL
+
+			rows, err = db.Query(qu, p.Start, p.End, p.Machine, p.Set)
+		} else if p.Machine != "all" && p.Set == 0 {
+			qu := q.Where(f.Add(ql.Eq, "ball_machine")).SQL
+
+			rows, err = db.Query(qu, p.Start, p.End, p.Machine)
+		} else if p.Machine == "all" && p.Set != 0 {
+			qu := q.Where(f.Add(ql.Eq, "ball_set")).SQL
+
+			rows, err = db.Query(qu, p.Start, p.End, p.Set)
+		} else {
+			qu := q.Where(f).SQL
+
+			rows, err = db.Query(qu, p.Start, p.End)
+		}
+
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		for rows.Next() {
+			var r dbRow
+			r.Num = make([]int, 7)
+			if err := rows.Scan(&r.Date, &r.Machine, &r.Set, &r.Num[0], &r.Num[1], &r.Num[2], &r.Num[3], &r.Num[4], &r.Num[5], &r.Num[6]); err != nil {
+				log.Println(err.Error())
+			}
+
+			c <- r
+		}
+
+		close(c)
+	}()
+
+	return c
 }
 
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
@@ -99,8 +144,7 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 			From("results")
 	)
 
-	c := ql.NewFilterSet()
-	c.Add(ql.Between, "date:DATE")
+	c := ql.NewFilterSet().Add(ql.Between, "date:DATE")
 	if p.Machine != "all" && p.Set != 0 {
 		c.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")
 		qu := q.Where(c).SQL
