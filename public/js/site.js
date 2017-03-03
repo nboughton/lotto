@@ -55,8 +55,8 @@ $(function () {
       machine: $(defs.machineSelect).val()
     }
     switch ($("#gq-query-type").val()) {
-      case "average":
-        $.getJSON("/api/average", params, function (data) {
+      case "results/average":
+        $.getJSON("/api/results/average", params, function (data) {
           $(defs.results).empty()
           $(defs.results).append('<h1 id="gq-average-num-res" class="centered"></h1>')
           for (i = 0; i < data.length; i++) {

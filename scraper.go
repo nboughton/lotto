@@ -42,7 +42,7 @@ func scraper() <-chan dbRow {
 
 					// Get details page to extract ball set and ball machine
 					href, _ := d.Find("a").Attr("href")
-					row.date, _ = time.Parse("02-01-2006", strings.Replace(href, "/lotto/results-", "", -1))
+					row.Date, _ = time.Parse("02-01-2006", strings.Replace(href, "/lotto/results-", "", -1))
 
 					// Extract machine and set
 					mDoc, err := goquery.NewDocument(fmt.Sprintf("%s%s", baseURL, href))
@@ -53,9 +53,9 @@ func scraper() <-chan dbRow {
 						sText := s.Children().First().Text()
 						if strings.Contains(sText, "Used:") {
 							if strings.Contains(sText, "Set") {
-								row.set, _ = strconv.Atoi(strings.Split(sText, ": ")[1])
+								row.Set, _ = strconv.Atoi(strings.Split(sText, ": ")[1])
 							} else {
-								row.machine = strings.Split(sText, ": ")[1]
+								row.Machine = strings.Split(sText, ": ")[1]
 							}
 						}
 					})
@@ -63,10 +63,10 @@ func scraper() <-chan dbRow {
 					// Extract numbers
 					n.Find("div .result").Each(func(i int, s *goquery.Selection) {
 						num, _ := strconv.Atoi(s.Text())
-						row.num = append(row.num, num)
+						row.Num = append(row.Num, num)
 					})
 
-					log.Println(row.date, row.num, row.machine, row.set)
+					log.Println(row.Date, row.Num, row.Machine, row.Set)
 					c <- row
 				}
 			})

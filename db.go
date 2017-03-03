@@ -33,10 +33,10 @@ type AppDB struct {
 }
 
 type dbRow struct {
-	date    time.Time
-	machine string
-	set     int
-	num     []int
+	Date    time.Time `json:"date"`
+	Machine string    `json:"machine"`
+	Set     int       `json:"machine"`
+	Num     []int     `json:"num"`
 }
 
 type queryParams struct {
@@ -79,7 +79,13 @@ func connectDB(path string) *AppDB {
 	return aDB
 }
 
-func (db *AppDB) getAverageNumbers(p queryParams) ([]int, error) {
+func (db *AppDB) getResults(p queryParams) ([]dbRow, error) {
+	var r []dbRow
+
+	return r, nil
+}
+
+func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	var (
 		r = make([]int, 7)
 		q = ql.NewQuery().
@@ -157,11 +163,11 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 func (db *AppDB) getMachineList(bySet int) ([]string, error) {
 	var (
 		result []string
+		rows   *sql.Rows
+		err    error
 		q      = ql.NewQuery().
 			Select("DISTINCT(ball_machine)").
 			From("results")
-		rows *sql.Rows
-		err  error
 	)
 
 	if bySet != 0 {
@@ -187,12 +193,11 @@ func (db *AppDB) getMachineList(bySet int) ([]string, error) {
 func (db *AppDB) getSetList(byMachine string) ([]int, error) {
 	var (
 		result []int
+		rows   *sql.Rows
+		err    error
 		q      = ql.NewQuery().
 			Select("DISTINCT(ball_set)").
 			From("results")
-		rows *sql.Rows
-		err  error
-		//Order("ball_set")
 	)
 
 	if byMachine != "all" {
@@ -231,7 +236,7 @@ func (db *AppDB) populateDB() error {
 
 	// Iterate scrape data
 	for d := range scraper() {
-		if _, err := tx.Stmt(q).Exec(d.date, d.set, d.machine, d.num[0], d.num[1], d.num[2], d.num[3], d.num[4], d.num[5], d.num[6]); err != nil {
+		if _, err := tx.Stmt(q).Exec(d.Date, d.Set, d.Machine, d.Num[0], d.Num[1], d.Num[2], d.Num[3], d.Num[4], d.Num[5], d.Num[6]); err != nil {
 			tx.Rollback()
 			return err
 		}

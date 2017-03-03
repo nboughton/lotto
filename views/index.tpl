@@ -3,7 +3,7 @@
     <div id="graph-query" class="gq">
       <span class="gq-input"><label for="gq-query-type">Query Type: </label>
         <select id="gq-query-type">
-          <option value="average">Average Results</option>
+          <option value="results/average">Average Results</option>
         </select>
       </span>
       <span class="gq-input">
