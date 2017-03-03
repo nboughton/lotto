@@ -28,7 +28,7 @@
   align-self: flex-start;
 }
 
-.gq-input input, .gq-input select {
+.gq-input > input, .gq-input > select {
   align-self: flex-end;
   margin-left: auto;
   float: right;

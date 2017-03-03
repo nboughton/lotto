@@ -20,6 +20,17 @@ $(function () {
     $(".gq-date").pickadate(pickerOpts)
   })
 
+  /// Rewrite option lists so that only valid combinations are allowed
+  $("#gq-machine-filter").change(function (e) {
+    // Redraw options list for Sets depending on Machine selection
+    var params = {
+      machine: $("#gq-machine-filter").val()
+    }
+    $.getJSON("/api/sets", params, function (data) {
+
+    })
+  })
+
   /// Query Exec
   $("#gq-submit").click(function (e) {
     var params = {
@@ -36,7 +47,6 @@ $(function () {
           for (i = 0; i < data.length; i++) {
             $("#gq-average-num-res").append("<span class='num'>" + data[i] + "</span>")
           }
-          console.log(data)
         })
     }
   })

@@ -6,9 +6,16 @@
           <option value="average">Average Results</option>
         </select>
       </span>
-      <span class="gq-input"><label for="gq-start-date">Start Date: </label><input type="date" class="gq-date" id="gq-start-date" /></span>
-      <span class="gq-input"><label for="gq-end-date">End Date: </label><input type="date" class="gq-date" id="gq-end-date" /></span>
-      <span class="gq-input"><label for="gq-machine-filter">Filter by Machine: </label>
+      <span class="gq-input">
+        <label for="gq-start-date">Start Date: </label>
+        <input type="date" class="gq-date" id="gq-start-date" value="{{ .Start }}" />
+      </span>
+      <span class="gq-input">
+        <label for="gq-end-date">End Date: </label>
+        <input type="date" class="gq-date" id="gq-end-date" value="{{ .End }}" />
+      </span>
+      <span class="gq-input">
+        <label for="gq-machine-filter">Filter by Machine: </label>
         <select id="gq-machine-filter">
           <option value="all">All</option>
           {{ range .Machines }}
@@ -16,7 +23,8 @@
           {{ end }}
         </select>
       </span>
-      <span class="gq-input"><label for="gq-set-filter">Filter by Set: </label>
+      <span class="gq-input">
+        <label for="gq-set-filter">Filter by Set: </label>
         <select id="gq-set-filter">
           <option value="0">All</option>
           {{ range .Sets }}

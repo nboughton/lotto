@@ -8,8 +8,9 @@ import (
 
 // PageData is used by the index template to populate things and stuff
 type PageData struct {
-	Machines []string
-	Sets     []int
+	Machines   []string
+	Sets       []int
+	Start, End string
 }
 
 func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
@@ -23,5 +24,10 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 		log.Println(err)
 	}
 
-	w.Render("index", &PageData{Machines: machines, Sets: sets})
+	s, e, err := db.getDataRange()
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.Render("index", &PageData{machines, sets, s.String(), e.String()})
 }

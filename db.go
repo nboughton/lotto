@@ -97,35 +97,29 @@ func (db *AppDB) getAverageNumbers(p queryParams) ([]int, error) {
 	c.Add(ql.Between, "date:DATE")
 	if p.Machine != "all" && p.Set != 0 {
 		c.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")
-		log.Println(q.Where(c).SQL, p.Machine, p.Set, p.Start, p.End)
+		qu := q.Where(c).SQL
 
-		if err := db.QueryRow(q.Where(c).SQL, p.Machine, p.Set, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			log.Println(err)
+		if err := db.QueryRow(qu, p.Start, p.End, p.Machine, p.Set).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
 			return r, err
 		}
 	} else if p.Machine != "all" && p.Set == 0 {
 		c.Add(ql.Eq, "ball_machine")
-		log.Println(q.Where(c).SQL, p.Machine, p.Start, p.End)
-		if err := db.QueryRow(q.Where(c).SQL, p.Machine, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			log.Println(err)
+		qu := q.Where(c).SQL
+
+		if err := db.QueryRow(qu, p.Start, p.End, p.Machine).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
 			return r, err
 		}
 	} else if p.Machine == "all" && p.Set != 0 {
 		c.Add(ql.Eq, "ball_set")
-		log.Println(q.Where(c).SQL, p.Set, p.Start, p.End)
-		if err := db.QueryRow(q.Where(c).SQL, p.Set, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			log.Println(err)
+		qu := q.Where(c).SQL
+
+		if err := db.QueryRow(qu, p.Start, p.End, p.Set).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
 			return r, err
 		}
 	} else {
-		qu := "SELECT SUM(num_1)/COUNT(num_1), SUM(num_2)/COUNT(num_2), SUM(num_3)/COUNT(num_3), SUM(num_4)/COUNT(num_4), SUM(num_5)/COUNT(num_5), SUM(num_6)/COUNT(num_6), SUM(bonus)/COUNT(bonus) FROM results WHERE DATE(date) BETWEEN DATE(?) AND DATE(?)"
-		if qu == q.Where(c).SQL {
-			log.Println("THEY FUCKING MATCH")
-			qu = q.Where(c).SQL
-		}
+		qu := q.Where(c).SQL
 
 		if err := db.QueryRow(qu, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			log.Println(err)
 			return r, err
 		}
 	}
