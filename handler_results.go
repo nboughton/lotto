@@ -6,10 +6,6 @@ import (
 	"github.com/pilu/traffic"
 )
 
-var (
-	jsTimeFormat = "2006-01-02"
-)
-
 func handlerResults(w traffic.ResponseWriter, r *traffic.Request) {
 	p := parseQueryParams(r)
 	res := []dbRow{}

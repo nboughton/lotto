@@ -24,7 +24,7 @@ var (
 	num_5 INT, 
 	num_6 INT, 
 	bonus INT)`
-	sqliteDateFormat = "2006-01-02 15:04:05-07:00"
+	formatSqlite = "2006-01-02 15:04:05-07:00"
 )
 
 // AppDB is a wrapper for *sql.DB so we can extend it by adding our own methods
@@ -199,8 +199,8 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 		return time.Now(), time.Now(), err
 	}
 
-	f, _ := time.Parse(sqliteDateFormat, first)
-	l, _ := time.Parse(sqliteDateFormat, last)
+	f, _ := time.Parse(formatSqlite, first)
+	l, _ := time.Parse(formatSqlite, last)
 	return f, l, nil
 }
 
