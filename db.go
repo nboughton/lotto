@@ -93,19 +93,19 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 
 		f := ql.NewFilterSet().Add(ql.Between, "date:DATE")
 		if p.Machine != "all" && p.Set != 0 {
-			qu := q.Where(f.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")).SQL
+			qu := q.Where(f.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")).Order("DATE(date)").SQL
 
 			rows, err = db.Query(qu, p.Start, p.End, p.Machine, p.Set)
 		} else if p.Machine != "all" && p.Set == 0 {
-			qu := q.Where(f.Add(ql.Eq, "ball_machine")).SQL
+			qu := q.Where(f.Add(ql.Eq, "ball_machine")).Order("DATE(date)").SQL
 
 			rows, err = db.Query(qu, p.Start, p.End, p.Machine)
 		} else if p.Machine == "all" && p.Set != 0 {
-			qu := q.Where(f.Add(ql.Eq, "ball_set")).SQL
+			qu := q.Where(f.Add(ql.Eq, "ball_set")).Order("DATE(date)").SQL
 
 			rows, err = db.Query(qu, p.Start, p.End, p.Set)
 		} else {
-			qu := q.Where(f).SQL
+			qu := q.Where(f).Order("DATE(date)").SQL
 
 			rows, err = db.Query(qu, p.Start, p.End)
 		}

@@ -7,5 +7,5 @@
   <link rel="stylesheet" type="text/css" href="/css/site.min.css" />
 </head>
 <body>
-  <h1>Random Number Analysis</h1>
+  <h1>Analysis</h1>
 

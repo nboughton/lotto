@@ -38,9 +38,9 @@
   padding: 5px;
 }
 
-.graph-canvas {
-  width: 400px;
-  height: 400px;
+#gq-results-graph {
+  width: 100%;
+  height: 600px;
 }
 
 footer {

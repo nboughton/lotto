@@ -29,5 +29,5 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 		log.Println(err)
 	}
 
-	w.Render("index", &PageData{machines, sets, s.String(), e.String()})
+	w.Render("index", &PageData{machines, sets, s.Format(formatYYYYMMDD), e.Format(formatYYYYMMDD)})
 }
