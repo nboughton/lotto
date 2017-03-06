@@ -1,41 +1,46 @@
 {{ template "includes/header" }}
-  <div id="app-container">
-    <div id="graph-query" class="gq">
-      <span class="gq-input"><label for="gq-query-type">Query Type: </label>
-        <select id="gq-query-type">
+  <div id="container">
+    <section id="query">
+      <span class="form-element">
+        <label for="query-type">Query Type: </label>
+        <select id="query-type">
           <option value="results/average">Average Results</option>
           <option value="results/graph">Graph Results</option>
         </select>
       </span>
-      <span class="gq-input">
-        <label for="gq-start-date">Start Date: </label>
-        <input type="date" class="gq-date" id="gq-start-date" value="{{ .Start }}" />
+      <span class="form-element">
+        <label for="date-start">Start: </label>
+        <input type="date" class="form-date" id="date-start" value="{{ .Start }}" />
       </span>
-      <span class="gq-input">
-        <label for="gq-end-date">End Date: </label>
-        <input type="date" class="gq-date" id="gq-end-date" value="{{ .End }}" />
+      <span class="form-element">
+        <label for="date-end">End: </label>
+        <input type="date" class="form-date" id="date-end" value="{{ .End }}" />
       </span>
-      <span class="gq-input">
-        <label for="gq-machine-filter">Filter by Machine: </label>
-        <select id="gq-machine-filter">
+      <span class="form-element">
+        <label for="filter-machine">Machine: </label>
+        <select id="filter-machine">
           <option value="all">All</option>
           {{ range .Machines }}
           <option value="{{ . }}">{{ . }}</option>
-          {{ end }}
+          {{- end }}
         </select>
       </span>
-      <span class="gq-input">
-        <label for="gq-set-filter">Filter by Set: </label>
-        <select id="gq-set-filter">
+      <span class="form-element">
+        <label for="filter-set">Set: </label>
+        <select id="filter-set">
           <option value="0">All</option>
           {{ range .Sets }}
           <option value="{{ . }}">{{ . }}</option>
-          {{ end }}
+          {{- end }}
         </select>
       </span>
-      <span class="gq-input"><label for="gq-submit"></label><input type="button" id="gq-submit" value="Show Data" /></span>
-    </div>
-    <div id="gq-query-results"></div>
+      <span class="form-element">
+        <label for="query-submit"></label>
+        <input type="button" id="query-submit" value="Show Data" />
+      </span>
+    </section>
+    
+    <section id="results"></section>
   </div>
 {{ template "includes/footer" }}
 

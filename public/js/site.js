@@ -1,14 +1,16 @@
 $(function () {
   // Define a map for key ids/classes in case I decide to change them later
   var sel = {
-    machineSelect: "#gq-machine-filter",
-    setSelect: "#gq-set-filter",
-    dateClass: ".gq-date",
-    dateStart: "#gq-start-date",
-    dateEnd: "#gq-end-date",
-    results: "#gq-query-results",
-    resultsAvg: "#gq-results-average",
-    resultsGraph: "#gq-results-graph"
+    machineSelect: "#filter-machine",
+    setSelect: "#filter-set",
+    dateClass: ".form-date",
+    dateStart: "#date-start",
+    dateEnd: "#date-end",
+    queryType: "#query-type",
+    querySubmit: "#query-submit",
+    results: "#results",
+    resultsAvg: "#results-average",
+    resultsGraph: "#results-graph"
   }
 
   var chartOptions = {
@@ -72,8 +74,8 @@ $(function () {
   })
 
   /// Query Exec
-  $("#gq-submit").click(function (e) {
-    switch ($("#gq-query-type").val()) {
+  $(sel.querySubmit).click(function (e) {
+    switch ($(sel.queryType).val()) {
       case "results/average":
         drawResultsAverage()
         break
@@ -88,7 +90,7 @@ $(function () {
   function drawResultsAverage() {
     $.getJSON("/api/results/average", params(), function (d) {
       // Empty results dive and append container for data
-      $(sel.results).empty().append('<h1 id="gq-results-average" class="centered"></h1>')
+      $(sel.results).empty().append('<h1 id="' + sel.resultsAvg.replace('#', '') + '" class="centered"></h1>')
       for (i = 0; i < d.length; i++) {
         $(sel.resultsAvg).append("<span class='num'>" + d[i] + "</span>")
       }
@@ -103,14 +105,13 @@ $(function () {
 
         o.backgroundColor = c.fill
         o.borderColor = c.stroke
-        o.borderWidth = 2
+        o.borderWidth = 1.5
         o.pointBorderColor = "rgba(0,0,0,0)"
-        o.lineTension = 0.3
+        //o.lineTension = 0.3
       })
 
       // Empty results div and append container for data
-      $(sel.results).empty().append('<canvas id="gq-results-graph"></canvas>')
-
+      $(sel.results).empty().append('<canvas id="results-graph"></canvas>')
       var resultsChart = new Chart($(sel.resultsGraph), {
         type: "line",
         data: d

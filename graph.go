@@ -20,7 +20,7 @@ func parseResultsForGraph(records <-chan dbRow) graphData {
 
 	labelsSet := false
 	for row := range records {
-		gd.Labels = append(gd.Labels, row.Date.Format(formatYYYYMMDD))
+		gd.Labels = append(gd.Labels, fmt.Sprintf("%d/%s\n%s", row.Set, row.Machine, row.Date.Format(formatYYYYMMDD)))
 		for i := 0; i < 7; i++ {
 			if !labelsSet {
 				label := ""
