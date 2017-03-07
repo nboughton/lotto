@@ -25,6 +25,7 @@ var (
 	num_6 INT, 
 	bonus INT)`
 	formatSqlite = "2006-01-02 15:04:05-07:00"
+	formatYYYYMMDD = "2006-01-02"
 )
 
 // AppDB is a wrapper for *sql.DB so we can extend it by adding our own methods

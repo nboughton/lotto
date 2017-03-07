@@ -2,8 +2,6 @@ package main
 
 import "fmt"
 
-var formatYYYYMMDD = "2006-01-02"
-
 type graphData struct {
 	Labels   []string  `json:"labels"`
 	Datasets []dataset `json:"datasets"`
