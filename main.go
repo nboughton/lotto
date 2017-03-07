@@ -29,8 +29,8 @@ func init() {
 
 	// Update every 24 hours
 	go func() {
-		for t := range time.NewTicker(time.Hour).C {
-			if t.Hour() == 0 {
+		for t := range time.NewTicker(time.Minute).C {
+			if t.Hour() == 0 && t.Minute() == 0 {
 				db.updateDB()
 			}
 		}
