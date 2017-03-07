@@ -1,4 +1,5 @@
 $(function () {
+  //******************************************************* GLOBALS */
   // Define a map for key ids/classes in case I decide to change them later
   var sel = {
     machineSelect: "#filter-machine",
@@ -13,6 +14,7 @@ $(function () {
     resultsGraph: "#results-graph"
   }
 
+  // Chart config
   var chartOptions = {
     tooltips: {
       mode: "label"
@@ -29,23 +31,7 @@ $(function () {
     "Bonus Ball": { "fill": "rgba(255,0,0,0.05)", "stroke": "rgba(255,0,0,1)" },
   }
 
-  /// Utility Functions
-  // Return a unix timestamp for n number of days ago
-  function nDaysAgo(n) {
-    var d = new Date()
-    d.setDate(d.getDate() - n)
-    return Math.floor(d.getTime() / 1000)
-  }
-
-  function params() {
-    return {
-      start: $(sel.dateStart).val(),
-      end: $(sel.dateEnd).val(),
-      set: $(sel.setSelect).val(),
-      machine: $(sel.machineSelect).val()
-    }
-  }
-
+  //******************************************************* HANDLERS */
   /// Pickadate.js
   $.getJSON("/api/range", function (d) {
     var pickerOpts = {
@@ -87,6 +73,23 @@ $(function () {
     }
   })
 
+  //******************************************************* FUNCTIONS */
+  // Return a unix timestamp for n number of days ago
+  function nDaysAgo(n) {
+    var d = new Date()
+    d.setDate(d.getDate() - n)
+    return Math.floor(d.getTime() / 1000)
+  }
+
+  function params() {
+    return {
+      start: $(sel.dateStart).val(),
+      end: $(sel.dateEnd).val(),
+      set: $(sel.setSelect).val(),
+      machine: $(sel.machineSelect).val()
+    }
+  }
+
   function drawResultsAverage() {
     $.getJSON("/api/results/average", params(), function (d) {
       // Empty results dive and append container for data
@@ -111,10 +114,11 @@ $(function () {
       })
 
       // Empty results div and append container for data
-      $(sel.results).empty().append('<canvas id="results-graph"></canvas>')
+      $(sel.results).empty().append('<canvas id="' + sel.resultsGraph.replace("#", "") + '"></canvas>')
       var resultsChart = new Chart($(sel.resultsGraph), {
         type: "line",
-        data: d
+        data: d,
+        options: chartOptions
       })
     })
   }
