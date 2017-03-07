@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"time"
 
 	"github.com/pilu/traffic"
 )
@@ -25,6 +26,15 @@ func init() {
 	router.Get("/api/results/graph", handlerResultsGraph)
 	router.Get("/api/sets", handlerListSets)
 	//router.Get("/api/machines", handlerListMachines) // Not currently in use
+
+	// Update every 24 hours
+	go func() {
+		for t := range time.NewTicker(time.Hour).C {
+			if t.Hour() == 0 {
+				db.updateDB()
+			}
+		}
+	}()
 }
 
 func main() {

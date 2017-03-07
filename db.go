@@ -69,11 +69,18 @@ func connectDB(path string) *AppDB {
 	aDB := &AppDB{db}
 
 	// Check if we have any data yet, otherwise populate the db
+	log.Println("Checking database")
 	if rows, _ := aDB.getRowCount(); rows == 0 {
 		log.Println("No data, scraping site")
 		if err := aDB.populateDB(); err != nil {
 			log.Fatal(err.Error())
 		}
+	}
+
+	// run update
+	log.Println("Updating database")
+	if err := aDB.updateDB(); err != nil {
+		log.Fatal(err.Error())
 	}
 
 	return aDB
@@ -215,8 +222,8 @@ func (db *AppDB) getMachineList(bySet int) ([]string, error) {
 	)
 
 	if bySet != 0 {
-		c := ql.NewFilterSet().Add(ql.Eq, "ball_set")
-		q.Where(c).Order("ball_machine")
+		f := ql.NewFilterSet().Add(ql.Eq, "ball_set")
+		q.Where(f).Order("ball_machine")
 		rows, err = db.Query(q.SQL, bySet)
 	} else {
 		rows, err = db.Query(q.Order("ball_machine").SQL)
@@ -245,8 +252,8 @@ func (db *AppDB) getSetList(byMachine string) ([]int, error) {
 	)
 
 	if byMachine != "all" {
-		c := ql.NewFilterSet().Add(ql.Eq, "ball_machine")
-		q.Where(c).Order("ball_set")
+		f := ql.NewFilterSet().Add(ql.Eq, "ball_machine")
+		q.Where(f).Order("ball_set")
 		rows, err = db.Query(q.SQL, byMachine)
 	} else {
 		rows, err = db.Query(q.Order("ball_set").SQL)
@@ -264,6 +271,49 @@ func (db *AppDB) getSetList(byMachine string) ([]int, error) {
 	return result, nil
 }
 
+func (db *AppDB) updateDB() error {
+	// Prepare insert
+	qInsert, err := db.Prepare(ql.NewQuery().
+		Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
+	if err != nil {
+		return err
+	}
+	// Generate Select
+	qSelect := ql.NewQuery().
+		Select("COUNT(*)").
+		From("results").
+		Where(ql.NewFilterSet().Add(ql.Eq, "date")).SQL
+
+	// Begin transaction
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Iterate scrape data
+	for d := range updateScraper() {
+		// Check we don't already have this record
+		var i int
+		if err := tx.QueryRow(qSelect, d.Date.Format(formatSqlite)).Scan(&i); err != nil {
+			tx.Rollback()
+			return err
+		}
+		if i != 0 {
+			log.Println(d.Date.String(), "already in DB, skipping")
+			continue
+		}
+		// Insert new record
+		if _, err := tx.Stmt(qInsert).Exec(d.Date, d.Set, d.Machine, d.Num[0], d.Num[1], d.Num[2], d.Num[3], d.Num[4], d.Num[5], d.Num[6]); err != nil {
+			tx.Rollback()
+			return err
+		}
+		log.Println(d, " inserted")
+	}
+	tx.Commit()
+
+	return nil
+}
+
 func (db *AppDB) populateDB() error {
 	// Prepare statement
 	q, err := db.Prepare(ql.NewQuery().
@@ -279,11 +329,12 @@ func (db *AppDB) populateDB() error {
 	}
 
 	// Iterate scrape data
-	for d := range scraper() {
+	for d := range archiveScraper() {
 		if _, err := tx.Stmt(q).Exec(d.Date, d.Set, d.Machine, d.Num[0], d.Num[1], d.Num[2], d.Num[3], d.Num[4], d.Num[5], d.Num[6]); err != nil {
 			tx.Rollback()
 			return err
 		}
+		log.Println(d)
 	}
 	tx.Commit()
 

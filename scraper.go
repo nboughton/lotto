@@ -13,14 +13,71 @@ import (
 var (
 	baseURL    = "https://www.lottery.co.uk"
 	archiveURL = "%s/lotto/results/archive-%d"
+	resultsURL = "%s/lotto/results"
 	start      = 1994
 )
+
+func updateScraper() <-chan dbRow {
+	c := make(chan dbRow)
+
+	go func() {
+		// Grab the results page and then start traipsing through their awful HTML to find results links
+		doc, err := goquery.NewDocument(fmt.Sprintf(resultsURL, baseURL))
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		doc.Find("a").Each(func(i int, s *goquery.Selection) {
+			if s.HasClass("button-blue") {
+				href, ok := s.Attr("href")
+
+				if ok && strings.Contains(href, "/lotto/results-") {
+					var row dbRow
+
+					row.Date, err = time.Parse("02-01-2006", strings.Replace(href, "/lotto/results-", "", -1))
+					if err != nil {
+						log.Println("Date parse error: ", err.Error())
+					}
+
+					page, err := goquery.NewDocument(fmt.Sprintf("%s%s", baseURL, href))
+					if err != nil {
+						log.Println("Page get error: ", err.Error())
+					}
+
+					page.Find("span .lotto-ball").Each(func(i int, s *goquery.Selection) {
+						n, _ := strconv.Atoi(s.Text())
+						row.Num = append(row.Num, n)
+					})
+
+					n, _ := strconv.Atoi(page.Find("span .lotto-bonus-ball").First().Text())
+					row.Num = append(row.Num, n)
+
+					page.Find(".lotto tr td").Each(func(i int, s *goquery.Selection) {
+						if strings.Contains(s.Text(), "Used:") {
+							if strings.Contains(s.Text(), "Machine") {
+								row.Machine = strings.Split(s.Text(), ": ")[1]
+							} else {
+								row.Set, _ = strconv.Atoi(strings.Split(s.Text(), ": ")[1])
+							}
+						}
+					})
+
+					c <- row
+				}
+			}
+		})
+
+		close(c)
+	}()
+
+	return c
+}
 
 // scraper is a special kind of evil. It will return a stream of data as it
 // pulls all lotto result data from 1994 onwards including ball machine and
 // ball set used.
-func scraper() <-chan dbRow {
-	var c = make(chan dbRow)
+func archiveScraper() <-chan dbRow {
+	c := make(chan dbRow)
 
 	go func() {
 		// Iterate each year of the archives from start
@@ -66,7 +123,6 @@ func scraper() <-chan dbRow {
 						row.Num = append(row.Num, num)
 					})
 
-					log.Println(row.Date, row.Num, row.Machine, row.Set)
 					c <- row
 				}
 			})
