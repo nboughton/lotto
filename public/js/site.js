@@ -129,6 +129,8 @@ $(function () {
   function drawResultsGraphPlotly() {
     $.getJSON("/api/results/plotly", params(), function (d) {
       console.log(d)
+      $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
+      Plotly.newPlot(sel.resultsGraph.replace("#", ""), d)
     })
   }
 })
