@@ -1,13 +1,13 @@
 body {
-	margin: auto;
+	margin-left: auto;
+	margin-right: auto;
 	display: flex;
 	flex-flow: column;
 	width: 90%;
+	height: 100%;
 }
 
 #container {
-	width: 100%;
-	height: 100%;
 	display: flex;
 	flex-flow: column;
 	justify-content: center;
@@ -34,8 +34,8 @@ body {
 }
 
 #results-graph {
-	width: 100%;
-	height: 100%;
+	width: 90vw;
+	height: 90vh;
 }
 
 footer {

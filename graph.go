@@ -28,7 +28,7 @@ func parseResultsForGraph(records <-chan dbRow) plotlyData {
 					gd.Data[j].Name = "Bonus Ball"
 				}
 			}
-			gd.Data[j].X = append(gd.Data[j].X, fmt.Sprintf("%d:%s:%s", row.Set, row.Machine, row.Date.Format(formatYYYYMMDD)))
+			gd.Data[j].X = append(gd.Data[j].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
 			gd.Data[j].Y = append(gd.Data[j].Y, float64(row.Num[j]))
 		}
 		i++

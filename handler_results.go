@@ -18,8 +18,7 @@ func handlerResults(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerResultsGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	p := parseQueryParams(r)
-	w.WriteJSON(parseResultsForGraph(db.getResults(p)))
+	w.WriteJSON(parseResultsForGraph(db.getResults(parseQueryParams(r))))
 }
 
 func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {
