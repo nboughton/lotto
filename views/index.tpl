@@ -6,7 +6,6 @@
         <select id="query-type">
           <option value="results/average">Average Results</option>
           <option value="results/graph">Graph Results</option>
-          <option value="results/plotly">Plotly Test</option>
         </select>
       </span>
       <span class="form-element">

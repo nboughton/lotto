@@ -34,11 +34,6 @@ func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 }
 
-func handlerResultsPlotly(w traffic.ResponseWriter, r *traffic.Request) {
-	p := parseQueryParams(r)
-	w.WriteJSON(parseResultsForGraphPlotly(db.getResults(p)))
-}
-
 func parseQueryParams(r *traffic.Request) queryParams {
 	var p queryParams
 	p.Start = r.Param("start")

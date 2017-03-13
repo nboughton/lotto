@@ -2,16 +2,6 @@ package main
 
 import "fmt"
 
-type graphData struct {
-	Labels   []string  `json:"labels"`
-	Datasets []dataset `json:"datasets"`
-}
-
-type dataset struct {
-	Label string `json:"label"`
-	Data  []int  `json:"data"`
-}
-
 type plotlyData struct {
 	Data []plotlyDatasetLine `json:"data"`
 }
@@ -23,32 +13,7 @@ type plotlyDatasetLine struct {
 	Mode string    `json:"mode"`
 }
 
-func parseResultsForGraph(records <-chan dbRow) graphData {
-	var gd graphData
-	gd.Datasets = make([]dataset, 7)
-
-	labelsSet := false
-	for row := range records {
-		gd.Labels = append(gd.Labels, fmt.Sprintf("%d:%s:%s", row.Set, row.Machine, row.Date.Format(formatYYYYMMDD)))
-		for i := 0; i < 7; i++ {
-			if !labelsSet {
-				label := ""
-				if i < 6 {
-					label = fmt.Sprintf("Ball %d", i+1)
-				} else {
-					label = "Bonus Ball"
-				}
-				gd.Datasets[i].Label = label
-			}
-			gd.Datasets[i].Data = append(gd.Datasets[i].Data, row.Num[i])
-		}
-		labelsSet = true
-	}
-
-	return gd
-}
-
-func parseResultsForGraphPlotly(records <-chan dbRow) plotlyData {
+func parseResultsForGraph(records <-chan dbRow) plotlyData {
 	var gd plotlyData
 	gd.Data = make([]plotlyDatasetLine, 7)
 

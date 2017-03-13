@@ -14,23 +14,6 @@ $(function () {
     resultsGraph: "#results-graph"
   }
 
-  // Chart config
-  var chartOptions = {
-    tooltips: {
-      mode: "label"
-    }
-  }
-
-  var chartColours = {
-    "Ball 1": { "fill": "rgba(255,0,132,0.05)", "stroke": "rgba(255,0,132,1)" },
-    "Ball 2": { "fill": "rgba(156,0,255,0.05)", "stroke": "rgba(156,0,255,1)" },
-    "Ball 3": { "fill": "rgba(54,0,255,0.05)", "stroke": "rgba(54,0,255,1)" },
-    "Ball 4": { "fill": "rgba(0,84,255,0.05)", "stroke": "rgba(0,84,255,1)" },
-    "Ball 5": { "fill": "rgba(0,186,255,0.05)", "stroke": "rgba(0,186,255,1)" },
-    "Ball 6": { "fill": "rgba(0,255,30,0.05)", "stroke": "rgba(0,255,30,1)" },
-    "Bonus Ball": { "fill": "rgba(255,0,0,0.05)", "stroke": "rgba(255,0,0,1)" },
-  }
-
   //******************************************************* HANDLERS */
   /// Pickadate.js
   $.getJSON("/api/range", function (d) {
@@ -68,9 +51,6 @@ $(function () {
       case "results/graph":
         drawResultsGraph()
         break
-      case "results/plotly":
-        drawResultsGraphPlotly()
-        break
       default:
         break
     }
@@ -105,32 +85,9 @@ $(function () {
 
   function drawResultsGraph() {
     $.getJSON("/api/results/graph", params(), function (d) {
-      // Set graph colours 
-      $.each(d.datasets, function (i, o) {
-        var c = chartColours[o.label]
-
-        o.backgroundColor = c.fill
-        o.borderColor = c.stroke
-        o.borderWidth = 1.5
-        o.pointBorderColor = "rgba(0,0,0,0)"
-        //o.lineTension = 0.3
-      })
-
-      // Empty results div and append container for data
-      $(sel.results).empty().append('<canvas id="' + sel.resultsGraph.replace("#", "") + '"></canvas>')
-      var resultsChart = new Chart($(sel.resultsGraph), {
-        type: "line",
-        data: d,
-        options: chartOptions
-      })
-    })
-  }
-
-  function drawResultsGraphPlotly() {
-    $.getJSON("/api/results/plotly", params(), function (d) {
-      console.log(d)
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
       Plotly.newPlot(sel.resultsGraph.replace("#", ""), d)
     })
   }
+
 })
