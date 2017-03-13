@@ -68,6 +68,9 @@ $(function () {
       case "results/graph":
         drawResultsGraph()
         break
+      case "results/plotly":
+        drawResultsGraphPlotly()
+        break
       default:
         break
     }
@@ -120,6 +123,12 @@ $(function () {
         data: d,
         options: chartOptions
       })
+    })
+  }
+
+  function drawResultsGraphPlotly() {
+    $.getJSON("/api/results/plotly", params(), function (d) {
+      console.log(d)
     })
   }
 })
