@@ -66,9 +66,9 @@ func parseResultsFor3DScatterGraph(records <-chan dbRow) []plotlyDataset3DScatte
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
-						Size:    1.8,
-						Opacity: 0.8,
-						Line:    line{Width: 0.2},
+						Size:    4,
+						Opacity: 1,
+						//Line:    line{Width: 0.2},
 					},
 				}
 

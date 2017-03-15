@@ -38,7 +38,7 @@ $(function () {
       })
     })
   })
-
+/*
   $(sel.dateClass).change(function (e) {
     var that = this
     $.getJSON("/api/machines", params(), function (d) {
@@ -48,6 +48,7 @@ $(function () {
       })
     })
   })
+  */
 
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
