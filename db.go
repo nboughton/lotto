@@ -88,7 +88,7 @@ func connectDB(path string) *AppDB {
 }
 
 // Apply filters for queries
-func qFilters(q *qGen.Query, p queryParams) []interface{} {
+func applyFilters(q *qGen.Query, p queryParams) []interface{} {
 	var qp []interface{}
 
 	f := qGen.NewFilterSet().Add(qGen.Between, "date:DATE")
@@ -121,9 +121,8 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 			Select("date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
 			From("results")
 
-		qp := qFilters(q, p)
+		qp := applyFilters(q, p)
 		rows, err := db.Query(q.Order("DATE(date)").SQL, qp...)
-
 		if err != nil {
 			log.Println(err.Error())
 		}
@@ -158,7 +157,7 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 			From("results")
 	)
 
-	qp := qFilters(q, p)
+	qp := applyFilters(q, p)
 	if err := db.QueryRow(q.SQL, qp...).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
 		return r, err
 	}
@@ -174,8 +173,8 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 			From("results")
 	)
 
-	p.Machine = "all"
-	qp := qFilters(q, p)
+	p.Machine = "all" // Ensure queryParams are right for this
+	qp := applyFilters(q, p)
 	rows, err := db.Query(q.Order("ball_machine").SQL, qp...)
 	if err != nil {
 		return result, err
@@ -198,8 +197,8 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 			From("results")
 	)
 
-	p.Set = 0
-	qp := qFilters(q, p)
+	p.Set = 0 // Ensure queryParams are right for this
+	qp := applyFilters(q, p)
 	rows, err := db.Query(q.Order("ball_set").SQL, qp...)
 	if err != nil {
 		return result, err
