@@ -17,8 +17,12 @@ func handlerResults(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(res)
 }
 
-func handlerResultsGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(parseResultsForGraph(db.getResults(parseQueryParams(r))))
+func handlerResultsLineGraph(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(parseResultsForLineGraph(db.getResults(parseQueryParams(r))))
+}
+
+func handlerResults3DScatterGraph(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(parseResultsFor3DScatterGraph(db.getResults(parseQueryParams(r))))
 }
 
 func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {

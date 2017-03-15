@@ -4,8 +4,9 @@
       <span class="form-element">
         <label for="query-type">Query Type: </label>
         <select id="query-type">
-          <option value="results/average">Average Results</option>
-          <option value="results/graph">Graph Results</option>
+          <option value="num-average">Average Results</option>
+          <option value="graph-line">Line Graph</option>
+          <option value="graph-3d-scatter">3D Scatter Graph</option>
         </select>
       </span>
       <span class="form-element">

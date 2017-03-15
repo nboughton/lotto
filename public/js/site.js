@@ -45,11 +45,14 @@ $(function () {
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
     switch ($(sel.queryType).val()) {
-      case "results/average":
+      case "num-average":
         drawResultsAverage()
         break
-      case "results/graph":
-        drawResultsGraph()
+      case "graph-line":
+        drawResultsGraph("line")
+        break
+      case "graph-3d-scatter":
+        drawResultsGraph("3d/scatter")
         break
       default:
         break
@@ -83,8 +86,9 @@ $(function () {
     })
   }
 
-  function drawResultsGraph() {
-    $.getJSON("/api/results/graph", params(), function (d) {
+  function drawResultsGraph(type) {
+    $.getJSON("/api/results/graph/" + type, params(), function (d) {
+      console.log(d)
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
       Plotly.newPlot(sel.resultsGraph.replace("#", ""), d)
     })
