@@ -87,7 +87,8 @@ func connectDB(path string) *AppDB {
 	return aDB
 }
 
-// Apply filters for queries
+// Apply filters for queries, always run this before executing a query as it edits the
+// query in place by pointer
 func applyFilters(q *qGen.Query, p queryParams) []interface{} {
 	qp := []interface{}{p.Start, p.End} // We always constrain results by date
 
