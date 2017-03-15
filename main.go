@@ -26,7 +26,7 @@ func init() {
 	router.Get("/api/results/graph/line", handlerResultsLineGraph)
 	router.Get("/api/results/graph/3d/scatter", handlerResults3DScatterGraph)
 	router.Get("/api/sets", handlerListSets)
-	//router.Get("/api/machines", handlerListMachines) // Not currently in use
+	router.Get("/api/machines", handlerListMachines)
 
 	// Update every 24 hours
 	go func() {

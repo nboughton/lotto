@@ -14,17 +14,24 @@ type PageData struct {
 }
 
 func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
-	sets, err := db.getSetList(queryParams{Set: 0})
-	if err != nil {
-		log.Println(err)
-	}
-
-	machines, err := db.getMachineList(queryParams{Machine: "all"})
-	if err != nil {
-		log.Println(err)
-	}
-
 	s, e, err := db.getDataRange()
+	if err != nil {
+		log.Println(err)
+	}
+
+	q := queryParams{
+		Start:   s.Format(formatYYYYMMDD),
+		End:     e.Format(formatYYYYMMDD),
+		Machine: "all",
+		Set:     0,
+	}
+
+	sets, err := db.getSetList(q)
+	if err != nil {
+		log.Println(err)
+	}
+
+	machines, err := db.getMachineList(q)
 	if err != nil {
 		log.Println(err)
 	}

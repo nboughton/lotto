@@ -5,11 +5,19 @@ import (
 )
 
 func handlerListSets(w traffic.ResponseWriter, r *traffic.Request) {
-	res, _ := db.getSetList(parseQueryParams(r))
-	w.WriteJSON(res)
+	res, err := db.getSetList(parseQueryParams(r))
+	if err != nil {
+		w.WriteJSON(err)
+	} else {
+		w.WriteJSON(res)
+	}
 }
 
 func handlerListMachines(w traffic.ResponseWriter, r *traffic.Request) {
-	res, _ := db.getMachineList(parseQueryParams(r))
-	w.WriteJSON(res)
+	res, err := db.getMachineList(parseQueryParams(r))
+	if err != nil {
+		w.WriteJSON(err)
+	} else {
+		w.WriteJSON(res)
+	}
 }

@@ -174,6 +174,7 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 			From("results")
 	)
 
+	p.Machine = "all"
 	qp := qFilters(q, p)
 	rows, err := db.Query(q.Order("ball_machine").SQL, qp...)
 	if err != nil {
@@ -197,6 +198,7 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 			From("results")
 	)
 
+	p.Set = 0
 	qp := qFilters(q, p)
 	rows, err := db.Query(q.Order("ball_set").SQL, qp...)
 	if err != nil {

@@ -30,14 +30,21 @@ $(function () {
 
   /// Redraw options list for Sets depending on Machine selection
   $(sel.machineSelect).change(function (e) {
-    var p = {
-      machine: $(sel.machineSelect).val()
-    }
-    $.getJSON("/api/sets", p, function (d) {
+    $.getJSON("/api/sets", params(), function (d) {
       var el = $(sel.setSelect)
       el.empty().append('<option value="0">All</option>')
       $.each(d, function (i, n) {
         el.append('<option value="' + n + '">' + n + '</option>')
+      })
+    })
+  })
+
+  $(sel.dateClass).change(function (e) {
+    var that = this
+    $.getJSON("/api/machines", params(), function (d) {
+      that.empty().append('<option value="all">All</option>')
+      $.each(d, function (i, m) {
+        that.append('<option value="' + m + '">' + m + '</option>')
       })
     })
   })
