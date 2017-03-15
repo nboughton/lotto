@@ -88,7 +88,6 @@ $(function () {
 
   function drawResultsGraph(type) {
     $.getJSON("/api/results/graph/" + type, params(), function (d) {
-      console.log(d)
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
       Plotly.newPlot(sel.resultsGraph.replace("#", ""), d)
     })

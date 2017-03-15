@@ -33,12 +33,26 @@ func parseResultsForLineGraph(records <-chan dbRow) []plotlyDatasetLine {
 }
 
 type plotlyDataset3DScatter struct {
-	X    []string `json:"x"` // machine:set
-	Y    []string `json:"y"` // date
-	Z    []int    `json:"z"` // number
-	Name string   `json:"name"`
-	Mode string   `json:"mode"`
-	Type string   `json:"type"`
+	X      []string `json:"x"` // machine:set
+	Y      []string `json:"y"` // date
+	Z      []int    `json:"z"` // number
+	Name   string   `json:"name"`
+	Mode   string   `json:"mode"`
+	Type   string   `json:"type"`
+	Marker marker   `json:"marker"`
+}
+
+type marker struct {
+	Colour  string  `json:"colour"`
+	Size    float64 `json:"size"`
+	Line    line    `json:"line"`
+	Opacity float64 `json:"opacity"`
+	Symbol  string  `json:"symbol"`
+}
+
+type line struct {
+	Width  float64 `json:"width"`
+	Colour string  `json:"colour"`
 }
 
 func parseResultsFor3DScatterGraph(records <-chan dbRow) []plotlyDataset3DScatter {
@@ -51,6 +65,11 @@ func parseResultsFor3DScatterGraph(records <-chan dbRow) []plotlyDataset3DScatte
 				set := plotlyDataset3DScatter{
 					Mode: "markers",
 					Type: "scatter3d",
+					Marker: marker{
+						Size:    1.8,
+						Opacity: 0.8,
+						Line:    line{Width: 0.2},
+					},
 				}
 
 				data[ball] = set

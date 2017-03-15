@@ -11,7 +11,7 @@
       </span>
       <span class="form-element">
         <label for="date-start">Start: </label>
-        <input type="date" class="form-date" id="date-start" value="{{ .Start }}" />
+        <input type="date" class="form-date" id="date-start" value="2015-10-10" />
       </span>
       <span class="form-element">
         <label for="date-end">End: </label>
