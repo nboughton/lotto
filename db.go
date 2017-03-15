@@ -6,7 +6,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	ql "github.com/nboughton/go-stupidqlite"
+	qs "github.com/nboughton/go-stupidqlite"
 )
 
 var (
@@ -24,7 +24,7 @@ var (
 	num_5 INT, 
 	num_6 INT, 
 	bonus INT)`
-	formatSqlite = "2006-01-02 15:04:05-07:00"
+	formatSqlite   = "2006-01-02 15:04:05-07:00"
 	formatYYYYMMDD = "2006-01-02"
 )
 
@@ -87,36 +87,41 @@ func connectDB(path string) *AppDB {
 	return aDB
 }
 
+// Apply filters for queries
+func qFilters(q *qs.Query, p queryParams) []interface{} {
+	var qp []interface{}
+
+	f := qs.NewFilterSet().Add(qs.Between, "date:DATE")
+	if p.Machine != "all" && p.Set != 0 {
+		q.Where(f.Add(qs.Eq, "ball_machine").Add(qs.Eq, "ball_set"))
+		qp = []interface{}{p.Start, p.End, p.Machine, p.Set}
+
+	} else if p.Machine != "all" && p.Set == 0 {
+		q.Where(f.Add(qs.Eq, "ball_machine"))
+		qp = []interface{}{p.Start, p.End, p.Machine}
+
+	} else if p.Machine == "all" && p.Set != 0 {
+		q.Where(f.Add(qs.Eq, "ball_set"))
+		qp = []interface{}{p.Start, p.End, p.Set}
+
+	} else {
+		q.Where(f)
+		qp = []interface{}{p.Start, p.End}
+
+	}
+
+	return qp
+}
+
 func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	var c = make(chan dbRow)
 
 	go func() {
-		var (
-			rows *sql.Rows
-			err  error
-			q    = ql.NewQuery().
-				Select("date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
-				From("results")
-		)
+		q := qs.NewQuery().
+			Select("date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
+			From("results")
 
-		f := ql.NewFilterSet().Add(ql.Between, "date:DATE")
-		if p.Machine != "all" && p.Set != 0 {
-			qu := q.Where(f.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")).Order("DATE(date)").SQL
-
-			rows, err = db.Query(qu, p.Start, p.End, p.Machine, p.Set)
-		} else if p.Machine != "all" && p.Set == 0 {
-			qu := q.Where(f.Add(ql.Eq, "ball_machine")).Order("DATE(date)").SQL
-
-			rows, err = db.Query(qu, p.Start, p.End, p.Machine)
-		} else if p.Machine == "all" && p.Set != 0 {
-			qu := q.Where(f.Add(ql.Eq, "ball_set")).Order("DATE(date)").SQL
-
-			rows, err = db.Query(qu, p.Start, p.End, p.Set)
-		} else {
-			qu := q.Where(f).Order("DATE(date)").SQL
-
-			rows, err = db.Query(qu, p.Start, p.End)
-		}
+		rows, err := db.Query(q.Order("DATE(date)").SQL, qFilters(q, p)...)
 
 		if err != nil {
 			log.Println(err.Error())
@@ -141,7 +146,7 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	var (
 		r = make([]int, 7)
-		q = ql.NewQuery().
+		q = qs.NewQuery().
 			Select("SUM(num_1)/COUNT(num_1)",
 				"SUM(num_2)/COUNT(num_2)",
 				"SUM(num_3)/COUNT(num_3)",
@@ -152,83 +157,22 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 			From("results")
 	)
 
-	c := ql.NewFilterSet().Add(ql.Between, "date:DATE")
-	if p.Machine != "all" && p.Set != 0 {
-		c.Add(ql.Eq, "ball_machine").Add(ql.Eq, "ball_set")
-		qu := q.Where(c).SQL
-
-		if err := db.QueryRow(qu, p.Start, p.End, p.Machine, p.Set).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			return r, err
-		}
-	} else if p.Machine != "all" && p.Set == 0 {
-		c.Add(ql.Eq, "ball_machine")
-		qu := q.Where(c).SQL
-
-		if err := db.QueryRow(qu, p.Start, p.End, p.Machine).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			return r, err
-		}
-	} else if p.Machine == "all" && p.Set != 0 {
-		c.Add(ql.Eq, "ball_set")
-		qu := q.Where(c).SQL
-
-		if err := db.QueryRow(qu, p.Start, p.End, p.Set).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			return r, err
-		}
-	} else {
-		qu := q.Where(c).SQL
-
-		if err := db.QueryRow(qu, p.Start, p.End).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-			return r, err
-		}
+	if err := db.QueryRow(q.SQL, qFilters(q, p)...).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+		return r, err
 	}
 
 	return r, nil
 }
 
-func (db *AppDB) getRowCount() (int, error) {
-	var rows int
-	if err := db.QueryRow(ql.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&rows); err != nil {
-		return rows, err
-	}
-
-	return rows, nil
-}
-
-func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
-	var (
-		first string
-		last  string
-		q     = ql.NewQuery().
-			Select("MIN(date)", "MAX(date)").
-			From("results")
-	)
-
-	if err := db.QueryRow(q.SQL).Scan(&first, &last); err != nil {
-		return time.Now(), time.Now(), err
-	}
-
-	f, _ := time.Parse(formatSqlite, first)
-	l, _ := time.Parse(formatSqlite, last)
-	return f, l, nil
-}
-
-func (db *AppDB) getMachineList(bySet int) ([]string, error) {
+func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 	var (
 		result []string
-		rows   *sql.Rows
-		err    error
-		q      = ql.NewQuery().
+		q      = qs.NewQuery().
 			Select("DISTINCT(ball_machine)").
 			From("results")
 	)
 
-	if bySet != 0 {
-		f := ql.NewFilterSet().Add(ql.Eq, "ball_set")
-		q.Where(f).Order("ball_machine")
-		rows, err = db.Query(q.SQL, bySet)
-	} else {
-		rows, err = db.Query(q.Order("ball_machine").SQL)
-	}
+	rows, err := db.Query(q.Order("ball_machine").SQL, qFilters(q, p)...)
 	if err != nil {
 		return result, err
 	}
@@ -242,23 +186,15 @@ func (db *AppDB) getMachineList(bySet int) ([]string, error) {
 	return result, nil
 }
 
-func (db *AppDB) getSetList(byMachine string) ([]int, error) {
+func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	var (
 		result []int
-		rows   *sql.Rows
-		err    error
-		q      = ql.NewQuery().
+		q      = qs.NewQuery().
 			Select("DISTINCT(ball_set)").
 			From("results")
 	)
 
-	if byMachine != "all" {
-		f := ql.NewFilterSet().Add(ql.Eq, "ball_machine")
-		q.Where(f).Order("ball_set")
-		rows, err = db.Query(q.SQL, byMachine)
-	} else {
-		rows, err = db.Query(q.Order("ball_set").SQL)
-	}
+	rows, err := db.Query(q.Order("ball_set").SQL, qFilters(q, p)...)
 	if err != nil {
 		return result, err
 	}
@@ -272,18 +208,45 @@ func (db *AppDB) getSetList(byMachine string) ([]int, error) {
 	return result, nil
 }
 
+func (db *AppDB) getRowCount() (int, error) {
+	var rows int
+	if err := db.QueryRow(qs.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&rows); err != nil {
+		return rows, err
+	}
+
+	return rows, nil
+}
+
+func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
+	var (
+		first string
+		last  string
+		q     = qs.NewQuery().
+			Select("MIN(date)", "MAX(date)").
+			From("results")
+	)
+
+	if err := db.QueryRow(q.SQL).Scan(&first, &last); err != nil {
+		return time.Now(), time.Now(), err
+	}
+
+	f, _ := time.Parse(formatSqlite, first)
+	l, _ := time.Parse(formatSqlite, last)
+	return f, l, nil
+}
+
 func (db *AppDB) updateDB() error {
 	// Prepare insert
-	qInsert, err := db.Prepare(ql.NewQuery().
+	qInsert, err := db.Prepare(qs.NewQuery().
 		Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
 	if err != nil {
 		return err
 	}
 	// Generate Select
-	qSelect := ql.NewQuery().
+	qSelect := qs.NewQuery().
 		Select("COUNT(*)").
 		From("results").
-		Where(ql.NewFilterSet().Add(ql.Eq, "date")).SQL
+		Where(qs.NewFilterSet().Add(qs.Eq, "date")).SQL
 
 	// Begin transaction
 	tx, err := db.Begin()
@@ -317,7 +280,7 @@ func (db *AppDB) updateDB() error {
 
 func (db *AppDB) populateDB() error {
 	// Prepare statement
-	q, err := db.Prepare(ql.NewQuery().
+	q, err := db.Prepare(qs.NewQuery().
 		Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
 	if err != nil {
 		return err
