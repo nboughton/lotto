@@ -18,11 +18,11 @@ func handlerResults(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerResultsLineGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(parseResultsForLineGraph(db.getResults(parseQueryParams(r))))
+	w.WriteJSON(graphLine(db.getResults(parseQueryParams(r))))
 }
 
-func handlerResults3DScatterGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(parseResultsFor3DScatterGraph(db.getResults(parseQueryParams(r))))
+func handlerResultsScatter3DGraph(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(graphScatter3D(db.getResults(parseQueryParams(r))))
 }
 
 func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {

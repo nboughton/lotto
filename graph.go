@@ -2,15 +2,15 @@ package main
 
 import "fmt"
 
-type plotlyDatasetLine struct {
+type datasetLine struct {
 	X    []string  `json:"x"`
 	Y    []float64 `json:"y"`
 	Name string    `json:"name"`
 	Mode string    `json:"mode"`
 }
 
-func parseResultsForLineGraph(records <-chan dbRow) []plotlyDatasetLine {
-	data := make([]plotlyDatasetLine, 7)
+func graphLine(records <-chan dbRow) []datasetLine {
+	data := make([]datasetLine, 7)
 
 	i := 0
 	for row := range records {
@@ -32,7 +32,7 @@ func parseResultsForLineGraph(records <-chan dbRow) []plotlyDatasetLine {
 	return data
 }
 
-type plotlyDataset3DScatter struct {
+type datasetScatter3D struct {
 	X      []string `json:"x"` // machine:set
 	Y      []string `json:"y"` // date
 	Z      []int    `json:"z"` // number
@@ -55,14 +55,15 @@ type line struct {
 	Colour string  `json:"colour"`
 }
 
-func parseResultsFor3DScatterGraph(records <-chan dbRow) []plotlyDataset3DScatter {
-	data := make([]plotlyDataset3DScatter, 7)
+func graphScatter3D(records <-chan dbRow) []datasetScatter3D {
+	data := make([]datasetScatter3D, 7)
 
 	i := 0
 	for row := range records {
 		for ball := 0; ball < 7; ball++ {
 			if i == 0 {
-				set := plotlyDataset3DScatter{
+				set := datasetScatter3D{
+
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{

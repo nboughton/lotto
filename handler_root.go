@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/pilu/traffic"
 )
@@ -19,6 +20,7 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 		log.Println(err)
 	}
 
+	s, _ = time.Parse(formatYYYYMMDD, "2015-10-10")
 	q := queryParams{
 		Start:   s.Format(formatYYYYMMDD),
 		End:     e.Format(formatYYYYMMDD),

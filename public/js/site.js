@@ -30,25 +30,14 @@ $(function () {
 
   /// Redraw options list for Sets depending on Machine selection
   $(sel.machineSelect).change(function (e) {
-    $.getJSON("/api/sets", params(), function (d) {
-      var el = $(sel.setSelect)
-      el.empty().append('<option value="0">All</option>')
-      $.each(d, function (i, n) {
-        el.append('<option value="' + n + '">' + n + '</option>')
-      })
-    })
+    redrawSetsList()
   })
-/*
+
   $(sel.dateClass).change(function (e) {
-    var that = this
-    $.getJSON("/api/machines", params(), function (d) {
-      that.empty().append('<option value="all">All</option>')
-      $.each(d, function (i, m) {
-        that.append('<option value="' + m + '">' + m + '</option>')
-      })
-    })
+    redrawMachinesList()
+    redrawSetsList()
   })
-  */
+  
 
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
@@ -82,6 +71,25 @@ $(function () {
       set: $(sel.setSelect).val(),
       machine: $(sel.machineSelect).val()
     }
+  }
+
+  function redrawSetsList() {
+    $.getJSON("/api/sets", params(), function (d) {
+      var el = $(sel.setSelect)
+      el.empty().append('<option value="0">All</option>')
+      $.each(d, function (i, n) {
+        el.append('<option value="' + n + '">' + n + '</option>')
+      })
+    })
+  }
+
+  function redrawMachinesList() {
+    $.getJSON("/api/machines", params(), function (d) {
+      $(sel.machineSelect).empty().append('<option value="all">All</option>')
+      $.each(d, function (i, m) {
+        $(sel.machineSelect).append('<option value="' + m + '">' + m + '</option>')
+      })
+    })
   }
 
   function drawResultsAverage() {
