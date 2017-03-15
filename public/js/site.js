@@ -58,12 +58,6 @@ $(function () {
 
   //******************************************************* FUNCTIONS */
   // Return a unix timestamp for n number of days ago
-  function nDaysAgo(n) {
-    var d = new Date()
-    d.setDate(d.getDate() - n)
-    return Math.floor(d.getTime() / 1000)
-  }
-
   function params() {
     return {
       start: $(sel.dateStart).val(),
