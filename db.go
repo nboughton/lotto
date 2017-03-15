@@ -6,7 +6,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	qs "github.com/nboughton/go-stupidqlite"
+	qGen "github.com/nboughton/go-stupidqlite"
 )
 
 var (
@@ -88,20 +88,20 @@ func connectDB(path string) *AppDB {
 }
 
 // Apply filters for queries
-func qFilters(q *qs.Query, p queryParams) []interface{} {
+func qFilters(q *qGen.Query, p queryParams) []interface{} {
 	var qp []interface{}
 
-	f := qs.NewFilterSet().Add(qs.Between, "date:DATE")
+	f := qGen.NewFilterSet().Add(qGen.Between, "date:DATE")
 	if p.Machine != "all" && p.Set != 0 {
-		q.Where(f.Add(qs.Eq, "ball_machine").Add(qs.Eq, "ball_set"))
+		q.Where(f.Add(qGen.Eq, "ball_machine").Add(qGen.Eq, "ball_set"))
 		qp = []interface{}{p.Start, p.End, p.Machine, p.Set}
 
 	} else if p.Machine != "all" && p.Set == 0 {
-		q.Where(f.Add(qs.Eq, "ball_machine"))
+		q.Where(f.Add(qGen.Eq, "ball_machine"))
 		qp = []interface{}{p.Start, p.End, p.Machine}
 
 	} else if p.Machine == "all" && p.Set != 0 {
-		q.Where(f.Add(qs.Eq, "ball_set"))
+		q.Where(f.Add(qGen.Eq, "ball_set"))
 		qp = []interface{}{p.Start, p.End, p.Set}
 
 	} else {
@@ -117,7 +117,7 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	var c = make(chan dbRow)
 
 	go func() {
-		q := qs.NewQuery().
+		q := qGen.NewQuery().
 			Select("date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
 			From("results")
 
@@ -147,7 +147,7 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	var (
 		r = make([]int, 7)
-		q = qs.NewQuery().
+		q = qGen.NewQuery().
 			Select("SUM(num_1)/COUNT(num_1)",
 				"SUM(num_2)/COUNT(num_2)",
 				"SUM(num_3)/COUNT(num_3)",
@@ -169,7 +169,7 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 	var (
 		result []string
-		q      = qs.NewQuery().
+		q      = qGen.NewQuery().
 			Select("DISTINCT(ball_machine)").
 			From("results")
 	)
@@ -193,7 +193,7 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	var (
 		result []int
-		q      = qs.NewQuery().
+		q      = qGen.NewQuery().
 			Select("DISTINCT(ball_set)").
 			From("results")
 	)
@@ -216,7 +216,7 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 
 func (db *AppDB) getRowCount() (int, error) {
 	var rows int
-	if err := db.QueryRow(qs.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&rows); err != nil {
+	if err := db.QueryRow(qGen.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&rows); err != nil {
 		return rows, err
 	}
 
@@ -227,7 +227,7 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 	var (
 		first string
 		last  string
-		q     = qs.NewQuery().
+		q     = qGen.NewQuery().
 			Select("MIN(date)", "MAX(date)").
 			From("results")
 	)
@@ -243,16 +243,16 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 
 func (db *AppDB) updateDB() error {
 	// Prepare insert
-	qInsert, err := db.Prepare(qs.NewQuery().
+	qInsert, err := db.Prepare(qGen.NewQuery().
 		Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
 	if err != nil {
 		return err
 	}
 	// Generate Select
-	qSelect := qs.NewQuery().
+	qSelect := qGen.NewQuery().
 		Select("COUNT(*)").
 		From("results").
-		Where(qs.NewFilterSet().Add(qs.Eq, "date")).SQL
+		Where(qGen.NewFilterSet().Add(qGen.Eq, "date")).SQL
 
 	// Begin transaction
 	tx, err := db.Begin()
@@ -286,7 +286,7 @@ func (db *AppDB) updateDB() error {
 
 func (db *AppDB) populateDB() error {
 	// Prepare statement
-	q, err := db.Prepare(qs.NewQuery().
+	q, err := db.Prepare(qGen.NewQuery().
 		Insert("results", "date", "ball_set", "ball_machine", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").SQL)
 	if err != nil {
 		return err
