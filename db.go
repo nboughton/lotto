@@ -89,24 +89,23 @@ func connectDB(path string) *AppDB {
 
 // Apply filters for queries
 func applyFilters(q *qGen.Query, p queryParams) []interface{} {
-	var qp []interface{}
+	qp := []interface{}{p.Start, p.End} // We always constrain results by date
 
 	f := qGen.NewFilterSet().Add(qGen.Between, "date:DATE")
 	if p.Machine != "all" && p.Set != 0 {
 		q.Where(f.Add(qGen.Eq, "ball_machine").Add(qGen.Eq, "ball_set"))
-		qp = []interface{}{p.Start, p.End, p.Machine, p.Set}
+		qp = append(qp, p.Machine, p.Set)
 
 	} else if p.Machine != "all" && p.Set == 0 {
 		q.Where(f.Add(qGen.Eq, "ball_machine"))
-		qp = []interface{}{p.Start, p.End, p.Machine}
+		qp = append(qp, p.Machine)
 
 	} else if p.Machine == "all" && p.Set != 0 {
 		q.Where(f.Add(qGen.Eq, "ball_set"))
-		qp = []interface{}{p.Start, p.End, p.Set}
+		qp = append(qp, p.Set)
 
 	} else {
 		q.Where(f)
-		qp = []interface{}{p.Start, p.End}
 
 	}
 
