@@ -122,7 +122,8 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 			From("results")
 
 		qp := applyFilters(q, p)
-		rows, err := db.Query(q.Order("DATE(date)").SQL, qp...)
+		stmt, _ := db.Prepare(q.Order("DATE(date)").SQL)
+		rows, err := stmt.Query(qp...)
 		if err != nil {
 			log.Println(err.Error())
 		}
@@ -158,7 +159,8 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	)
 
 	qp := applyFilters(q, p)
-	if err := db.QueryRow(q.SQL, qp...).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+	stmt, _ := db.Prepare(q.SQL)
+	if err := stmt.QueryRow(qp...).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
 		return r, err
 	}
 
@@ -175,7 +177,8 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 
 	p.Machine = "all" // Ensure queryParams are right for this
 	qp := applyFilters(q, p)
-	rows, err := db.Query(q.Order("ball_machine").SQL, qp...)
+	stmt, _ := db.Prepare(q.Order("ball_machine").SQL)
+	rows, err := stmt.Query(qp...)
 	if err != nil {
 		return result, err
 	}
@@ -199,7 +202,8 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 
 	p.Set = 0 // Ensure queryParams are right for this
 	qp := applyFilters(q, p)
-	rows, err := db.Query(q.Order("ball_set").SQL, qp...)
+	stmt, _ := db.Prepare(q.Order("ball_set").SQL)
+	rows, err := stmt.Query(qp...)
 	if err != nil {
 		return result, err
 	}
