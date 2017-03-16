@@ -7,29 +7,7 @@ type datasetLine struct {
 	Y    []float64 `json:"y"`
 	Name string    `json:"name"`
 	Mode string    `json:"mode"`
-}
-
-func graphLine(records <-chan dbRow) []datasetLine {
-	data := make([]datasetLine, 7)
-
-	i := 0
-	for row := range records {
-		for ball := 0; ball < 7; ball++ {
-			if i == 0 {
-				data[ball].Mode = "line"
-				if ball < 6 {
-					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
-				} else {
-					data[ball].Name = "Bonus Ball"
-				}
-			}
-			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
-			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
-		}
-		i++
-	}
-
-	return data
+	Line line      `json:"line"`
 }
 
 type datasetScatter3D struct {
@@ -53,6 +31,34 @@ type marker struct {
 type line struct {
 	Width  float64 `json:"width"`
 	Colour string  `json:"colour"`
+	Shape  string  `json:"shape"`
+}
+
+func graphLine(records <-chan dbRow) []datasetLine {
+	data := make([]datasetLine, 7)
+
+	i := 0
+	for row := range records {
+		for ball := 0; ball < 7; ball++ {
+			if i == 0 {
+				data[ball] = datasetLine{
+					Mode: "line",
+					Line: line{Shape: "spline", Width: 1.5},
+				}
+
+				if ball < 6 {
+					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
+				} else {
+					data[ball].Name = "Bonus Ball"
+				}
+			}
+			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
+			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
+		}
+		i++
+	}
+
+	return data
 }
 
 func graphScatter3D(records <-chan dbRow) []datasetScatter3D {
@@ -63,7 +69,6 @@ func graphScatter3D(records <-chan dbRow) []datasetScatter3D {
 		for ball := 0; ball < 7; ball++ {
 			if i == 0 {
 				set := datasetScatter3D{
-
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
