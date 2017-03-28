@@ -92,17 +92,17 @@ func connectDB(path string) *AppDB {
 func applyFilters(q *qGen.Query, p queryParams) []interface{} {
 	qp := []interface{}{p.Start, p.End} // We always constrain results by date
 
-	f := qGen.NewFilterSet().Add(qGen.Between, "date:DATE")
+	f := qGen.NewFilterSet().Add("date:DATE", qGen.Between)
 	if p.Machine != "all" && p.Set != 0 {
-		q.Where(f.Add(qGen.Eq, "ball_machine").Add(qGen.Eq, "ball_set"))
+		q.Where(f.Add("ball_machine", qGen.Eq).Add("ball_set", qGen.Eq))
 		qp = append(qp, p.Machine, p.Set)
 
 	} else if p.Machine != "all" && p.Set == 0 {
-		q.Where(f.Add(qGen.Eq, "ball_machine"))
+		q.Where(f.Add("ball_machine", qGen.Eq))
 		qp = append(qp, p.Machine)
 
 	} else if p.Machine == "all" && p.Set != 0 {
-		q.Where(f.Add(qGen.Eq, "ball_set"))
+		q.Where(f.Add("ball_set", qGen.Eq))
 		qp = append(qp, p.Set)
 
 	} else {
@@ -255,7 +255,7 @@ func (db *AppDB) updateDB() error {
 	qSelect := qGen.NewQuery().
 		Select("COUNT(*)").
 		From("results").
-		Where(qGen.NewFilterSet().Add(qGen.Eq, "date")).SQL
+		Where(qGen.NewFilterSet().Add("date", qGen.Eq)).SQL
 
 	// Begin transaction
 	tx, err := db.Begin()
