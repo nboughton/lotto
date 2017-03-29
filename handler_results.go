@@ -25,6 +25,10 @@ func handlerResultsScatter3DGraph(w traffic.ResponseWriter, r *traffic.Request) 
 	w.WriteJSON(graphScatter3D(db.getResults(parseQueryParams(r))))
 }
 
+func handlerMachineSetsCombos(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(db.getMachineSetCombinations(parseQueryParams(r)))
+}
+
 func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {
 	p := parseQueryParams(r)
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	qGen "github.com/nboughton/go-stupidqlite"
 )
@@ -144,19 +145,27 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	return c
 }
 
+func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
+	results := make(map[string]int)
+
+	for row := range db.getResults(p) {
+		results[fmt.Sprintf("%s:%d", row.Machine, row.Set)]++
+	}
+
+	return results
+}
+
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
-	var (
-		r = make([]int, 7)
-		q = qGen.NewQuery().
-			Select("SUM(num_1)/COUNT(num_1)",
-				"SUM(num_2)/COUNT(num_2)",
-				"SUM(num_3)/COUNT(num_3)",
-				"SUM(num_4)/COUNT(num_4)",
-				"SUM(num_5)/COUNT(num_5)",
-				"SUM(num_6)/COUNT(num_6)",
-				"SUM(bonus)/COUNT(bonus)").
-			From("results")
-	)
+	r := make([]int, 7)
+	q := qGen.NewQuery().
+		Select("SUM(num_1)/COUNT(num_1)",
+			"SUM(num_2)/COUNT(num_2)",
+			"SUM(num_3)/COUNT(num_3)",
+			"SUM(num_4)/COUNT(num_4)",
+			"SUM(num_5)/COUNT(num_5)",
+			"SUM(num_6)/COUNT(num_6)",
+			"SUM(bonus)/COUNT(bonus)").
+		From("results")
 
 	qp := applyFilters(q, p)
 	stmt, _ := db.Prepare(q.SQL)
@@ -168,12 +177,10 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 }
 
 func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
-	var (
-		result []string
-		q      = qGen.NewQuery().
-			Select("DISTINCT(ball_machine)").
-			From("results")
-	)
+	var result []string
+	q := qGen.NewQuery().
+		Select("DISTINCT(ball_machine)").
+		From("results")
 
 	p.Machine = "all" // Ensure queryParams are right for this
 	qp := applyFilters(q, p)
@@ -193,12 +200,10 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 }
 
 func (db *AppDB) getSetList(p queryParams) ([]int, error) {
-	var (
-		result []int
-		q      = qGen.NewQuery().
-			Select("DISTINCT(ball_set)").
-			From("results")
-	)
+	var result []int
+	q := qGen.NewQuery().
+		Select("DISTINCT(ball_set)").
+		From("results")
 
 	p.Set = 0 // Ensure queryParams are right for this
 	qp := applyFilters(q, p)
@@ -227,13 +232,10 @@ func (db *AppDB) getRowCount() (int, error) {
 }
 
 func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
-	var (
-		first string
-		last  string
-		q     = qGen.NewQuery().
-			Select("MIN(date)", "MAX(date)").
-			From("results")
-	)
+	var first, last string
+	q := qGen.NewQuery().
+		Select("MIN(date)", "MAX(date)").
+		From("results")
 
 	if err := db.QueryRow(q.SQL).Scan(&first, &last); err != nil {
 		return time.Now(), time.Now(), err

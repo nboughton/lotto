@@ -45,6 +45,7 @@ type line struct {
 func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 	data := make([]dataset2D, 7)
 
+	// Use an array to sync markers with regression lines
 	colors := []string{"rgba(31,119,180,1)", "rgba(255,127,14,1)", "rgba(44,160,44,1)", "rgba(214,39,40,1)", "rgba(148,103,189,1)", "rgba(140,86,75,1)", "rgba(227,119,194,1)"}
 
 	// Create a float64 numeric representation of 'X' axis

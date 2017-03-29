@@ -27,6 +27,7 @@ func init() {
 	router.Get("/api/results/graph/3d/scatter", handlerResultsScatter3DGraph)
 	router.Get("/api/sets", handlerListSets)
 	router.Get("/api/machines", handlerListMachines)
+	router.Get("/api/machines/sets/combos", handlerMachineSetsCombos)
 
 	// Update every 24 hours
 	go func() {
