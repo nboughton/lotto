@@ -101,6 +101,12 @@ $(function () {
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
       Plotly.newPlot(sel.resultsGraph.replace("#", ""), d)
     })
+    getMachinesSetsCombos()
   }
 
+  function getMachinesSetsCombos() {
+    $.getJSON("/api/machines/sets/combos", params(), function (d) {
+      console.log(d)
+    })
+  }
 })
