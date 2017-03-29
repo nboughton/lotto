@@ -48,8 +48,8 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 	// Use an array to sync markers with regression lines
 	colors := []string{"rgba(31,119,180,1)", "rgba(255,127,14,1)", "rgba(44,160,44,1)", "rgba(214,39,40,1)", "rgba(148,103,189,1)", "rgba(140,86,75,1)", "rgba(227,119,194,1)"}
 
-	// Create a float64 numeric representation of 'X' axis
-	regX := []float64{}
+	// Create a float64 numeric representation of linear regression 'X' axis
+	lrX := []float64{}
 
 	// Create scatter data
 	i := 0
@@ -74,7 +74,7 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
 			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
 		}
-		regX = append(regX, float64(i))
+		lrX = append(lrX, float64(i))
 		i++
 	}
 
@@ -82,10 +82,10 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 	if bestFit {
 		linReg := make([]dataset2D, 7)
 		for i, set := range data {
-			a, b := stat.LinearRegression(regX, set.Y, nil, false)
+			a, b := stat.LinearRegression(lrX, set.Y, nil, false)
 
-			y := make([]float64, len(set.Y))
-			for idx, x := range regX {
+			y := make([]float64, len(lrX))
+			for idx, x := range lrX {
 				y[idx] = a + (b * x)
 			}
 
