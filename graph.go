@@ -84,8 +84,8 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 			a, b := stat.LinearRegression(regX, set.Y, nil, false)
 
 			y := make([]float64, len(set.Y))
-			for yI := 0; yI < len(regX); yI++ {
-				y[yI] = a + (b * regX[yI])
+			for idx, x := range regX {
+				y[idx] = a + (b * x)
 			}
 
 			linReg[i] = dataset2D{
