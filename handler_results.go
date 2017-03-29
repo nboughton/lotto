@@ -17,8 +17,8 @@ func handlerResults(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(res)
 }
 
-func handlerResultsLineGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphLine(db.getResults(parseQueryParams(r))))
+func handlerResultsScatterGraph(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(graphScatter(db.getResults(parseQueryParams(r)), true))
 }
 
 func handlerResultsScatter3DGraph(w traffic.ResponseWriter, r *traffic.Request) {

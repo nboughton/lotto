@@ -37,7 +37,7 @@ $(function () {
     redrawMachinesList()
     redrawSetsList()
   })
-  
+
 
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
@@ -45,8 +45,8 @@ $(function () {
       case "num-average":
         drawResultsAverage()
         break
-      case "graph-line":
-        drawResultsGraph("line")
+      case "graph-scatter":
+        drawResultsGraph("scatter")
         break
       case "graph-3d-scatter":
         drawResultsGraph("3d/scatter")
