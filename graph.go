@@ -65,9 +65,9 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 				}
 
 				if ball < 6 {
-					data[ball].Name = fmt.Sprintf("%d", ball+1)
+					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
 				} else {
-					data[ball].Name = "B"
+					data[ball].Name = "Bonus"
 				}
 			}
 			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
@@ -129,7 +129,7 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 				if ball < 6 {
 					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
 				} else {
-					data[ball].Name = "Bonus Ball"
+					data[ball].Name = "Bonus"
 				}
 			}
 			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d", row.Machine, row.Set))
