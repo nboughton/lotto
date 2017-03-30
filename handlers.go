@@ -42,16 +42,16 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 	w.Render("index", &PageData{machines, sets, q.Start, q.End})
 }
 
-func handlerResultsScatterGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphScatter(db.getResults(parseQueryParams(r)), true))
-}
-
-func handlerResultsScatter3DGraph(w traffic.ResponseWriter, r *traffic.Request) {
+func handlerResultsScatter3D(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(graphScatter3D(db.getResults(parseQueryParams(r))))
 }
 
-func handlerResultsBarGraph(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphBar(db.getResults(parseQueryParams(r))))
+func handlerResultsFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(graphFreqDist(db.getResults(parseQueryParams(r)), false, r.Param("type")))
+}
+
+func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
+	w.WriteJSON(graphTimeSeries(db.getResults(parseQueryParams(r)), false, r.Param("type")))
 }
 
 func handlerMachineSetsCombos(w traffic.ResponseWriter, r *traffic.Request) {

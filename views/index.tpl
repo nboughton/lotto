@@ -4,10 +4,11 @@
       <span class="form-element">
         <label for="query-type">Query Type: </label>
         <select id="query-type">
-          <option value="graph-bar">Frequency Dist (bar)</option>
-          <option value="graph-scatter">Frequency Dist (scatter/trend)</option>
+          <option value="graph-freqdist-bar">Frequency Dist (bar)</option>
+          <option value="graph-freqdist-scatter">Frequency Dist (scatter)</option>
+          <option vlaue="graph-timeseries-scatter">Time Series (scatter/line)</option>
           <option value="graph-3d-scatter">3D Scatter Plot (pretty!)</option>
-          <option value="num-average">Average Results</option>
+          <option value="num-average-mean">Mean Averages</option>
         </select>
       </span>
       <span class="form-element">

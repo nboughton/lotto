@@ -75,14 +75,18 @@ $(function () {
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
     switch ($(sel.queryType).val()) {
-      case "num-average":
+      case "num-average-mean":
         drawResultsAverage()
         break
-      case "graph-bar":
-        drawResultsGraph("bar", layouts.bar)
+      case "graph-freqdist-bar":
+        drawResultsGraph("freqdist/bar", layouts.bar)
         break
-      case "graph-scatter":
-        drawResultsGraph("scatter", layouts.scatter)
+      case "graph-freqdist-scatter":
+        drawResultsGraph("freqdist/scatter", layouts.scatter)
+        break
+      case "graph-timeseries-scatter":
+        console.log("timeseries")
+        drawResultsGraph("timeseries/scatter")
         break
       case "graph-3d-scatter":
         drawResultsGraph("3d/scatter", layouts.scatter3D)
@@ -151,5 +155,5 @@ $(function () {
 
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
-  drawResultsGraph("bar", layouts.bar)
+  drawResultsGraph("freqdist/bar", layouts.bar)
 })

@@ -4,11 +4,21 @@ import (
 	"fmt"
 
 	"github.com/gonum/stat"
+	"log"
 )
 
 var (
 	maxBallNum = 59
 	balls      = 7
+	colors     = []string{
+		"rgba(31,119,180,1)",
+		"rgba(255,127,14,1)",
+		"rgba(44,160,44,1)",
+		"rgba(214,39,40,1)",
+		"rgba(148,103,189,1)",
+		"rgba(140,86,75,1)",
+		"rgba(227,119,194,1)",
+	}
 )
 
 type dataset2D struct {
@@ -30,6 +40,7 @@ type dataset3D struct {
 	Mode   string   `json:"mode"`
 	Type   string   `json:"type"`
 	Marker marker   `json:"marker"`
+	Line   line     `json:"line"`
 }
 
 type marker struct {
@@ -41,90 +52,100 @@ type marker struct {
 }
 
 type line struct {
-	Width  float64 `json:"width"`
-	Colour string  `json:"color"`
-	Shape  string  `json:"shape"`
-	Dash   string  `json:"dash"`
+	Width   float64 `json:"width"`
+	Colour  string  `json:"color"`
+	Shape   string  `json:"shape"`
+	Dash    string  `json:"dash"`
+	Opacity float64 `json:"opacity"`
 }
 
-func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
+func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 	data := make([]dataset2D, balls)
 
-	// x: date:machine:set
-	// y: ball result
+	// Distribution over time
+	switch t {
+	case "scatter":
+		log.Println("time series, ho!")
+		i := 0
+		for row := range records {
+			for ball := 0; ball < balls; ball++ {
+				if i == 0 {
+					data[ball] = dataset2D{
+						Mode: "markers+lines",
+						Marker: marker{
+							Colour:  colors[ball],
+							Size:    8,
+							Opacity: 1,
+						},
+						Line: line{
+							Dash:  "dot",
+							Width: 0.5,
+						},
+					}
 
-	// Use an array to sync marker colours with regression lines
-	colors := []string{"rgba(31,119,180,1)", "rgba(255,127,14,1)", "rgba(44,160,44,1)", "rgba(214,39,40,1)", "rgba(148,103,189,1)", "rgba(140,86,75,1)", "rgba(227,119,194,1)"}
-
-	// Create scatter data
-	i := 0
-	for row := range records {
-		for ball := 0; ball < balls; ball++ {
-			if i == 0 {
-				data[ball] = dataset2D{
-					Mode: "markers",
-					Marker: marker{
-						Colour:  colors[ball],
-						Size:    8,
-						Opacity: 1,
-					},
-					X: freqDistXLabels(),
-					Y: make([]float64, maxBallNum),
+					data[ball].Name = label(ball)
 				}
-
-				data[ball].Name = label(ball)
+				data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
+				data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
 			}
-
-			data[ball].Y[row.Num[ball]-1]++
+			i++
 		}
-		i++
 	}
-	/* Distribution over time
-	i := 0
-	for row := range records {
-		for ball := 0; ball < balls; ball++ {
-			if i == 0 {
-				data[ball] = dataset2D{
-					Mode: "markers",
-					Marker: marker{
-						Colour:  colors[ball],
-						Size:    8,
-						Opacity: 1,
-					},
+	log.Println(data)
+
+	return data
+}
+
+func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset2D {
+	data := make([]dataset2D, balls)
+
+	switch t {
+	case "scatter":
+		// Create scatter data
+		i := 0
+		for row := range records {
+			for ball := 0; ball < balls; ball++ {
+				if i == 0 {
+					data[ball] = dataset2D{
+						Mode: "markers+lines",
+						Marker: marker{
+							Colour:  colors[ball],
+							Size:    8,
+							Opacity: 1,
+						},
+						Line: line{
+							Dash:  "dot",
+							Width: 0.5,
+						},
+						X: freqDistXLabels(),
+						Y: make([]float64, maxBallNum),
+					}
+
+					data[ball].Name = label(ball)
 				}
 
-				data[ball].Name = label(ball)
+				data[ball].Y[row.Num[ball]-1]++
 			}
-			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
-			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
-		}
-		lrX = append(lrX, float64(i))
-		i++
-	}*/
-
-	// Calculate and append linear regressions for each set
-	if bestFit {
-		linReg, lrX := make([]dataset2D, balls), make([]float64, maxBallNum)
-		for i := range lrX {
-			lrX[i] = float64(i) + 1
+			i++
 		}
 
-		for i, set := range data {
-			linReg[i] = dataset2D{
-				Name: set.Name,
-				Mode: "lines",
-				Line: line{
-					Dash:   "dot",
-					Width:  1.5,
-					Colour: colors[i],
-				},
-				ConnectGaps: true,
-				X:           set.X,
-				Y:           linRegYData(lrX, set.Y, false),
+	case "bar":
+		i := 0
+		for row := range records {
+			for ball := 0; ball < balls; ball++ {
+				if i == 0 {
+					data[ball] = dataset2D{
+						Type: "bar",
+						X:    freqDistXLabels(),
+						Y:    make([]float64, maxBallNum),
+					}
+					data[ball].Name = label(ball)
+				}
+
+				data[ball].Y[row.Num[ball]-1]++
 			}
+			i++
 		}
-
-		data = append(data, linReg...)
 	}
 
 	return data
@@ -145,10 +166,16 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
-						Size:    2,
+						Size:    3,
 						Opacity: 1,
-						//Line:    line{Width: 0.2},
+						Line:    line{Width: 0.1},
 					},
+					/*
+						Line: line{
+							Width:   0.5,
+							Opacity: 0.5,
+						},
+					*/
 				}
 
 				data[ball].Name = label(ball)
@@ -163,30 +190,29 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 	return data
 }
 
-func graphBar(records <-chan dbRow) []dataset2D {
-	data := make([]dataset2D, balls)
-
-	// x: numbers 1..maxBallNum
-	// y: frequency
-
-	i := 0
-	for row := range records {
-		for ball := 0; ball < balls; ball++ {
-			if i == 0 {
-				data[ball] = dataset2D{
-					Type: "bar",
-					X:    freqDistXLabels(),
-					Y:    make([]float64, maxBallNum),
-				}
-				data[ball].Name = label(ball)
-			}
-
-			data[ball].Y[row.Num[ball]-1]++
-		}
-		i++
+func generateLinRegSets(data []dataset2D) []dataset2D {
+	// Calculate and append linear regressions for each set
+	linReg, lrX := make([]dataset2D, balls), make([]float64, maxBallNum)
+	for i := range lrX {
+		lrX[i] = float64(i) + 1
 	}
 
-	return data
+	for i, set := range data {
+		linReg[i] = dataset2D{
+			Name: set.Name,
+			Mode: "lines",
+			Line: line{
+				Dash:   "dot",
+				Width:  1.5,
+				Colour: colors[i],
+			},
+			ConnectGaps: true,
+			X:           set.X,
+			Y:           linRegYData(lrX, set.Y, false),
+		}
+	}
+
+	return linReg
 }
 
 func freqDistXLabels() []string {
