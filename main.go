@@ -25,6 +25,7 @@ func init() {
 	router.Get("/api/results/average", handlerResultsAverage)
 	router.Get("/api/results/graph/scatter", handlerResultsScatterGraph)
 	router.Get("/api/results/graph/3d/scatter", handlerResultsScatter3DGraph)
+	router.Get("/api/results/graph/bar", handlerResultsBarGraph)
 	router.Get("/api/sets", handlerListSets)
 	router.Get("/api/machines", handlerListMachines)
 	router.Get("/api/machines/sets/combos", handlerMachineSetsCombos)

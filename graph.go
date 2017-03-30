@@ -45,6 +45,9 @@ type line struct {
 func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 	data := make([]dataset2D, 7)
 
+	// x: date:machine:set
+	// y: ball result
+
 	// Use an array to sync markers with regression lines
 	colors := []string{"rgba(31,119,180,1)", "rgba(255,127,14,1)", "rgba(44,160,44,1)", "rgba(214,39,40,1)", "rgba(148,103,189,1)", "rgba(140,86,75,1)", "rgba(227,119,194,1)"}
 
@@ -112,6 +115,10 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 func graphScatter3D(records <-chan dbRow) []dataset3D {
 	data := make([]dataset3D, 7)
 
+	// x: machine:set
+	// y: date
+	// z: ball result
+
 	i := 0
 	for row := range records {
 		for ball := 0; ball < 7; ball++ {
@@ -136,6 +143,43 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d", row.Machine, row.Set))
 			data[ball].Y = append(data[ball].Y, row.Date.Format(formatYYYYMMDD))
 			data[ball].Z = append(data[ball].Z, row.Num[ball])
+		}
+		i++
+	}
+
+	return data
+}
+
+func graphBar(records <-chan dbRow) []dataset2D {
+	data := make([]dataset2D, 7)
+
+	// x: numbers 1..60
+	// y: frequency
+
+	i := 0
+	for row := range records {
+		for ball := 0; ball < 7; ball++ {
+			if i == 0 {
+				// Populate X labels
+				var x []string
+				for j := 0; j < 60; j++ {
+					x = append(x, fmt.Sprintf("%d", j+1))
+				}
+
+				data[ball] = dataset2D{
+					Type: "bar",
+					X:    x,
+					Y:    make([]float64, 60),
+				}
+
+				if ball < 6 {
+					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
+				} else {
+					data[ball].Name = "Bonus"
+				}
+			}
+
+			data[ball].Y[row.Num[ball]]++
 		}
 		i++
 	}

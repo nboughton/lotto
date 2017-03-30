@@ -45,6 +45,9 @@ $(function () {
       case "num-average":
         drawResultsAverage()
         break
+      case "graph-bar":
+        drawResultsGraph("bar", { barmode: "stack" })
+        break
       case "graph-scatter":
         drawResultsGraph("scatter")
         break
@@ -96,10 +99,10 @@ $(function () {
     })
   }
 
-  function drawResultsGraph(type) {
+  function drawResultsGraph(type, layout) {
     $.getJSON("/api/results/graph/" + type, params(), function (d) {
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
-      Plotly.newPlot(sel.resultsGraph.replace("#", ""), d)
+      Plotly.newPlot(sel.resultsGraph.replace("#", ""), d, layout)
     })
     getMachinesSetsCombos()
   }

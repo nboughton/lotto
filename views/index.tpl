@@ -5,8 +5,9 @@
         <label for="query-type">Query Type: </label>
         <select id="query-type">
           <option value="num-average">Average Results</option>
-          <option value="graph-scatter">Scatter Graph</option>
-          <option value="graph-3d-scatter">3D Scatter Graph</option>
+          <option value="graph-bar">frequency distribution</option>
+          <option value="graph-scatter">results by date:machine:set</option>
+          <option value="graph-3d-scatter">3D scatter plot</option>
         </select>
       </span>
       <span class="form-element">
