@@ -14,6 +14,38 @@ $(function () {
     resultsGraph: "#results-graph"
   }
 
+  var layouts = {
+    bar: {
+      barmode: "stack",
+      xaxis: {
+        title: "Result"
+      },
+      yaxis: {
+        title: "Frequency"
+      }
+    },
+    scatter: {
+      xaxis: {
+        title: "Result"
+      },
+      yaxis: {
+        title: "Frequency"
+      }
+    },
+    scatter3D: {
+      scene: {
+        xaxis: {
+          title: "Machine"
+        },
+        yaxis: {
+          title: "Set"
+        },
+        zaxis: {
+          title: "Result"
+        }
+      }
+    }
+  }
   //******************************************************* HANDLERS */
   /// Pickadate.js
   $.getJSON("/api/range", function (d) {
@@ -47,13 +79,13 @@ $(function () {
         drawResultsAverage()
         break
       case "graph-bar":
-        drawResultsGraph("bar", { barmode: "stack" })
+        drawResultsGraph("bar", layouts.bar)
         break
       case "graph-scatter":
-        drawResultsGraph("scatter")
+        drawResultsGraph("scatter", layouts.scatter)
         break
       case "graph-3d-scatter":
-        drawResultsGraph("3d/scatter")
+        drawResultsGraph("3d/scatter", layouts.scatter3D)
         break
       default:
         break
@@ -119,5 +151,5 @@ $(function () {
 
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
-  drawResultsGraph("bar", { barmode: "stack" })
+  drawResultsGraph("bar", layouts.bar)
 })
