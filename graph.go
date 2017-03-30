@@ -6,6 +6,11 @@ import (
 	"github.com/gonum/stat"
 )
 
+var (
+	maxBallNum = 59
+	balls      = 7
+)
+
 type dataset2D struct {
 	X           []string  `json:"x"`
 	Y           []float64 `json:"y"`
@@ -18,8 +23,8 @@ type dataset2D struct {
 }
 
 type dataset3D struct {
-	X      []string `json:"x"` // machine:set
-	Y      []string `json:"y"` // date
+	X      []string `json:"x"` // machine
+	Y      []int    `json:"y"` // set
 	Z      []int    `json:"z"` // number
 	Name   string   `json:"name"`
 	Mode   string   `json:"mode"`
@@ -43,21 +48,41 @@ type line struct {
 }
 
 func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
-	data := make([]dataset2D, 7)
+	data := make([]dataset2D, balls)
 
 	// x: date:machine:set
 	// y: ball result
 
-	// Use an array to sync markers with regression lines
+	// Use an array to sync marker colours with regression lines
 	colors := []string{"rgba(31,119,180,1)", "rgba(255,127,14,1)", "rgba(44,160,44,1)", "rgba(214,39,40,1)", "rgba(148,103,189,1)", "rgba(140,86,75,1)", "rgba(227,119,194,1)"}
-
-	// Create a float64 numeric representation of linear regression 'X' axis
-	lrX := []float64{}
 
 	// Create scatter data
 	i := 0
 	for row := range records {
-		for ball := 0; ball < 7; ball++ {
+		for ball := 0; ball < balls; ball++ {
+			if i == 0 {
+				data[ball] = dataset2D{
+					Mode: "markers",
+					Marker: marker{
+						Colour:  colors[ball],
+						Size:    8,
+						Opacity: 1,
+					},
+					X: freqDistXLabels(),
+					Y: make([]float64, maxBallNum),
+				}
+
+				data[ball].Name = label(ball)
+			}
+
+			data[ball].Y[row.Num[ball]-1]++
+		}
+		i++
+	}
+	/* Distribution over time
+	i := 0
+	for row := range records {
+		for ball := 0; ball < balls; ball++ {
 			if i == 0 {
 				data[ball] = dataset2D{
 					Mode: "markers",
@@ -68,30 +93,23 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 					},
 				}
 
-				if ball < 6 {
-					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
-				} else {
-					data[ball].Name = "Bonus"
-				}
+				data[ball].Name = label(ball)
 			}
 			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
 			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
 		}
 		lrX = append(lrX, float64(i))
 		i++
-	}
+	}*/
 
 	// Calculate and append linear regressions for each set
 	if bestFit {
-		linReg := make([]dataset2D, 7)
+		linReg, lrX := make([]dataset2D, balls), make([]float64, maxBallNum)
+		for i := range lrX {
+			lrX[i] = float64(i) + 1
+		}
+
 		for i, set := range data {
-			a, b := stat.LinearRegression(lrX, set.Y, nil, false)
-
-			y := make([]float64, len(lrX))
-			for idx, x := range lrX {
-				y[idx] = a + (b * x)
-			}
-
 			linReg[i] = dataset2D{
 				Name: set.Name,
 				Mode: "lines",
@@ -102,7 +120,7 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 				},
 				ConnectGaps: true,
 				X:           set.X,
-				Y:           y,
+				Y:           linRegYData(lrX, set.Y, false),
 			}
 		}
 
@@ -113,35 +131,30 @@ func graphScatter(records <-chan dbRow, bestFit bool) []dataset2D {
 }
 
 func graphScatter3D(records <-chan dbRow) []dataset3D {
-	data := make([]dataset3D, 7)
+	data := make([]dataset3D, balls)
 
-	// x: machine:set
-	// y: date
+	// x: machine
+	// y: set
 	// z: ball result
 
 	i := 0
 	for row := range records {
-		for ball := 0; ball < 7; ball++ {
+		for ball := 0; ball < balls; ball++ {
 			if i == 0 {
-				set := dataset3D{
+				data[ball] = dataset3D{
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
-						Size:    4,
+						Size:    2,
 						Opacity: 1,
 						//Line:    line{Width: 0.2},
 					},
 				}
 
-				data[ball] = set
-				if ball < 6 {
-					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
-				} else {
-					data[ball].Name = "Bonus"
-				}
+				data[ball].Name = label(ball)
 			}
-			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d", row.Machine, row.Set))
-			data[ball].Y = append(data[ball].Y, row.Date.Format(formatYYYYMMDD))
+			data[ball].X = append(data[ball].X, row.Machine)
+			data[ball].Y = append(data[ball].Y, row.Set)
 			data[ball].Z = append(data[ball].Z, row.Num[ball])
 		}
 		i++
@@ -151,38 +164,61 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 }
 
 func graphBar(records <-chan dbRow) []dataset2D {
-	data := make([]dataset2D, 7)
+	data := make([]dataset2D, balls)
 
-	// x: numbers 1..60
+	// x: numbers 1..maxBallNum
 	// y: frequency
 
 	i := 0
 	for row := range records {
-		for ball := 0; ball < 7; ball++ {
+		for ball := 0; ball < balls; ball++ {
 			if i == 0 {
-				// Populate X labels
-				var x []string
-				for j := 0; j < 60; j++ {
-					x = append(x, fmt.Sprintf("%d", j+1))
-				}
-
 				data[ball] = dataset2D{
 					Type: "bar",
-					X:    x,
-					Y:    make([]float64, 60),
+					X:    freqDistXLabels(),
+					Y:    make([]float64, maxBallNum),
 				}
-
-				if ball < 6 {
-					data[ball].Name = fmt.Sprintf("Ball %d", ball+1)
-				} else {
-					data[ball].Name = "Bonus"
-				}
+				data[ball].Name = label(ball)
 			}
 
-			data[ball].Y[row.Num[ball]]++
+			data[ball].Y[row.Num[ball]-1]++
 		}
 		i++
 	}
 
 	return data
+}
+
+func freqDistXLabels() []string {
+	var x []string
+	for i := 0; i < maxBallNum; i++ {
+		x = append(x, fmt.Sprintf("%d", i+1))
+	}
+	return x
+}
+
+func linRegYData(lrX, lrY []float64, subzero bool) []float64 {
+	a, b := stat.LinearRegression(lrX, lrY, nil, false)
+
+	y := make([]float64, len(lrX))
+	for idx, x := range lrX {
+		n := a + (b * x)
+		if subzero {
+			y[idx] = n
+		} else if n < 0 {
+			y[idx] = 0
+		} else {
+			y[idx] = n
+		}
+
+	}
+	return y
+}
+
+func label(ball int) string {
+	if ball < 6 {
+		return fmt.Sprintf("Ball %d", ball+1)
+	}
+
+	return "Bonus"
 }

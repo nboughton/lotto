@@ -33,6 +33,7 @@ $(function () {
     redrawSetsList()
   })
 
+  /// Redraw machine and set lists to reflect available data for date range
   $(sel.dateClass).change(function (e) {
     redrawMachinesList()
     redrawSetsList()
@@ -60,7 +61,7 @@ $(function () {
   })
 
   //******************************************************* FUNCTIONS */
-  // Return a unix timestamp for n number of days ago
+  /// Return query params 
   function params() {
     return {
       start: $(sel.dateStart).val(),
@@ -82,16 +83,16 @@ $(function () {
 
   function redrawMachinesList() {
     $.getJSON("/api/machines", params(), function (d) {
-      $(sel.machineSelect).empty().append('<option value="all">All</option>')
+      var el = $(sel.machineSelect)
+      el.empty().append('<option value="all">All</option>')
       $.each(d, function (i, m) {
-        $(sel.machineSelect).append('<option value="' + m + '">' + m + '</option>')
+        el.append('<option value="' + m + '">' + m + '</option>')
       })
     })
   }
 
   function drawResultsAverage() {
     $.getJSON("/api/results/average", params(), function (d) {
-      // Empty results dive and append container for data
       $(sel.results).empty().append('<h1 id="' + sel.resultsAvg.replace('#', '') + '" class="centered"></h1>')
       for (i = 0; i < d.length; i++) {
         $(sel.resultsAvg).append("<span class='num'>" + d[i] + "</span>")
@@ -104,12 +105,19 @@ $(function () {
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
       Plotly.newPlot(sel.resultsGraph.replace("#", ""), d, layout)
     })
-    getMachinesSetsCombos()
+    //getMachinesSetsCombos()
   }
 
+  /*
+  // currently unused
   function getMachinesSetsCombos() {
     $.getJSON("/api/machines/sets/combos", params(), function (d) {
       console.log(d)
     })
   }
+  */
+
+  //******************************************************* WHAT DO */
+  // Draw a frequency distribution
+  drawResultsGraph("bar", { barmode: "stack" })
 })
