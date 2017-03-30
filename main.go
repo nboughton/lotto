@@ -28,7 +28,7 @@ func init() {
 	router.Get("/api/results/graph/bar", handlerResultsBarGraph)
 	router.Get("/api/sets", handlerListSets)
 	router.Get("/api/machines", handlerListMachines)
-	router.Get("/api/machines/sets/combos", handlerMachineSetsCombos)
+	//router.Get("/api/machines/sets/combos", handlerMachineSetsCombos)
 
 	// Update every 24 hours
 	go func() {

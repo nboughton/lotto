@@ -236,8 +236,9 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 	q := qGen.NewQuery().
 		Select("MIN(date)", "MAX(date)").
 		From("results")
+	stmt, _ := db.Prepare(q.SQL)
 
-	if err := db.QueryRow(q.SQL).Scan(&first, &last); err != nil {
+	if err := stmt.QueryRow().Scan(&first, &last); err != nil {
 		return time.Now(), time.Now(), err
 	}
 
