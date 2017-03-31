@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	//"sort"
+	"sort"
 
 	"github.com/gonum/stat"
 	//"log"
@@ -204,19 +204,23 @@ func graphScatter3D(records <-chan dbRow) []dataset {
 	return data
 }
 
-func graphMSFreqDist(records <-chan dbRow) []dataset {
-	data := make([]dataset, 12)
-	// @TODO: Machine/Set frequency dist.
-	/*
-		i := 0
-		for row := records {
-			if i == 0 {
-				data[]
-			}
-		}
-	*/
+func graphMSFreqDist(m map[string]int) []dataset {
+	data := dataset{
+		Type: graphTypeBar,
+	}
 
-	return data
+	l := []string{}
+	for k := range m {
+		l = append(l, k)
+	}
+	sort.Strings(l)
+
+	for _, k := range l {
+		data.X = append(data.X, k)
+		data.Y = append(data.Y, float64(m[k]))
+	}
+
+	return []dataset{data}
 }
 
 func regressionSets(data []dataset, t string) []dataset {

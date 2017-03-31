@@ -99,6 +99,9 @@ $(function () {
       case "graph-freqdist-scatter":
         drawResultsGraph("freqdist/scatter", layouts.freqdist.scatter)
         break
+      case "graph-freqdist-ms":
+        drawResultsGraph("freqdist-ms")
+        break
       case "graph-timeseries-scatter":
         drawResultsGraph("timeseries/scatter", layouts.timeseries.line)
         break
