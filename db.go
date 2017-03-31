@@ -197,7 +197,7 @@ func (db *AppDB) getResultsAverageRanges(p queryParams) ([]string, error) {
 
 	for i := 1; i < len(rI); i++ {
 		if i%2 != 0 {
-			r = append(r, fmt.Sprintf("%d - %d", rI[i-1], rI[i]))
+			r = append(r, fmt.Sprintf("%d-%d", rI[i-1], rI[i]))
 		}
 	}
 

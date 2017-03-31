@@ -47,11 +47,11 @@ func handlerResultsScatter3D(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerResultsFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphFreqDist(db.getResults(params(r)), false, r.Param("type")))
+	w.WriteJSON(graphFreqDist(db.getResults(params(r)), true, r.Param("type")))
 }
 
 func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphTimeSeries(db.getResults(params(r)), false, r.Param("type")))
+	w.WriteJSON(graphTimeSeries(db.getResults(params(r)), true, r.Param("type")))
 }
 
 func handlerMachineSetsCombos(w traffic.ResponseWriter, r *traffic.Request) {

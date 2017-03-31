@@ -15,21 +15,33 @@ $(function () {
   }
 
   var layouts = {
-    bar: {
-      barmode: "stack",
-      xaxis: {
-        title: "Result"
+    freqdist: {
+      bar: {
+        barmode: "stack",
+        xaxis: {
+          title: "Result"
+        },
+        yaxis: {
+          title: "Frequency"
+        }
       },
-      yaxis: {
-        title: "Frequency"
+      scatter: {
+        xaxis: {
+          title: "Result"
+        },
+        yaxis: {
+          title: "Frequency"
+        }
       }
     },
-    scatter: {
-      xaxis: {
-        title: "Result"
-      },
-      yaxis: {
-        title: "Frequency"
+    timeseries: {
+      line: {
+        xaxis: {
+          title: "Date:Set:Machine",
+        },
+        yaxis: {
+          title: "Result"
+        }
       }
     },
     scatter3D: {
@@ -76,22 +88,22 @@ $(function () {
   $(sel.querySubmit).click(function (e) {
     switch ($(sel.queryType).val()) {
       case "num-average-mean":
-        drawResultsAverage()
+        drawResultsAverage("")
         break
       case "num-average-ranges":
         drawResultsAverage("/ranges")
         break
       case "graph-freqdist-bar":
-        drawResultsGraph("freqdist/bar", layouts.bar)
+        drawResultsGraph("freqdist/bar", layouts.freqdist.bar)
         break
       case "graph-freqdist-scatter":
-        drawResultsGraph("freqdist/scatter", layouts.scatter)
+        drawResultsGraph("freqdist/scatter", layouts.freqdist.scatter)
         break
       case "graph-timeseries-scatter":
-        drawResultsGraph("timeseries/scatter")
+        drawResultsGraph("timeseries/scatter", layouts.timeseries.line)
         break
       case "graph-timeseries-line":
-        drawResultsGraph("timeseries/line")
+        drawResultsGraph("timeseries/line", layouts.timeseries.line)
         break
       case "graph-3d-scatter":
         drawResultsGraph("3d/scatter", layouts.scatter3D)
@@ -136,7 +148,7 @@ $(function () {
     $.getJSON("/api/results/average" + type, params(), function (d) {
       $(sel.results).empty().append('<h1 id="' + sel.resultsAvg.replace('#', '') + '" class="centered"></h1>')
       $.each(d, function (i, n) {
-        $(sel.resultsAvg).append("<span class='num'>" + n + ", </span>")
+        $(sel.resultsAvg).append("<span class='num'>" + n + "</span>")
       })
     })
   }
@@ -160,5 +172,5 @@ $(function () {
 
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
-  drawResultsGraph("freqdist/bar", layouts.bar)
+  drawResultsGraph("freqdist/bar", layouts.freqdist.bar)
 })

@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
+	//"sort"
 
 	"github.com/gonum/stat"
+	//"log"
 )
 
 var (
-	maxBallNum = 59
-	balls      = 7
-	colors     = []string{
+	colors = []string{
 		"rgba(31,119,180,1)",
 		"rgba(255,127,14,1)",
 		"rgba(44,160,44,1)",
@@ -20,9 +20,20 @@ var (
 	}
 )
 
-type dataset2D struct {
+const (
+	maxBallNum       = 59
+	balls            = 7
+	regressionLinear = "linear"
+	regressionPoly   = "polynomial"
+	graphTypeScatter = "scatter"
+	graphTypeBar     = "bar"
+	graphTypeLine    = "line"
+)
+
+type dataset struct {
 	X           []string  `json:"x"`
 	Y           []float64 `json:"y"`
+	Z           []int     `json:"z"` // number
 	Name        string    `json:"name"`
 	Mode        string    `json:"mode"`
 	Type        string    `json:"type"`
@@ -31,15 +42,16 @@ type dataset2D struct {
 	ConnectGaps bool      `json:"connectgaps"`
 }
 
-type dataset3D struct {
-	X      []string `json:"x"` // machine
-	Y      []int    `json:"y"` // set
-	Z      []int    `json:"z"` // number
-	Name   string   `json:"name"`
-	Mode   string   `json:"mode"`
-	Type   string   `json:"type"`
-	Marker marker   `json:"marker"`
-	Line   line     `json:"line"`
+type datasetB struct {
+	X           []string  `json:"x"`
+	Y           []float64 `json:"y"`
+	Z           []int     `json:"z"` // number
+	Name        string    `json:"name"`
+	Mode        string    `json:"mode"`
+	Type        string    `json:"type"`
+	Line        line      `json:"line"`
+	Marker      markerB   `json:"marker"`
+	ConnectGaps bool      `json:"connectgaps"`
 }
 
 type marker struct {
@@ -50,6 +62,16 @@ type marker struct {
 	Symbol  string  `json:"symbol"`
 }
 
+type markerB struct {
+	Colour   string    `json:"color"`
+	Size     []float64 `json:"size"`
+	SizeMode string    `json:"sizemode"`
+	SizeRef  float64   `json:"sizeref"`
+	Line     line      `json:"line"`
+	Opacity  float64   `json:"opacity"`
+	Symbol   string    `json:"symbol"`
+}
+
 type line struct {
 	Width   float64 `json:"width"`
 	Colour  string  `json:"color"`
@@ -58,8 +80,8 @@ type line struct {
 	Opacity float64 `json:"opacity"`
 }
 
-func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
-	data := make([]dataset2D, balls)
+func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset {
+	data := make([]dataset, balls)
 
 	i := 0
 	for row := range records {
@@ -67,23 +89,18 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 			if i == 0 {
 
 				switch t {
-				case "scatter":
-					data[ball] = dataset2D{
-						Mode: "markers+lines",
+				case graphTypeScatter:
+					data[ball] = dataset{
+						Mode: "markers",
 						Marker: marker{
 							Colour:  colors[ball],
-							Size:    8,
+							Size:    6,
 							Opacity: 1,
-						},
-						Line: line{
-							Shape: "spline",
-							Dash:  "dot",
-							Width: 0.5,
 						},
 					}
 
-				case "line":
-					data[ball] = dataset2D{
+				case graphTypeLine:
+					data[ball] = dataset{
 						Mode: "lines",
 						Line: line{
 							Width: 1,
@@ -100,11 +117,15 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 		i++
 	}
 
+	if bestFit && t == graphTypeScatter {
+		data = append(data, regressionSets(data, regressionLinear)...)
+	}
+
 	return data
 }
 
-func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset2D {
-	data := make([]dataset2D, balls)
+func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset {
+	data := make([]dataset, balls)
 
 	i := 0
 	for row := range records {
@@ -112,25 +133,21 @@ func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 			if i == 0 {
 
 				switch t {
-				case "scatter":
-					data[ball] = dataset2D{
-						Mode: "markers+lines",
+				case graphTypeScatter:
+					data[ball] = dataset{
+						Mode: "markers",
 						Marker: marker{
 							Colour:  colors[ball],
-							Size:    8,
+							Size:    6,
 							Opacity: 1,
-						},
-						Line: line{
-							Dash:  "dot",
-							Width: 0.5,
 						},
 						X: freqDistXLabels(),
 						Y: make([]float64, maxBallNum),
 					}
 
-				case "bar":
-					data[ball] = dataset2D{
-						Type: "bar",
+				case graphTypeBar:
+					data[ball] = dataset{
+						Type: graphTypeBar,
 						X:    freqDistXLabels(),
 						Y:    make([]float64, maxBallNum),
 					}
@@ -145,11 +162,17 @@ func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 		i++
 	}
 
+	/*
+		if bestFit && t != graphTypeBar {
+			data = append(data, regressionSets(data, regressionPoly)...)
+		}
+	*/
+
 	return data
 }
 
-func graphScatter3D(records <-chan dbRow) []dataset3D {
-	data := make([]dataset3D, balls)
+func graphScatter3D(records <-chan dbRow) []dataset {
+	data := make([]dataset, balls)
 
 	// x: machine
 	// y: set
@@ -159,7 +182,7 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 	for row := range records {
 		for ball := 0; ball < balls; ball++ {
 			if i == 0 {
-				data[ball] = dataset3D{
+				data[ball] = dataset{
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
@@ -167,18 +190,12 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 						Opacity: 0.9,
 						Line:    line{Width: 0.1},
 					},
-					/*
-						Line: line{
-							Width:   0.5,
-							Opacity: 0.5,
-						},
-					*/
 				}
 
 				data[ball].Name = label(ball)
 			}
 			data[ball].X = append(data[ball].X, row.Machine)
-			data[ball].Y = append(data[ball].Y, row.Set)
+			data[ball].Y = append(data[ball].Y, float64(row.Set))
 			data[ball].Z = append(data[ball].Z, row.Num[ball])
 		}
 		i++
@@ -187,37 +204,63 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 	return data
 }
 
-func generateLinRegSets(data []dataset2D) []dataset2D {
-	// Calculate and append linear regressions for each set
-	linReg, lrX := make([]dataset2D, balls), make([]float64, maxBallNum)
-	for i := range lrX {
-		lrX[i] = float64(i) + 1
+func graphMSFreqDist(records <-chan dbRow) []dataset {
+	data := make([]dataset, 12)
+	// @TODO: Machine/Set frequency dist.
+	/*
+		i := 0
+		for row := records {
+			if i == 0 {
+				data[]
+			}
+		}
+	*/
+
+	return data
+}
+
+func regressionSets(data []dataset, t string) []dataset {
+	// Calculate and append regressionLinear regressions for each set
+	r, rX := make([]dataset, balls), make([]float64, len(data[0].Y))
+
+	// Generate numerical X axis data
+	for i := range rX {
+		rX[i] = float64(i) + 1
 	}
 
+	// Iterate existing sets and create new regression sets
 	for i, set := range data {
-		linReg[i] = dataset2D{
+		r[i] = dataset{
 			Name: set.Name,
 			Mode: "lines",
 			Line: line{
 				Dash:   "dot",
-				Width:  1.5,
+				Width:  2,
 				Colour: colors[i],
 			},
 			ConnectGaps: true,
 			X:           set.X,
-			Y:           linRegYData(lrX, set.Y, false),
+		}
+
+		switch t {
+		case regressionLinear:
+			r[i].Y = linRegYData(rX, set.Y, false)
+		case regressionPoly:
+			r[i].Y = polRegYData(rX, set.Y, false)
 		}
 	}
 
-	return linReg
+	return r
 }
 
-func freqDistXLabels() []string {
-	var x []string
-	for i := 0; i < maxBallNum; i++ {
-		x = append(x, fmt.Sprintf("%d", i+1))
-	}
-	return x
+func polRegYData(prX, prY []float64, subzero bool) []float64 {
+	// @TODO: polynomial regression sets for non-linear best fits
+	y := make([]float64, len(prX))
+	//a, b := stat.LinearRegression(prX, prY, nil, false)
+	//r2 := stat.RSquared(prX, prY, nil, a, b)
+	//log.Println(r2)
+
+	return y
 }
 
 func linRegYData(lrX, lrY []float64, subzero bool) []float64 {
@@ -236,6 +279,14 @@ func linRegYData(lrX, lrY []float64, subzero bool) []float64 {
 
 	}
 	return y
+}
+
+func freqDistXLabels() []string {
+	var x []string
+	for i := 0; i < maxBallNum; i++ {
+		x = append(x, fmt.Sprintf("%d", i+1))
+	}
+	return x
 }
 
 func label(ball int) string {
