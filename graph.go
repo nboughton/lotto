@@ -164,8 +164,8 @@ func graphScatter3D(records <-chan dbRow) []dataset3D {
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
-						Size:    3,
-						Opacity: 1,
+						Size:    4,
+						Opacity: 0.9,
 						Line:    line{Width: 0.1},
 					},
 					/*
