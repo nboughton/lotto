@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	//"log"
 	"sort"
 
 	"github.com/gonum/stat"
-	//"log"
 )
 
 var (
@@ -223,6 +223,68 @@ func graphMSFreqDist(m map[string]int) []dataset {
 	return []dataset{data}
 }
 
+func graphMSFreqDist2(records <-chan dbRow) []datasetB {
+	// Filter results into map
+	// machines = x
+	// m[set]freq = datasets, sizes
+	m := make(map[string]map[int]float64)
+	for row := range records {
+		_, ok := m[row.Machine]
+		if !ok {
+			m[row.Machine] = make(map[int]float64)
+		}
+
+		m[row.Machine][row.Set] += 10
+	}
+	//log.Println(m)
+
+	// Set machines list
+	machines := []string{}
+	for key := range m {
+		machines = append(machines, key)
+	}
+	sort.Strings(machines)
+
+	// Create datasets
+	data := []datasetB{}
+	for _, machine := range machines {
+		// Create sorted sets list for machine
+		sets := []int{}
+		for k := range m[machine] {
+			sets = append(sets, k)
+		}
+		sort.Ints(sets)
+
+		// Create sorted list of sizes
+		sizes := []float64{}
+		for _, set := range sets {
+			sizes = append(sizes, float64(m[machine][set]))
+		}
+
+		// float64 version of sets
+		fSets := []float64{}
+		for _, n := range sets {
+			fSets = append(fSets, float64(n))
+		}
+
+		// Instantiate dataset
+		data = append(data, datasetB{
+			Name: machine,
+			Mode: "markers",
+			Marker: markerB{
+				Size:     sizes,
+				SizeMode: "area",
+				//SizeRef:  2e5,
+				Opacity: 1,
+			},
+			X: machines,
+			Y: fSets,
+		})
+	}
+
+	return data
+}
+
 func regressionSets(data []dataset, t string) []dataset {
 	// Calculate and append regressionLinear regressions for each set
 	r, rX := make([]dataset, balls), make([]float64, len(data[0].Y))
@@ -250,7 +312,7 @@ func regressionSets(data []dataset, t string) []dataset {
 		case regressionLinear:
 			r[i].Y = linRegYData(rX, set.Y, false)
 		case regressionPoly:
-			r[i].Y = polRegYData(rX, set.Y, false)
+			r[i].Y = polRegYData(rX, set.Y, false) // Not currently working because I suck at maths
 		}
 	}
 
