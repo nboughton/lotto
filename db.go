@@ -115,7 +115,7 @@ func applyFilters(q *qGen.Query, p queryParams) []interface{} {
 }
 
 func (db *AppDB) getResults(p queryParams) <-chan dbRow {
-	var c = make(chan dbRow)
+	c := make(chan dbRow)
 
 	go func() {
 		q := qGen.NewQuery().
@@ -146,13 +146,13 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 }
 
 func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
-	results := make(map[string]int)
+	r := make(map[string]int)
 
 	for row := range db.getResults(p) {
-		results[fmt.Sprintf("%s:%d", row.Machine, row.Set)]++
+		r[fmt.Sprintf("%s:%d", row.Machine, row.Set)]++
 	}
 
-	return results
+	return r
 }
 
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
@@ -176,8 +176,36 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	return r, nil
 }
 
+func (db *AppDB) getResultsAverageRanges(p queryParams) ([]string, error) {
+	r := []string{}
+	q := qGen.NewQuery()
+
+	qSelect := []string{}
+	for i := 1; i <= 6; i++ {
+		qSelect = append(qSelect, fmt.Sprintf("MIN(num_%d)", i), fmt.Sprintf("MAX(num_%d)", i))
+	}
+	qSelect = append(qSelect, "MIN(bonus)", "MAX(bonus)")
+
+	q.Select(qSelect...).From("results")
+	qp := applyFilters(q, p)
+	stmt, _ := db.Prepare(q.SQL)
+
+	rI := make([]int, 14)
+	if err := stmt.QueryRow(qp...).Scan(&rI[0], &rI[1], &rI[2], &rI[3], &rI[4], &rI[5], &rI[6], &rI[7], &rI[8], &rI[9], &rI[10], &rI[11], &rI[12], &rI[13]); err != nil {
+		return r, err
+	}
+
+	for i := 1; i < len(rI); i++ {
+		if i%2 != 0 {
+			r = append(r, fmt.Sprintf("%d - %d", rI[i-1], rI[i]))
+		}
+	}
+
+	return r, nil
+}
+
 func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
-	var result []string
+	r := []string{}
 	q := qGen.NewQuery().
 		Select("DISTINCT(ball_machine)").
 		From("results")
@@ -187,20 +215,20 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 	stmt, _ := db.Prepare(q.Order("ball_machine").SQL)
 	rows, err := stmt.Query(qp...)
 	if err != nil {
-		return result, err
+		return r, err
 	}
 
 	for rows.Next() {
 		var m string
 		rows.Scan(&m)
-		result = append(result, m)
+		r = append(r, m)
 	}
 
-	return result, nil
+	return r, nil
 }
 
 func (db *AppDB) getSetList(p queryParams) ([]int, error) {
-	var result []int
+	r := []int{}
 	q := qGen.NewQuery().
 		Select("DISTINCT(ball_set)").
 		From("results")
@@ -210,16 +238,16 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	stmt, _ := db.Prepare(q.Order("ball_set").SQL)
 	rows, err := stmt.Query(qp...)
 	if err != nil {
-		return result, err
+		return r, err
 	}
 
 	for rows.Next() {
 		var s int
 		rows.Scan(&s)
-		result = append(result, s)
+		r = append(r, s)
 	}
 
-	return result, nil
+	return r, nil
 }
 
 func (db *AppDB) getRowCount() (int, error) {

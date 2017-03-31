@@ -7,8 +7,10 @@
           <option value="graph-freqdist-bar">Frequency Dist (bar)</option>
           <option value="graph-freqdist-scatter">Frequency Dist (scatter)</option>
           <option value="graph-timeseries-scatter">Time Series (scatter/line)</option>
+          <option value="graph-timeseries-line">Time Series (line)</option>
           <option value="graph-3d-scatter">3D Scatter Plot (pretty!)</option>
           <option value="num-average-mean">Mean Averages</option>
+          <option value="num-average-ranges">Result Ranges</option>
         </select>
       </span>
     <span class="form-element">

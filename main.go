@@ -22,6 +22,7 @@ func init() {
 	router.Get("/", handlerRoot)
 	router.Get("/api/range", handlerDataRange)
 	router.Get("/api/results/average", handlerResultsAverage)
+	router.Get("/api/results/average/ranges", handlerResultsAverageRanges)
 	router.Get("/api/results/graph/freqdist/:type", handlerResultsFreqDist)
 	router.Get("/api/results/graph/timeseries/:type", handlerResultsTimeSeries)
 	router.Get("/api/results/graph/3d/scatter", handlerResultsScatter3D)

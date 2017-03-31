@@ -43,25 +43,33 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerResultsScatter3D(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphScatter3D(db.getResults(parseQueryParams(r))))
+	w.WriteJSON(graphScatter3D(db.getResults(params(r))))
 }
 
 func handlerResultsFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphFreqDist(db.getResults(parseQueryParams(r)), false, r.Param("type")))
+	w.WriteJSON(graphFreqDist(db.getResults(params(r)), false, r.Param("type")))
 }
 
 func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphTimeSeries(db.getResults(parseQueryParams(r)), false, r.Param("type")))
+	w.WriteJSON(graphTimeSeries(db.getResults(params(r)), false, r.Param("type")))
 }
 
 func handlerMachineSetsCombos(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(db.getMachineSetCombinations(parseQueryParams(r)))
+	w.WriteJSON(db.getMachineSetCombinations(params(r)))
 }
 
 func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getResultsAverage(parseQueryParams(r))
+	res, err := db.getResultsAverage(params(r))
 	if err != nil {
-		//w.WriteJSON("Invalid machine/set combination")
+		w.WriteJSON(err.Error())
+	} else {
+		w.WriteJSON(res)
+	}
+}
+
+func handlerResultsAverageRanges(w traffic.ResponseWriter, r *traffic.Request) {
+	res, err := db.getResultsAverageRanges(params(r))
+	if err != nil {
 		w.WriteJSON(err.Error())
 	} else {
 		w.WriteJSON(res)
@@ -69,7 +77,7 @@ func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerListSets(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getSetList(parseQueryParams(r))
+	res, err := db.getSetList(params(r))
 	if err != nil {
 		w.WriteJSON(err)
 	} else {
@@ -78,7 +86,7 @@ func handlerListSets(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerListMachines(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getMachineList(parseQueryParams(r))
+	res, err := db.getMachineList(params(r))
 	if err != nil {
 		w.WriteJSON(err)
 	} else {
@@ -95,7 +103,7 @@ func handlerDataRange(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(map[string]int64{"first": f.Unix(), "last": l.Unix()})
 }
 
-func parseQueryParams(r *traffic.Request) queryParams {
+func params(r *traffic.Request) queryParams {
 	var p queryParams
 	p.Start = r.Param("start")
 	p.End = r.Param("end")

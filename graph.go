@@ -61,13 +61,13 @@ type line struct {
 func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 	data := make([]dataset2D, balls)
 
-	// Distribution over time
-	switch t {
-	case "scatter":
-		i := 0
-		for row := range records {
-			for ball := 0; ball < balls; ball++ {
-				if i == 0 {
+	i := 0
+	for row := range records {
+		for ball := 0; ball < balls; ball++ {
+			if i == 0 {
+
+				switch t {
+				case "scatter":
 					data[ball] = dataset2D{
 						Mode: "markers+lines",
 						Marker: marker{
@@ -82,13 +82,22 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 						},
 					}
 
-					data[ball].Name = label(ball)
-				}
-				data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
-				data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
+				case "line":
+					data[ball] = dataset2D{
+						Mode: "lines",
+						Line: line{
+							Width: 1,
+						},
+					}
+				} // END SWITCH
+
+				data[ball].Name = label(ball)
 			}
-			i++
+			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
+			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
 		}
+
+		i++
 	}
 
 	return data
@@ -97,13 +106,13 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 	data := make([]dataset2D, balls)
 
-	switch t {
-	case "scatter":
-		// Create scatter data
-		i := 0
-		for row := range records {
-			for ball := 0; ball < balls; ball++ {
-				if i == 0 {
+	i := 0
+	for row := range records {
+		for ball := 0; ball < balls; ball++ {
+			if i == 0 {
+
+				switch t {
+				case "scatter":
 					data[ball] = dataset2D{
 						Mode: "markers+lines",
 						Marker: marker{
@@ -119,31 +128,21 @@ func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 						Y: make([]float64, maxBallNum),
 					}
 
-					data[ball].Name = label(ball)
-				}
-
-				data[ball].Y[row.Num[ball]-1]++
-			}
-			i++
-		}
-
-	case "bar":
-		i := 0
-		for row := range records {
-			for ball := 0; ball < balls; ball++ {
-				if i == 0 {
+				case "bar":
 					data[ball] = dataset2D{
 						Type: "bar",
 						X:    freqDistXLabels(),
 						Y:    make([]float64, maxBallNum),
 					}
-					data[ball].Name = label(ball)
-				}
 
-				data[ball].Y[row.Num[ball]-1]++
+				} // END SWITCH
+
+				data[ball].Name = label(ball)
 			}
-			i++
+
+			data[ball].Y[row.Num[ball]-1]++
 		}
+		i++
 	}
 
 	return data

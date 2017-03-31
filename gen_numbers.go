@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func generateNumbers() []int {
+func generateNumbers(ranges []string) []int {
 	var (
 		pool    []int
 		results []int

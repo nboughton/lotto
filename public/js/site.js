@@ -78,6 +78,9 @@ $(function () {
       case "num-average-mean":
         drawResultsAverage()
         break
+      case "num-average-ranges":
+        drawResultsAverage("/ranges")
+        break
       case "graph-freqdist-bar":
         drawResultsGraph("freqdist/bar", layouts.bar)
         break
@@ -86,6 +89,9 @@ $(function () {
         break
       case "graph-timeseries-scatter":
         drawResultsGraph("timeseries/scatter")
+        break
+      case "graph-timeseries-line":
+        drawResultsGraph("timeseries/line")
         break
       case "graph-3d-scatter":
         drawResultsGraph("3d/scatter", layouts.scatter3D)
@@ -126,12 +132,12 @@ $(function () {
     })
   }
 
-  function drawResultsAverage() {
-    $.getJSON("/api/results/average", params(), function (d) {
+  function drawResultsAverage(type) {
+    $.getJSON("/api/results/average" + type, params(), function (d) {
       $(sel.results).empty().append('<h1 id="' + sel.resultsAvg.replace('#', '') + '" class="centered"></h1>')
-      for (i = 0; i < d.length; i++) {
-        $(sel.resultsAvg).append("<span class='num'>" + d[i] + "</span>")
-      }
+      $.each(d, function (i, n) {
+        $(sel.resultsAvg).append("<span class='num'>" + n + ", </span>")
+      })
     })
   }
 
