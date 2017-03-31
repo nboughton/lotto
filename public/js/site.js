@@ -85,7 +85,6 @@ $(function () {
         drawResultsGraph("freqdist/scatter", layouts.scatter)
         break
       case "graph-timeseries-scatter":
-        console.log("timeseries")
         drawResultsGraph("timeseries/scatter")
         break
       case "graph-3d-scatter":

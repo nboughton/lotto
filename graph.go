@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gonum/stat"
-	"log"
 )
 
 var (
@@ -65,7 +64,6 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 	// Distribution over time
 	switch t {
 	case "scatter":
-		log.Println("time series, ho!")
 		i := 0
 		for row := range records {
 			for ball := 0; ball < balls; ball++ {
@@ -78,6 +76,7 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 							Opacity: 1,
 						},
 						Line: line{
+							Shape: "spline",
 							Dash:  "dot",
 							Width: 0.5,
 						},
@@ -91,7 +90,6 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset2D {
 			i++
 		}
 	}
-	log.Println(data)
 
 	return data
 }
