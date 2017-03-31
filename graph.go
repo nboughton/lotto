@@ -267,19 +267,21 @@ func graphMSFreqDist2(records <-chan dbRow) []datasetB {
 			fSets = append(fSets, float64(n))
 		}
 
-		// Instantiate dataset
-		data = append(data, datasetB{
-			Name: machine,
-			Mode: "markers",
-			Marker: markerB{
-				Size:     sizes,
-				SizeMode: "area",
-				//SizeRef:  2e5,
-				Opacity: 1,
-			},
-			X: machines,
-			Y: fSets,
-		})
+		for _, set := range fSets {
+			// Instantiate dataset
+			data = append(data, datasetB{
+				Name: fmt.Sprintf("%f", set),
+				Mode: "markers",
+				Marker: markerB{
+					Size:     sizes,
+					SizeMode: "area",
+					//SizeRef:  2e5,
+					Opacity: 1,
+				},
+				X: machines,
+				Y: fSets,
+			})
+		}
 	}
 
 	return data
