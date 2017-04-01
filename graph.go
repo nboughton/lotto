@@ -4,6 +4,8 @@ import (
 	"fmt"
 	//"log"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/gonum/stat"
 )
@@ -23,6 +25,7 @@ var (
 const (
 	maxBallNum       = 59
 	balls            = 7
+	avgMarkerSize    = 8
 	regressionLinear = "linear"
 	regressionPoly   = "polynomial"
 	graphTypeScatter = "scatter"
@@ -45,7 +48,7 @@ type dataset struct {
 type datasetB struct {
 	X           []string  `json:"x"`
 	Y           []float64 `json:"y"`
-	Z           []int     `json:"z"` // number
+	Z           []float64 `json:"z"` // number
 	Name        string    `json:"name"`
 	Mode        string    `json:"mode"`
 	Type        string    `json:"type"`
@@ -94,7 +97,7 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset {
 						Mode: "markers",
 						Marker: marker{
 							Colour:  colors[ball],
-							Size:    6,
+							Size:    avgMarkerSize,
 							Opacity: 1,
 						},
 					}
@@ -138,7 +141,7 @@ func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset {
 						Mode: "markers",
 						Marker: marker{
 							Colour:  colors[ball],
-							Size:    6,
+							Size:    avgMarkerSize,
 							Opacity: 1,
 						},
 						X: freqDistXLabels(),
@@ -186,7 +189,7 @@ func graphScatter3D(records <-chan dbRow) []dataset {
 					Mode: "markers",
 					Type: "scatter3d",
 					Marker: marker{
-						Size:    4,
+						Size:    avgMarkerSize / 2,
 						Opacity: 0.9,
 						Line:    line{Width: 0.1},
 					},
@@ -206,7 +209,12 @@ func graphScatter3D(records <-chan dbRow) []dataset {
 
 func graphMSFreqDist(m map[string]int) []dataset {
 	data := dataset{
-		Type: graphTypeBar,
+		Type: "scatter3d",
+		Mode: "markers",
+		Marker: marker{
+			Size:    avgMarkerSize,
+			Opacity: 1,
+		},
 	}
 
 	l := []string{}
@@ -216,75 +224,43 @@ func graphMSFreqDist(m map[string]int) []dataset {
 	sort.Strings(l)
 
 	for _, k := range l {
-		data.X = append(data.X, k)
+		s := strings.Split(k, ":")
+		z, _ := strconv.Atoi(s[1])
+
+		data.X = append(data.X, s[0])
 		data.Y = append(data.Y, float64(m[k]))
+		data.Z = append(data.Z, z)
 	}
 
 	return []dataset{data}
 }
 
-func graphMSFreqDist2(records <-chan dbRow) []datasetB {
-	// Filter results into map
-	// machines = x
-	// m[set]freq = datasets, sizes
-	m := make(map[string]map[int]float64)
-	for row := range records {
-		_, ok := m[row.Machine]
-		if !ok {
-			m[row.Machine] = make(map[int]float64)
-		}
-
-		m[row.Machine][row.Set] += 10
-	}
-	//log.Println(m)
-
-	// Set machines list
-	machines := []string{}
-	for key := range m {
-		machines = append(machines, key)
-	}
-	sort.Strings(machines)
-
-	// Create datasets
-	data := []datasetB{}
-	for _, machine := range machines {
-		// Create sorted sets list for machine
-		sets := []int{}
-		for k := range m[machine] {
-			sets = append(sets, k)
-		}
-		sort.Ints(sets)
-
-		// Create sorted list of sizes
-		sizes := []float64{}
-		for _, set := range sets {
-			sizes = append(sizes, float64(m[machine][set]))
-		}
-
-		// float64 version of sets
-		fSets := []float64{}
-		for _, n := range sets {
-			fSets = append(fSets, float64(n))
-		}
-
-		for _, set := range fSets {
-			// Instantiate dataset
-			data = append(data, datasetB{
-				Name: fmt.Sprintf("%f", set),
-				Mode: "markers",
-				Marker: markerB{
-					Size:     sizes,
-					SizeMode: "area",
-					//SizeRef:  2e5,
-					Opacity: 1,
-				},
-				X: machines,
-				Y: fSets,
-			})
-		}
+func graphMSFreqDist2(m map[string]int) []datasetB {
+	data := datasetB{
+		Type: "scatter",
+		Mode: "markers",
+		Marker: markerB{
+			Opacity: 0.8,
+			Line:    line{Width: 0.1},
+		},
 	}
 
-	return data
+	l := []string{}
+	for k := range m {
+		l = append(l, k)
+	}
+	sort.Strings(l)
+
+	for _, k := range l {
+		s := strings.Split(k, ":")
+		z, _ := strconv.Atoi(s[1])
+
+		data.X = append(data.X, s[0])
+		data.Y = append(data.Y, float64(z))
+		data.Marker.Size = append(data.Marker.Size, float64(m[k])*2)
+	}
+
+	return []datasetB{data}
 }
 
 func regressionSets(data []dataset, t string) []dataset {

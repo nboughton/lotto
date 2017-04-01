@@ -51,8 +51,9 @@ func handlerResultsFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerResultsMSFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphMSFreqDist2(db.getResults(params(r))))
+	//w.WriteJSON(graphMSFreqDist2(db.getResults(params(r))))
 	//w.WriteJSON(graphMSFreqDist(db.getMachineSetCombinations(params(r))))
+	w.WriteJSON(graphMSFreqDist2(db.getMachineSetCombinations(params(r))))
 }
 
 func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {

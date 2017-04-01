@@ -6,7 +6,7 @@
         <select id="query-type">
           <option value="graph-freqdist-bar">Frequency Dist (results, bar)</option>
           <option value="graph-freqdist-scatter">Frequency Dist (results, scatter)</option>
-          <option value="graph-freqdist-ms">Frequency Dist (machine:set, bar)</option>
+          <option value="graph-freqdist-ms">Frequency Dist (machine,set; bubble)</option>
           <option value="graph-timeseries-scatter">Time Series (results, scatter/trend)</option>
           <option value="graph-timeseries-line">Time Series (results, line)</option>
           <option value="graph-3d-scatter">3D Scatter Plot (results)</option>

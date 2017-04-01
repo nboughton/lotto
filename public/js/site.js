@@ -32,6 +32,15 @@ $(function () {
         yaxis: {
           title: "Frequency"
         }
+      },
+      ms: {
+        xaxis: {
+          title: "Machine"
+        },
+        yaxis: {
+          title: "Set"
+        },
+        hovermode: "closest"
       }
     },
     timeseries: {
@@ -45,15 +54,30 @@ $(function () {
       }
     },
     scatter3D: {
-      scene: {
-        xaxis: {
-          title: "Machine"
-        },
-        yaxis: {
-          title: "Set"
-        },
-        zaxis: {
-          title: "Result"
+      results: {
+        scene: {
+          xaxis: {
+            title: "Machine"
+          },
+          yaxis: {
+            title: "Set"
+          },
+          zaxis: {
+            title: "Result"
+          }
+        }
+      },
+      frequency: {
+        scene: {
+          xaxis: {
+            title: "Machine"
+          },
+          yaxis: {
+            title: "Frequency"
+          },
+          zaxis: {
+            title: "Set"
+          }
         }
       }
     }
@@ -100,7 +124,7 @@ $(function () {
         drawResultsGraph("freqdist/scatter", layouts.freqdist.scatter)
         break
       case "graph-freqdist-ms":
-        drawResultsGraph("freqdist-ms")
+        drawResultsGraph("freqdist-ms", layouts.freqdist.ms)
         break
       case "graph-timeseries-scatter":
         drawResultsGraph("timeseries/scatter", layouts.timeseries.line)
@@ -109,7 +133,7 @@ $(function () {
         drawResultsGraph("timeseries/line", layouts.timeseries.line)
         break
       case "graph-3d-scatter":
-        drawResultsGraph("3d/scatter", layouts.scatter3D)
+        drawResultsGraph("3d/scatter", layouts.scatter3D.results)
         break
       default:
         break
