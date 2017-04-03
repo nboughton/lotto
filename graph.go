@@ -230,9 +230,9 @@ func graphMSFreqDistScatter3D(m map[string]int) []dataset {
 		s := strings.Split(k, ":")
 		y, _ := strconv.Atoi(s[1])
 
-		data.X = append(data.X, s[0])
-		data.Y = append(data.Y, float64(y))
-		data.Z = append(data.Z, m[k])
+		data.X = append(data.X, s[0])       // MAchine
+		data.Y = append(data.Y, float64(y)) // Set
+		data.Z = append(data.Z, m[k])       // Frequency
 	}
 
 	return []dataset{data}
