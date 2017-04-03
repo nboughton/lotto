@@ -123,8 +123,11 @@ $(function () {
       case "graph-freqdist-scatter":
         drawResultsGraph("freqdist/scatter", layouts.freqdist.scatter)
         break
-      case "graph-freqdist-ms":
-        drawResultsGraph("freqdist-ms", layouts.freqdist.ms)
+      case "graph-freqdist-ms-bubble":
+        drawResultsGraph("freqdist-ms/bubble", layouts.freqdist.ms)
+        break
+      case "graph-freqdist-ms-scatter3D":
+        drawResultsGraph("freqdist-ms/scatter3D", layouts.freqdist.ms)
         break
       case "graph-timeseries-scatter":
         drawResultsGraph("timeseries/scatter", layouts.timeseries.line)
