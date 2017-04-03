@@ -7,7 +7,7 @@ import (
 
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	qGen "github.com/nboughton/go-stupidqlite"
+	qGen "github.com/nboughton/go-sqgenlite"
 )
 
 var (
