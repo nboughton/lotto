@@ -43,21 +43,24 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func handlerResultsScatter3D(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphScatter3D(db.getResults(params(r))))
+	w.WriteJSON(graphResultsRawScatter3D(db.getResults(params(r))))
 }
 
 func handlerResultsFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphFreqDist(db.getResults(params(r)), true, r.Param("type")))
+	w.WriteJSON(graphResultsFreqDist(db.getResults(params(r)), true, r.Param("type")))
 }
 
-func handlerResultsMSFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	//w.WriteJSON(graphMSFreqDist2(db.getResults(params(r))))
-	//w.WriteJSON(graphMSFreqDist(db.getMachineSetCombinations(params(r))))
-	w.WriteJSON(graphMSFreqDist2(db.getMachineSetCombinations(params(r))))
+func handlerMSFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
+	switch r.Param("type") {
+	case "bubble":
+		w.WriteJSON(graphMSFreqDistBubble(db.getMachineSetCombinations(params(r))))
+	case "scatter3d":
+		w.WriteJSON(graphMSFreqDistScatter3D(db.getMachineSetCombinations(params(r))))
+	}
 }
 
 func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphTimeSeries(db.getResults(params(r)), true, r.Param("type")))
+	w.WriteJSON(graphResultsTimeSeries(db.getResults(params(r)), true, r.Param("type")))
 }
 
 func handlerMachineSetsCombos(w traffic.ResponseWriter, r *traffic.Request) {
@@ -110,11 +113,11 @@ func handlerDataRange(w traffic.ResponseWriter, r *traffic.Request) {
 }
 
 func params(r *traffic.Request) queryParams {
-	var p queryParams
-	p.Start = r.Param("start")
-	p.End = r.Param("end")
-	p.Set, _ = strconv.Atoi(r.Param("set"))
-	p.Machine = r.Param("machine")
-
-	return p
+	set, _ := strconv.Atoi(r.Param("set"))
+	return queryParams{
+		Start:   r.Param("start"),
+		End:     r.Param("end"),
+		Set:     set,
+		Machine: r.Param("machine"),
+	}
 }

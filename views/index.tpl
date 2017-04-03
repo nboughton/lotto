@@ -4,12 +4,13 @@
     <span class="form-element">
         <label for="query-type">Query Type: </label>
         <select id="query-type">
-          <option value="graph-freqdist-bar">Frequency Dist (results, bar)</option>
-          <option value="graph-freqdist-scatter">Frequency Dist (results, scatter)</option>
-          <option value="graph-freqdist-ms">Frequency Dist (machine,set; bubble)</option>
-          <option value="graph-timeseries-scatter">Time Series (results, scatter/trend)</option>
-          <option value="graph-timeseries-line">Time Series (results, line)</option>
-          <option value="graph-3d-scatter">3D Scatter Plot (results)</option>
+          <option value="graph-results-freqdist-bar">Frequency Dist (results, bar)</option>
+          <option value="graph-results-freqdist-scatter">Frequency Dist (results, scatter)</option>
+          <option value="graph-results-timeseries-scatter">Time Series (results, scatter/trend)</option>
+          <option value="graph-results-timeseries-line">Time Series (results, line)</option>
+          <option value="graph-results-raw-scatter3d">3D Scatter Plot (results)</option>
+          <option value="graph-ms-freqdist-bubble">Frequency Dist (machine/set, bubble)</option>
+          <option value="graph-ms-freqdist-scatter3d">Frequency Dist (machine/set, scatter3d)</option>
           <option value="num-average-mean">Mean Averages</option>
           <option value="num-average-ranges">Result Ranges</option>
         </select>

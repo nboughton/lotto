@@ -73,10 +73,10 @@ $(function () {
             title: "Machine"
           },
           yaxis: {
-            title: "Frequency"
+            title: "Set"
           },
           zaxis: {
-            title: "Set"
+            title: "Frequency"
           }
         }
       }
@@ -117,26 +117,26 @@ $(function () {
       case "num-average-ranges":
         drawResultsAverage("/ranges")
         break
-      case "graph-freqdist-bar":
-        drawResultsGraph("freqdist/bar", layouts.freqdist.bar)
+      case "graph-results-freqdist-bar":
+        drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
         break
-      case "graph-freqdist-scatter":
-        drawResultsGraph("freqdist/scatter", layouts.freqdist.scatter)
+      case "graph-results-freqdist-scatter":
+        drawResultsGraph("results/freqdist/scatter", layouts.freqdist.scatter)
         break
-      case "graph-freqdist-ms-bubble":
-        drawResultsGraph("freqdist-ms/bubble", layouts.freqdist.ms)
+      case "graph-results-timeseries-scatter":
+        drawResultsGraph("results/timeseries/scatter", layouts.timeseries.line)
         break
-      case "graph-freqdist-ms-scatter3D":
-        drawResultsGraph("freqdist-ms/scatter3D", layouts.freqdist.ms)
+      case "graph-results-timeseries-line":
+        drawResultsGraph("results/timeseries/line", layouts.timeseries.line)
         break
-      case "graph-timeseries-scatter":
-        drawResultsGraph("timeseries/scatter", layouts.timeseries.line)
+      case "graph-results-raw-scatter3d":
+        drawResultsGraph("results/raw/scatter3d", layouts.scatter3D.results)
         break
-      case "graph-timeseries-line":
-        drawResultsGraph("timeseries/line", layouts.timeseries.line)
+      case "graph-ms-freqdist-bubble":
+        drawResultsGraph("ms/freqdist/bubble", layouts.freqdist.ms)
         break
-      case "graph-3d-scatter":
-        drawResultsGraph("3d/scatter", layouts.scatter3D.results)
+      case "graph-ms-freqdist-scatter3d":
+        drawResultsGraph("ms/freqdist/scatter3d", layouts.scatter3D.frequency)
         break
       default:
         break
@@ -184,23 +184,13 @@ $(function () {
   }
 
   function drawResultsGraph(type, layout) {
-    $.getJSON("/api/results/graph/" + type, params(), function (d) {
+    $.getJSON("/api/graph/" + type, params(), function (d) {
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
       Plotly.newPlot(sel.resultsGraph.replace("#", ""), d, layout)
     })
-    //getMachinesSetsCombos()
   }
-
-  /*
-  // currently unused
-  function getMachinesSetsCombos() {
-    $.getJSON("/api/machines/sets/combos", params(), function (d) {
-      console.log(d)
-    })
-  }
-  */
 
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
-  drawResultsGraph("freqdist/bar", layouts.freqdist.bar)
+  drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
 })

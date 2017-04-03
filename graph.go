@@ -83,7 +83,7 @@ type line struct {
 	Opacity float64 `json:"opacity"`
 }
 
-func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset {
+func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset {
 	data := make([]dataset, balls)
 
 	i := 0
@@ -127,7 +127,7 @@ func graphTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset {
 	return data
 }
 
-func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset {
+func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset {
 	data := make([]dataset, balls)
 
 	i := 0
@@ -174,7 +174,7 @@ func graphFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset {
 	return data
 }
 
-func graphScatter3D(records <-chan dbRow) []dataset {
+func graphResultsRawScatter3D(records <-chan dbRow) []dataset {
 	data := make([]dataset, balls)
 
 	// x: machine
@@ -207,13 +207,16 @@ func graphScatter3D(records <-chan dbRow) []dataset {
 	return data
 }
 
-func graphMSFreqDist(m map[string]int) []dataset {
+func graphMSFreqDistScatter3D(m map[string]int) []dataset {
 	data := dataset{
 		Type: "scatter3d",
 		Mode: "markers",
 		Marker: marker{
 			Size:    avgMarkerSize,
-			Opacity: 1,
+			Opacity: 0.9,
+			Line: line{
+				Width: 0.1,
+			},
 		},
 	}
 
@@ -225,17 +228,17 @@ func graphMSFreqDist(m map[string]int) []dataset {
 
 	for _, k := range l {
 		s := strings.Split(k, ":")
-		z, _ := strconv.Atoi(s[1])
+		y, _ := strconv.Atoi(s[1])
 
 		data.X = append(data.X, s[0])
-		data.Y = append(data.Y, float64(m[k]))
-		data.Z = append(data.Z, z)
+		data.Y = append(data.Y, float64(y))
+		data.Z = append(data.Z, m[k])
 	}
 
 	return []dataset{data}
 }
 
-func graphMSFreqDist2(m map[string]int) []datasetB {
+func graphMSFreqDistBubble(m map[string]int) []datasetB {
 	data := datasetB{
 		Type: "scatter",
 		Mode: "markers",
