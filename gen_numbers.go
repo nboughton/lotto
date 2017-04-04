@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func generateNumbers() []int {
+func drawRandomSet() []int {
 	var (
 		pool    []int
 		results []int

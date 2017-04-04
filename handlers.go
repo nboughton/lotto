@@ -121,7 +121,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 
 	resFreq = append(resFreq, bbSort[len(bbSort)-1].num)
 
-	w.WriteJSON(NumbersData{MeanAvg: resAvg, Ranges: resRange, Frequent: resFreq, Random: generateNumbers()})
+	w.WriteJSON(NumbersData{MeanAvg: resAvg, Ranges: resRange, Frequent: resFreq, Random: drawRandomSet()})
 
 }
 
