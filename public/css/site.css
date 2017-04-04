@@ -31,12 +31,9 @@ body {
 #results {
   display: flex;
 	flex-flow: column;
-	align-self: center;
-  justify-content: center;
-	text-align: center;
 }
 
-#results * {
+.centered {
 	padding: 5px;
 	margin: 5px;
 }
