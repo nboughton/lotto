@@ -107,6 +107,7 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 						Mode: "lines",
 						Line: line{
 							Width: 1,
+							Shape: "spline",
 						},
 					}
 				} // END SWITCH
