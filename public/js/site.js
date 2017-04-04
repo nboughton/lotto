@@ -196,7 +196,7 @@ $(function () {
       printArray(d.ranges, s)
 
       if (notes) {
-        $(sel.results).append("<p>" + notes + "</p>")
+        el.append("<p>" + notes + "</p>")
       }
     })
   }
