@@ -80,6 +80,7 @@ type NumbersData struct {
 	Frequent []int    `json:"frequent"`
 	Ranges   []string `json:"ranges"`
 	MeanAvg  []int    `json:"meanAvg"`
+	Random   []int    `json:"random"`
 }
 
 func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
@@ -120,7 +121,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 
 	resFreq = append(resFreq, bbSort[len(bbSort)-1].num)
 
-	w.WriteJSON(NumbersData{MeanAvg: resAvg, Ranges: resRange, Frequent: resFreq})
+	w.WriteJSON(NumbersData{MeanAvg: resAvg, Ranges: resRange, Frequent: resFreq, Random: generateNumbers()})
 
 }
 

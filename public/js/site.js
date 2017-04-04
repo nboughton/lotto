@@ -189,6 +189,12 @@ $(function () {
       el.append("<h3>Result Ranges</h3>")
       el.append('<h4 id="' + s + '" class="centered"></h4>')
       printArray(d.ranges, s)
+
+      s = sel.resultsNum.replace('#', 'random')
+      el.append("<h3>Random Set of Numbers</h3>")
+      el.append('<h4 id="' + s + '" class="centered"></h4>')
+      printArray(d.random, s)
+
       if (notes) {
         $(sel.results).append("<p>" + notes + "</p>")
       }

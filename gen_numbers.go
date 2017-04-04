@@ -2,10 +2,11 @@ package main
 
 import (
 	"math/rand"
+	"sort"
 	"time"
 )
 
-func generateNumbers(ranges []string) []int {
+func generateNumbers() []int {
 	var (
 		pool    []int
 		results []int
@@ -16,20 +17,26 @@ func generateNumbers(ranges []string) []int {
 		pool = append(pool, i)
 	}
 
-	// Set random seed
-	rand.Seed(time.Now().UnixNano())
-
 	// Select balls and remove each selected ball from the pool
-	for i := 0; i < 7; i++ {
-		// Select an index from the pool randomly
-		r := rand.Intn(len(pool))
-		// Get the value
-		n := pool[r]
-		// Append the new result
-		results = append(results, n)
-		// Remove n from pool
-		pool = append(pool[:n], pool[n+1:]...)
+	for i := 0; i < 6; i++ {
+		pool, results = drawBall(pool, results)
 	}
 
+	sort.Ints(results)
+
+	// One last time for the bonus ball
+	pool, results = drawBall(pool, results)
+
 	return results
+}
+
+func drawBall(p, r []int) ([]int, []int) {
+	rand.Seed(time.Now().UnixNano())
+	n := rand.Intn(len(p))
+	// Append the new result
+	r = append(r, p[n])
+	// Remove n from pool
+	p = append(p[:n], p[n+1:]...)
+
+	return p, r
 }
