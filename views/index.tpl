@@ -4,6 +4,7 @@
     <span class="form-element">
         <label for="query-type">Query Type: </label>
         <select id="query-type">
+          <option value="num-results">Frequent, Averages, Random</option>
           <option value="graph-results-freqdist-bar">Frequency Dist (results, bar)</option>
           <option value="graph-results-freqdist-scatter">Frequency Dist (results, scatter)</option>
           <option value="graph-results-timeseries-scatter">Time Series (results, scatter/trend)</option>
@@ -11,7 +12,6 @@
           <option value="graph-results-raw-scatter3d">3D Scatter Plot (results)</option>
           <option value="graph-ms-freqdist-bubble">Frequency Dist (machine/set, bubble)</option>
           <option value="graph-ms-freqdist-scatter3d">Frequency Dist (machine/set, scatter3d)</option>
-          <option value="num-results">Averages, Ranges and Most Frequent</option>
         </select>
       </span>
     <span class="form-element">
