@@ -167,9 +167,11 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 		i++
 	}
 
-	if bestFit && t != graphTypeBar {
-		data = append(data, regressionSet(data, regressionPoly)...)
-	}
+	/*
+		if bestFit && t != graphTypeBar {
+			data = append(data, regressionSet(data, regressionPoly)...)
+		}
+	*/
 
 	return data
 }
