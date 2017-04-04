@@ -36,6 +36,11 @@ body {
 	text-align: center;
 }
 
+#results * {
+	padding: 5px;
+	margin: 5px;
+}
+
 #results-graph {
 	width: 95vw;
 	height: 90vh;

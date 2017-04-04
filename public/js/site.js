@@ -111,14 +111,8 @@ $(function () {
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
     switch ($(sel.queryType).val()) {
-      case "num-results-mean":
-        drawResultsNumbers("average")
-        break
-      case "num-results-ranges":
-        drawResultsNumbers("ranges")
-        break
-      case "num-results-frequent":
-        drawResultsNumbers("frequent")
+      case "num-results":
+        drawResultsNumbers()
         break
       case "graph-results-freqdist-bar":
         drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
@@ -177,12 +171,24 @@ $(function () {
     })
   }
 
-  function drawResultsNumbers(type, notes) {
-    $.getJSON("/api/numbers/" + type, params(), function (d) {
-      $(sel.results).empty().append('<h1 id="' + sel.resultsNum.replace('#', '') + '" class="centered"></h1>')
-      $.each(d, function (i, n) {
-        $(sel.resultsNum).append("<span class='num'>" + n + "</span>")
-      })
+  function drawResultsNumbers(notes) {
+    $.getJSON("/api/numbers", params(), function (d) {
+      var el = $(sel.results)
+      el.empty()
+      var s = sel.resultsNum.replace('#', 'freq')
+      el.append("<h3>Most Frequent Numbers</h3>")
+      el.append('<h4 id="' + s + '" class="centered"></h4>')
+      printArray(d.frequent, s)
+
+      s = sel.resultsNum.replace('#', 'avg')
+      el.append("<h3>Mean Average Results</h3>")
+      el.append('<h4 id="' + s + '" class="centered"></h4>')
+      printArray(d.meanAvg, s)
+
+      s = sel.resultsNum.replace('#', 'ranges')
+      el.append("<h3>Result Ranges</h3>")
+      el.append('<h4 id="' + s + '" class="centered"></h4>')
+      printArray(d.ranges, s)
       if (notes) {
         $(sel.results).append("<p>" + notes + "</p>")
       }
@@ -196,6 +202,11 @@ $(function () {
     })
   }
 
+  function printArray(a, s) {
+    $.each(a, function (i, n) {
+      $("#" + s).append("<span class='num'>" + n + "</span>")
+    })
+  }
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
   drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)

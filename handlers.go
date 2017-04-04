@@ -75,44 +75,52 @@ func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(graphResultsTimeSeries(db.getResults(params(r)), true, r.Param("type")))
 }
 
+// NumbersData contains tidbits of information regarding numbers
+type NumbersData struct {
+	Frequent []int    `json:"frequent"`
+	Ranges   []string `json:"ranges"`
+	MeanAvg  []int    `json:"meanAvg"`
+}
+
 func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
-	switch r.Param("type") {
-	case "average":
-		res, err := db.getResultsAverage(params(r))
-		if err != nil {
-			w.WriteJSON(err.Error())
-		} else {
-			w.WriteJSON(res)
-		}
+	p := params(r)
+	resAvg, err := db.getResultsAverage(p)
+	if err != nil {
+		w.WriteJSON(err.Error())
+		return
+	}
 
-	case "ranges":
-		res, err := db.getResultsAverageRanges(params(r))
-		if err != nil {
-			w.WriteJSON(err.Error())
-		} else {
-			w.WriteJSON(res)
-		}
+	resRange, err := db.getResultsAverageRanges(p)
+	if err != nil {
+		w.WriteJSON(err.Error())
+		return
+	}
 
-	case "frequent":
-		bSort, res := make(ballSortByFreq, maxBallNum+1), make([]int, balls)
-
-		for row := range db.getResults(params(r)) {
-			for ball := 0; ball < balls; ball++ {
-				n := row.Num[ball]
+	bSort, bbSort, resFreq := make(ballSortByFreq, maxBallNum+1), make(ballSortByFreq, maxBallNum+1), []int{}
+	for row := range db.getResults(p) {
+		for ball := 0; ball < balls; ball++ {
+			n := row.Num[ball]
+			if ball < 6 {
 				bSort[n].num = n
 				bSort[n].freq++
+			} else {
+				bbSort[n].num = n
+				bbSort[n].freq++
 			}
 		}
-		sort.Sort(sort.Reverse(bSort))
 
-		for i, b := range bSort[:7] {
-			res[i] = b.num
-		}
-		sort.Ints(res)
+	}
+	sort.Sort(sort.Reverse(bSort))
+	sort.Sort(bbSort)
 
-		w.WriteJSON(res)
+	for _, b := range bSort[:6] {
+		resFreq = append(resFreq, b.num)
+	}
+	sort.Ints(resFreq)
 
-	} // END SWITCH
+	resFreq = append(resFreq, bbSort[len(bbSort)-1].num)
+
+	w.WriteJSON(NumbersData{MeanAvg: resAvg, Ranges: resRange, Frequent: resFreq})
 
 }
 
