@@ -29,8 +29,6 @@ func init() {
 	router.Get("/api/graph/results/raw/scatter3d", handlerResultsScatter3D)
 	router.Get("/api/graph/ms/freqdist/:type", handlerMSFreqDist)
 
-	//router.Get("/api/machines/sets/combos", handlerMachineSetsCombos)
-
 	// Update every 24 hours
 	go func() {
 		for t := range time.NewTicker(time.Minute).C {

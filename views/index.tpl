@@ -13,7 +13,7 @@
           <option value="graph-ms-freqdist-scatter3d">Frequency Dist (machine/set, scatter3d)</option>
           <option value="num-results-mean">Mean Averages</option>
           <option value="num-results-ranges">Result Ranges</option>
-          <option value="num-results-frequent">Most Frequent Results</option>
+          <option value="num-results-frequent">Most Frequent Numbers</option>
         </select>
       </span>
     <span class="form-element">

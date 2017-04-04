@@ -118,7 +118,7 @@ $(function () {
         drawResultsNumbers("ranges")
         break
       case "num-results-frequent":
-        drawResultsNumbers("frequent", "Where there is a tie a result is picked pseudo-randomly.")
+        drawResultsNumbers("frequent")
         break
       case "graph-results-freqdist-bar":
         drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
