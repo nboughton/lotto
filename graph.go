@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	//"github.com/gonum/matrix/mat64"
 	"github.com/gonum/stat"
 )
 
@@ -122,7 +123,7 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 	}
 
 	if bestFit && t == graphTypeScatter {
-		data = append(data, regressionSets(data, regressionLinear)...)
+		data = append(data, regressionSet(data, regressionLinear)...)
 	}
 
 	return data
@@ -166,11 +167,9 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 		i++
 	}
 
-	/*
-		if bestFit && t != graphTypeBar {
-			data = append(data, regressionSets(data, regressionPoly)...)
-		}
-	*/
+	if bestFit && t != graphTypeBar {
+		data = append(data, regressionSet(data, regressionPoly)...)
+	}
 
 	return data
 }
@@ -267,7 +266,7 @@ func graphMSFreqDistBubble(m map[string]int) []datasetB {
 	return []datasetB{data}
 }
 
-func regressionSets(data []dataset, t string) []dataset {
+func regressionSet(data []dataset, t string) []dataset {
 	// Calculate and append regressionLinear regressions for each set
 	r, rX := make([]dataset, balls), make([]float64, len(data[0].Y))
 
