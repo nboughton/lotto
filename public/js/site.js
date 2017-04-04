@@ -215,5 +215,6 @@ $(function () {
   }
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
-  drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
+  //drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
+  drawResultsNumbers()
 })
