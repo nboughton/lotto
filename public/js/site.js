@@ -10,7 +10,7 @@ $(function () {
     queryType: "#query-type",
     querySubmit: "#query-submit",
     results: "#results",
-    resultsAvg: "#results-average",
+    resultsNum: "#results-numbers",
     resultsGraph: "#results-graph"
   }
 
@@ -111,11 +111,14 @@ $(function () {
   /// Query Exec
   $(sel.querySubmit).click(function (e) {
     switch ($(sel.queryType).val()) {
-      case "num-average-mean":
-        drawResultsAverage("")
+      case "num-results-mean":
+        drawResultsNumbers("average")
         break
-      case "num-average-ranges":
-        drawResultsAverage("/ranges")
+      case "num-results-ranges":
+        drawResultsNumbers("ranges")
+        break
+      case "num-results-frequent":
+        drawResultsNumbers("frequent", "Where there is a tie a result is picked pseudo-randomly.")
         break
       case "graph-results-freqdist-bar":
         drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
@@ -174,12 +177,15 @@ $(function () {
     })
   }
 
-  function drawResultsAverage(type) {
-    $.getJSON("/api/results/average" + type, params(), function (d) {
-      $(sel.results).empty().append('<h1 id="' + sel.resultsAvg.replace('#', '') + '" class="centered"></h1>')
+  function drawResultsNumbers(type, notes) {
+    $.getJSON("/api/numbers/" + type, params(), function (d) {
+      $(sel.results).empty().append('<h1 id="' + sel.resultsNum.replace('#', '') + '" class="centered"></h1>')
       $.each(d, function (i, n) {
-        $(sel.resultsAvg).append("<span class='num'>" + n + "</span>")
+        $(sel.resultsNum).append("<span class='num'>" + n + "</span>")
       })
+      if (notes) {
+        $(sel.results).append("<p>" + notes + "</p>")
+      }
     })
   }
 

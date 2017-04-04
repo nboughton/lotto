@@ -11,8 +11,9 @@
           <option value="graph-results-raw-scatter3d">3D Scatter Plot (results)</option>
           <option value="graph-ms-freqdist-bubble">Frequency Dist (machine/set, bubble)</option>
           <option value="graph-ms-freqdist-scatter3d">Frequency Dist (machine/set, scatter3d)</option>
-          <option value="num-average-mean">Mean Averages</option>
-          <option value="num-average-ranges">Result Ranges</option>
+          <option value="num-results-mean">Mean Averages</option>
+          <option value="num-results-ranges">Result Ranges</option>
+          <option value="num-results-frequent">Most Frequent Results</option>
         </select>
       </span>
     <span class="form-element">

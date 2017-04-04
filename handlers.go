@@ -67,20 +67,51 @@ func handlerMachineSetsCombos(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(db.getMachineSetCombinations(params(r)))
 }
 
-func handlerResultsAverage(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getResultsAverage(params(r))
-	if err != nil {
-		w.WriteJSON(err.Error())
-	} else {
-		w.WriteJSON(res)
-	}
-}
+func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
+	switch r.Param("type") {
+	case "average":
+		res, err := db.getResultsAverage(params(r))
+		if err != nil {
+			w.WriteJSON(err.Error())
+		} else {
+			w.WriteJSON(res)
+		}
 
-func handlerResultsAverageRanges(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getResultsAverageRanges(params(r))
-	if err != nil {
-		w.WriteJSON(err.Error())
-	} else {
+	case "ranges":
+		res, err := db.getResultsAverageRanges(params(r))
+		if err != nil {
+			w.WriteJSON(err.Error())
+		} else {
+			w.WriteJSON(res)
+		}
+
+	case "frequent":
+		rec, res := make([]map[int]int, balls), make([]int, balls)
+
+		// Collate results and frequency
+		i := 0
+		for row := range db.getResults(params(r)) {
+			for ball := 0; ball < balls; ball++ {
+				if i == 0 {
+					rec[ball] = make(map[int]int)
+				}
+				rec[ball][row.Num[ball]]++
+			}
+
+			i++
+		}
+
+		// Get highest frequency numbers, where there is a tie
+		// iterating map items creates a pseudo random result
+		for i, ballSet := range rec {
+			highest := 0
+			for k, v := range ballSet {
+				if v > highest {
+					highest, res[i] = v, k
+				}
+			}
+		}
+
 		w.WriteJSON(res)
 	}
 }

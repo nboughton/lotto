@@ -30,7 +30,10 @@ body {
 
 #results {
   display: flex;
+	flex-flow: column;
+	align-self: center;
   justify-content: center;
+	text-align: center;
 }
 
 #results-graph {
