@@ -86,7 +86,7 @@ $(function () {
   var msg = "The bonus ball in each of these sets is treated as a separate " +
     "entity from the first 6, however some deduplication is done to ensure that no duplicate " +
     "numbers turn up in any of the sets. Where a duplicate would appear the next number in the " +
-    "relevant dataset is selected. Furthermore this analysis is purely for eductional " +
+    "relevant dataset is selected. Furthermore this analysis is purely for educational " +
     "use only. No conclusions should be drawn from this other than that it produces some " +
     "interesting graphs."
   //******************************************************* HANDLERS */
