@@ -199,12 +199,6 @@ $(function () {
     return s
   }
 
-  function printArray(a, s) {
-    $.each(a, function (i, n) {
-      $("#" + s).append("<span class='num'>" + n + "</span>")
-    })
-  }
-
   function drawResultsGraph(type, layout) {
     $.getJSON("/api/graph/" + type, params(), function (d) {
       $(sel.results).empty().append('<div id="' + sel.resultsGraph.replace("#", "") + '"></div>')
