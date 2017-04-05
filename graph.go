@@ -32,6 +32,17 @@ const (
 	graphTypeLine    = "line"
 )
 
+/*
+   Why are all axes strings? Because it's more flexible. I'm passing this data to
+	 Plotly.js which interprets it accordingly and where strconv has no value it returns
+	 an empty string which plotly ignores but maintains the correct number of elements
+	 in the set. This removes useless visual noise from the graph and allows me to make
+	 my axes anything. Yes, there's a performance overhead to the conversion but it is
+	 on the scale of a fraction of a fraction of a second, which I see as a reasonable
+	 compromise
+*/
+
+// standard dataset for most graphs
 type dataset struct {
 	X           []string `json:"x"`
 	Y           []string `json:"y"`
@@ -44,6 +55,8 @@ type dataset struct {
 	ConnectGaps bool     `json:"connectgaps"`
 }
 
+// datasetB is specifically for bubble graphs because it requires a distinctly different
+// marker object
 type datasetB struct {
 	X           []string `json:"x"`
 	Y           []string `json:"y"`
@@ -120,6 +133,7 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 		i++
 	}
 
+	// Best fit lines only really suit scatter graphs so far
 	if bestFit && t == graphTypeScatter {
 		data = append(data, regressionSet(data, regressionLinear)...)
 	}
@@ -166,10 +180,10 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 		i++
 	}
 
-	/*
-		if bestFit && t != graphTypeBar {
-			data = append(data, regressionSet(data, regressionPoly)...)
-		}
+	/* currently not working because I have yet to work out how to do non-linear best fit lines
+	if bestFit && t != graphTypeBar {
+		data = append(data, regressionSet(data, regressionPoly)...)
+	}
 	*/
 
 	return data
@@ -177,10 +191,6 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 
 func graphResultsRawScatter3D(records <-chan dbRow) []dataset {
 	data := make([]dataset, balls)
-
-	// x: machine
-	// y: set
-	// z: ball result
 
 	i := 0
 	for row := range records {
@@ -229,10 +239,9 @@ func graphMSFreqDistScatter3D(m map[string]int) []dataset {
 
 	for _, k := range l {
 		s := strings.Split(k, ":")
-		y, _ := strconv.Atoi(s[1])
 
 		data.X = append(data.X, s[0])               // Machine
-		data.Y = append(data.Y, strconv.Itoa(y))    // Set
+		data.Y = append(data.Y, s[1])               // Set
 		data.Z = append(data.Z, strconv.Itoa(m[k])) // Frequency
 	}
 
@@ -257,11 +266,10 @@ func graphMSFreqDistBubble(m map[string]int) []datasetB {
 
 	for _, k := range l {
 		s := strings.Split(k, ":")
-		z, _ := strconv.Atoi(s[1])
 
-		data.X = append(data.X, s[0])
-		data.Y = append(data.Y, strconv.Itoa(z))
-		data.Marker.Size = append(data.Marker.Size, float64(m[k])*2)
+		data.X = append(data.X, s[0])                                // Machine
+		data.Y = append(data.Y, s[1])                                // Set
+		data.Marker.Size = append(data.Marker.Size, float64(m[k])*2) // Frequency
 	}
 
 	return []datasetB{data}
