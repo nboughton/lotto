@@ -87,7 +87,7 @@ $(function () {
     "entity from the first 6, however some deduplication is done to ensure that no duplicate " +
     "numbers turn up in any of the sets. Where a duplicate would appear the next number in the " +
     "relevant dataset is selected. Furthermore this analysis is purely for eductional " +
-    "use only. No conclusions should be drawn from this other than that is produces some " +
+    "use only. No conclusions should be drawn from this other than that it produces some " +
     "interesting graphs."
   //******************************************************* HANDLERS */
   /// Pickadate.js
