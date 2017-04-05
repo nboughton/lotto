@@ -177,39 +177,31 @@ $(function () {
     $.getJSON("/api/numbers", params(), function (d) {
       var el = $(sel.results)
       el.empty()
-      var s = sel.resultsNum.replace('#', 'freq')
-      el.append("<h3>Most Frequent Numbers</h3>")
-      el.append('<h4 id="' + s + '" class="centered"></h4>')
-      printArray(d.frequent, s)
-
-      s = sel.resultsNum.replace('#', 'least')
-      el.append("<h3>Least Frequent Numbers</h3>")
-      el.append('<h4 id="' + s + '" class="centered"></h4>')
-      printArray(d.least, s)
-
-      s = sel.resultsNum.replace('#', 'mean-avg')
-      el.append("<h3>Mean Results</h3>")
-      el.append('<h4 id="' + s + '" class="centered"></h4>')
-      printArray(d.meanAvg, s)
-
-      s = sel.resultsNum.replace('#', 'mode-avg')
-      el.append("<h3>Mode Results</h3>")
-      el.append('<h4 id="' + s + '" class="centered"></h4>')
-      printArray(d.modeAvg, s)
-
-      s = sel.resultsNum.replace('#', 'random')
-      el.append("<h3>Random Set</h3>")
-      el.append('<h4 id="' + s + '" class="centered"></h4>')
-      printArray(d.random, s)
-
-      s = sel.resultsNum.replace('#', 'ranges')
-      el.append("<h3>Result Ranges</h3>")
-      el.append('<h4 id="' + s + '" class="centered"></h4>')
-      printArray(d.ranges, s)
-
+      el.append("<table id='" + sel.resultsNum.replace("#", "") + "'></table>")
+      $(sel.resultsNum).append("<thead><tr><td>Type</td><td>Ball 1</td><td>Ball 2</td><td>Ball 3</td><td>Ball 4</td><td>Ball 5</td><td>Ball 6</td><td>Bonus</td></tr></thead>")
+      $(sel.resultsNum).append("<tr><td>Most Frequent</td>" + printNumRow(d.frequent) + "</tr>")
+      $(sel.resultsNum).append("<tr><td>Least Frequent</td>" + printNumRow(d.least) + "</tr>")
+      $(sel.resultsNum).append("<tr><td>Mean</td>" + printNumRow(d.meanAvg) + "</tr>")
+      $(sel.resultsNum).append("<tr><td>Mode</td>" + printNumRow(d.modeAvg) + "</tr>")
+      $(sel.resultsNum).append("<tr><td>Random</td>" + printNumRow(d.random) + "</tr>")
+      $(sel.resultsNum).append("<tr><td>Ranges</td>" + printNumRow(d.ranges) + "</tr>")
       if (notes) {
         el.append("<p>" + notes + "</p>")
       }
+    })
+  }
+
+  function printNumRow(a) {
+    var s = ""
+    $.each(a, function (i, n) {
+      s += "<td class='num'>" + n + "</td>"
+    })
+    return s
+  }
+
+  function printArray(a, s) {
+    $.each(a, function (i, n) {
+      $("#" + s).append("<span class='num'>" + n + "</span>")
     })
   }
 
@@ -220,11 +212,6 @@ $(function () {
     })
   }
 
-  function printArray(a, s) {
-    $.each(a, function (i, n) {
-      $("#" + s).append("<span class='num'>" + n + "</span>")
-    })
-  }
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
   //drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)

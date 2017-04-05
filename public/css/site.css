@@ -14,7 +14,12 @@ body {
 }
 
 .num {
-  padding: 5px;
+  padding: 10px;
+}
+
+#results-numbers {
+	padding: 10px;
+	text-align: center;
 }
 
 #query {
