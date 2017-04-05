@@ -29,7 +29,7 @@ var (
 	formatYYYYMMDD = "2006-01-02"
 )
 
-// AppDB is a wrapper for *sql.DB so we can extend it by adding our own methods
+// AppDB is a wrapper for *sql.DB so I can extend it by adding my own methods
 type AppDB struct {
 	*sql.DB
 }
@@ -70,7 +70,7 @@ func connectDB(path string) *AppDB {
 
 	aDB := &AppDB{db}
 
-	// Check if we have any data yet, otherwise populate the db
+	// Check if I have any data yet, otherwise populate the db
 	log.Println("Checking database")
 	if rows, _ := aDB.getRowCount(); rows == 0 {
 		log.Println("No data, scraping site")
@@ -91,7 +91,7 @@ func connectDB(path string) *AppDB {
 // Apply filters for queries, always run this before executing a query as it edits the
 // query in place by pointer
 func applyFilters(q *qGen.Query, p queryParams) []interface{} {
-	qp := []interface{}{p.Start, p.End} // We always constrain results by date
+	qp := []interface{}{p.Start, p.End} // I always constrain results by date
 
 	f := qGen.NewFilterSet().Add("date:DATE", qGen.Between)
 	if p.Machine != "all" && p.Set != 0 {
@@ -157,15 +157,15 @@ func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
 
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	r := make([]int, 7)
-	q := qGen.NewQuery().
-		Select("SUM(num_1)/COUNT(num_1)",
-			"SUM(num_2)/COUNT(num_2)",
-			"SUM(num_3)/COUNT(num_3)",
-			"SUM(num_4)/COUNT(num_4)",
-			"SUM(num_5)/COUNT(num_5)",
-			"SUM(num_6)/COUNT(num_6)",
-			"SUM(bonus)/COUNT(bonus)").
-		From("results")
+	q := qGen.NewQuery()
+
+	qSelect := []string{}
+	for i := 1; i <= 6; i++ {
+		qSelect = append(qSelect, fmt.Sprintf("SUM(num_%d)/COUNT(num_%d)", i, i))
+	}
+	qSelect = append(qSelect, "SUM(bonus)/COUNT(bonus)")
+
+	q.Select(qSelect...).From("results")
 
 	qp := applyFilters(q, p)
 	stmt, _ := db.Prepare(q.SQL)
@@ -296,7 +296,7 @@ func (db *AppDB) updateDB() error {
 
 	// Iterate scrape data
 	for d := range updateScraper() {
-		// Check we don't already have this record
+		// Check I don't already have this record
 		var i int
 		if err := tx.QueryRow(qSelect, d.Date.Format(formatSqlite)).Scan(&i); err != nil {
 			tx.Rollback()
