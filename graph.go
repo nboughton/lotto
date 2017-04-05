@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gonum/stat"
+	pt "github.com/nboughton/go-plotlytypes"
 )
 
 var (
@@ -32,71 +33,8 @@ const (
 	graphTypeLine    = "line"
 )
 
-/*
-   Why are all axes strings? Because it's more flexible. I'm passing this data to
-	 Plotly.js which interprets it accordingly and where strconv has no value it returns
-	 an empty string which plotly ignores but maintains the correct number of elements
-	 in the set. This removes useless visual noise from the graph and allows me to make
-	 my axes anything. Yes, there's a performance overhead to the conversion but it is
-	 on the scale of a fraction of a fraction of a second, which I see as a reasonable
-	 compromise
-*/
-
-// standard dataset for most graphs
-type dataset struct {
-	X           []string `json:"x"`
-	Y           []string `json:"y"`
-	Z           []string `json:"z"`
-	Name        string   `json:"name"`
-	Mode        string   `json:"mode"`
-	Type        string   `json:"type"`
-	Line        line     `json:"line"`
-	Marker      marker   `json:"marker"`
-	ConnectGaps bool     `json:"connectgaps"`
-}
-
-// datasetB is specifically for bubble graphs because it requires a distinctly different
-// marker object
-type datasetB struct {
-	X           []string `json:"x"`
-	Y           []string `json:"y"`
-	Z           []string `json:"z"`
-	Name        string   `json:"name"`
-	Mode        string   `json:"mode"`
-	Type        string   `json:"type"`
-	Line        line     `json:"line"`
-	Marker      markerB  `json:"marker"`
-	ConnectGaps bool     `json:"connectgaps"`
-}
-
-type marker struct {
-	Colour  string  `json:"color"`
-	Size    float64 `json:"size"`
-	Line    line    `json:"line"`
-	Opacity float64 `json:"opacity"`
-	Symbol  string  `json:"symbol"`
-}
-
-type markerB struct {
-	Colour   string    `json:"color"`
-	Size     []float64 `json:"size"`
-	SizeMode string    `json:"sizemode"`
-	SizeRef  float64   `json:"sizeref"`
-	Line     line      `json:"line"`
-	Opacity  float64   `json:"opacity"`
-	Symbol   string    `json:"symbol"`
-}
-
-type line struct {
-	Width   float64 `json:"width"`
-	Colour  string  `json:"color"`
-	Shape   string  `json:"shape"`
-	Dash    string  `json:"dash"`
-	Opacity float64 `json:"opacity"`
-}
-
-func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []dataset {
-	data := make([]dataset, balls)
+func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []pt.Dataset {
+	data := make([]pt.Dataset, balls)
 
 	i := 0
 	for row := range records {
@@ -105,9 +43,9 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 
 				switch t {
 				case graphTypeScatter:
-					data[ball] = dataset{
+					data[ball] = pt.Dataset{
 						Mode: "markers",
-						Marker: marker{
+						Marker: pt.Marker{
 							Colour:  colors[ball],
 							Size:    avgMarkerSize,
 							Opacity: 1,
@@ -115,9 +53,9 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 					}
 
 				case graphTypeLine:
-					data[ball] = dataset{
+					data[ball] = pt.Dataset{
 						Mode: "lines",
-						Line: line{
+						Line: pt.Line{
 							Width: 1,
 							Shape: "spline",
 						},
@@ -141,8 +79,8 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 	return data
 }
 
-func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []dataset {
-	data := make([]dataset, balls)
+func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []pt.Dataset {
+	data := make([]pt.Dataset, balls)
 
 	i := 0
 	for row := range records {
@@ -151,9 +89,9 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 
 				switch t {
 				case graphTypeScatter:
-					data[ball] = dataset{
+					data[ball] = pt.Dataset{
 						Mode: "markers",
-						Marker: marker{
+						Marker: pt.Marker{
 							Colour:  colors[ball],
 							Size:    avgMarkerSize,
 							Opacity: 1,
@@ -163,7 +101,7 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 					}
 
 				case graphTypeBar:
-					data[ball] = dataset{
+					data[ball] = pt.Dataset{
 						Type: graphTypeBar,
 						X:    freqDistXLabels(),
 						Y:    make([]string, maxBallNum),
@@ -189,20 +127,20 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 	return data
 }
 
-func graphResultsRawScatter3D(records <-chan dbRow) []dataset {
-	data := make([]dataset, balls)
+func graphResultsRawScatter3D(records <-chan dbRow) []pt.Dataset {
+	data := make([]pt.Dataset, balls)
 
 	i := 0
 	for row := range records {
 		for ball := 0; ball < balls; ball++ {
 			if i == 0 {
-				data[ball] = dataset{
+				data[ball] = pt.Dataset{
 					Mode: "markers",
 					Type: "scatter3d",
-					Marker: marker{
+					Marker: pt.Marker{
 						Size:    avgMarkerSize / 2,
 						Opacity: 0.9,
-						Line:    line{Width: 0.1},
+						Line:    pt.Line{Width: 0.1},
 					},
 				}
 
@@ -218,14 +156,14 @@ func graphResultsRawScatter3D(records <-chan dbRow) []dataset {
 	return data
 }
 
-func graphMSFreqDistScatter3D(m map[string]int) []dataset {
-	data := dataset{
+func graphMSFreqDistScatter3D(m map[string]int) []pt.Dataset {
+	data := pt.Dataset{
 		Type: "scatter3d",
 		Mode: "markers",
-		Marker: marker{
+		Marker: pt.Marker{
 			Size:    avgMarkerSize,
 			Opacity: 0.9,
-			Line: line{
+			Line: pt.Line{
 				Width: 0.1,
 			},
 		},
@@ -245,16 +183,16 @@ func graphMSFreqDistScatter3D(m map[string]int) []dataset {
 		data.Z = append(data.Z, strconv.Itoa(m[k])) // Frequency
 	}
 
-	return []dataset{data}
+	return []pt.Dataset{data}
 }
 
-func graphMSFreqDistBubble(m map[string]int) []datasetB {
-	data := datasetB{
+func graphMSFreqDistBubble(m map[string]int) []pt.DatasetB {
+	data := pt.DatasetB{
 		Type: "scatter",
 		Mode: "markers",
-		Marker: markerB{
+		Marker: pt.MarkerB{
 			Opacity: 0.8,
-			Line:    line{Width: 0.1},
+			Line:    pt.Line{Width: 0.1},
 		},
 	}
 
@@ -272,12 +210,12 @@ func graphMSFreqDistBubble(m map[string]int) []datasetB {
 		data.Marker.Size = append(data.Marker.Size, float64(m[k])*2) // Frequency
 	}
 
-	return []datasetB{data}
+	return []pt.DatasetB{data}
 }
 
-func regressionSet(data []dataset, t string) []dataset {
+func regressionSet(data []pt.Dataset, t string) []pt.Dataset {
 	// Calculate and append regressionLinear regressions for each set
-	r, rX := make([]dataset, balls), make([]float64, len(data[0].Y))
+	r, rX := make([]pt.Dataset, balls), make([]float64, len(data[0].Y))
 
 	// Generate numerical X axis data
 	for i := range rX {
@@ -286,10 +224,10 @@ func regressionSet(data []dataset, t string) []dataset {
 
 	// Iterate existing sets and create new regression sets
 	for i, set := range data {
-		r[i] = dataset{
+		r[i] = pt.Dataset{
 			Name: set.Name,
 			Mode: "lines",
-			Line: line{
+			Line: pt.Line{
 				Dash:   "dot",
 				Width:  2,
 				Colour: colors[i],
