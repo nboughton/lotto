@@ -35,27 +35,27 @@ const (
 )
 
 type dataset struct {
-	X           []string  `json:"x"`
-	Y           []float64 `json:"y"`
-	Z           []int     `json:"z"` // number
-	Name        string    `json:"name"`
-	Mode        string    `json:"mode"`
-	Type        string    `json:"type"`
-	Line        line      `json:"line"`
-	Marker      marker    `json:"marker"`
-	ConnectGaps bool      `json:"connectgaps"`
+	X           []string `json:"x"`
+	Y           []string `json:"y"`
+	Z           []string `json:"z"`
+	Name        string   `json:"name"`
+	Mode        string   `json:"mode"`
+	Type        string   `json:"type"`
+	Line        line     `json:"line"`
+	Marker      marker   `json:"marker"`
+	ConnectGaps bool     `json:"connectgaps"`
 }
 
 type datasetB struct {
-	X           []string  `json:"x"`
-	Y           []float64 `json:"y"`
-	Z           []float64 `json:"z"` // number
-	Name        string    `json:"name"`
-	Mode        string    `json:"mode"`
-	Type        string    `json:"type"`
-	Line        line      `json:"line"`
-	Marker      markerB   `json:"marker"`
-	ConnectGaps bool      `json:"connectgaps"`
+	X           []string `json:"x"`
+	Y           []string `json:"y"`
+	Z           []string `json:"z"`
+	Name        string   `json:"name"`
+	Mode        string   `json:"mode"`
+	Type        string   `json:"type"`
+	Line        line     `json:"line"`
+	Marker      markerB  `json:"marker"`
+	ConnectGaps bool     `json:"connectgaps"`
 }
 
 type marker struct {
@@ -116,7 +116,7 @@ func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []data
 				data[ball].Name = label(ball)
 			}
 			data[ball].X = append(data[ball].X, fmt.Sprintf("%s:%d:%s", row.Date.Format(formatYYYYMMDD), row.Set, row.Machine))
-			data[ball].Y = append(data[ball].Y, float64(row.Num[ball]))
+			data[ball].Y = append(data[ball].Y, strconv.Itoa(row.Num[ball]))
 		}
 
 		i++
@@ -147,14 +147,14 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 							Opacity: 1,
 						},
 						X: freqDistXLabels(),
-						Y: make([]float64, maxBallNum),
+						Y: make([]string, maxBallNum),
 					}
 
 				case graphTypeBar:
 					data[ball] = dataset{
 						Type: graphTypeBar,
 						X:    freqDistXLabels(),
-						Y:    make([]float64, maxBallNum),
+						Y:    make([]string, maxBallNum),
 					}
 
 				} // END SWITCH
@@ -162,7 +162,8 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 				data[ball].Name = label(ball)
 			}
 
-			data[ball].Y[row.Num[ball]-1]++
+			n, _ := strconv.Atoi(data[ball].Y[row.Num[ball]-1])
+			data[ball].Y[row.Num[ball]-1] = strconv.Itoa(n + 1)
 		}
 		i++
 	}
@@ -200,8 +201,8 @@ func graphResultsRawScatter3D(records <-chan dbRow) []dataset {
 				data[ball].Name = label(ball)
 			}
 			data[ball].X = append(data[ball].X, row.Machine)
-			data[ball].Y = append(data[ball].Y, float64(row.Set))
-			data[ball].Z = append(data[ball].Z, row.Num[ball])
+			data[ball].Y = append(data[ball].Y, strconv.Itoa(row.Set))
+			data[ball].Z = append(data[ball].Z, strconv.Itoa(row.Num[ball]))
 		}
 		i++
 	}
@@ -232,9 +233,9 @@ func graphMSFreqDistScatter3D(m map[string]int) []dataset {
 		s := strings.Split(k, ":")
 		y, _ := strconv.Atoi(s[1])
 
-		data.X = append(data.X, s[0])       // MAchine
-		data.Y = append(data.Y, float64(y)) // Set
-		data.Z = append(data.Z, m[k])       // Frequency
+		data.X = append(data.X, s[0])               // Machine
+		data.Y = append(data.Y, strconv.Itoa(y))    // Set
+		data.Z = append(data.Z, strconv.Itoa(m[k])) // Frequency
 	}
 
 	return []dataset{data}
@@ -261,7 +262,7 @@ func graphMSFreqDistBubble(m map[string]int) []datasetB {
 		z, _ := strconv.Atoi(s[1])
 
 		data.X = append(data.X, s[0])
-		data.Y = append(data.Y, float64(z))
+		data.Y = append(data.Y, strconv.Itoa(z))
 		data.Marker.Size = append(data.Marker.Size, float64(m[k])*2)
 	}
 
@@ -291,11 +292,18 @@ func regressionSet(data []dataset, t string) []dataset {
 			X:           set.X,
 		}
 
+		// Translate Y axis to numerical data
+		rY := make([]float64, len(data[0].Y))
+		for j := range rY {
+			rY[j], _ = strconv.ParseFloat(data[i].Y[j], 64)
+		}
 		switch t {
 		case regressionLinear:
-			r[i].Y = linRegYData(rX, set.Y, false)
-		case regressionPoly:
-			r[i].Y = polRegYData(rX, set.Y, false) // Not currently working because I suck at maths
+			r[i].Y = linRegYData(rX, rY, false)
+			/*
+				case regressionPoly:
+					r[i].Y = polRegYData(rX, set.Y, false) // Not currently working because I suck at maths
+			*/
 		}
 	}
 
@@ -312,18 +320,19 @@ func polRegYData(prX, prY []float64, subzero bool) []float64 {
 	return y
 }
 
-func linRegYData(lrX, lrY []float64, subzero bool) []float64 {
+func linRegYData(lrX, lrY []float64, subzero bool) []string {
 	a, b := stat.LinearRegression(lrX, lrY, nil, false)
 
-	y := make([]float64, len(lrX))
+	y := make([]string, len(lrX))
 	for idx, x := range lrX {
 		n := a + (b * x)
+		f := strconv.FormatFloat(n, 'f', -1, 64)
 		if subzero {
-			y[idx] = n
+			y[idx] = f
 		} else if n < 0 {
-			y[idx] = 0
+			y[idx] = "0"
 		} else {
-			y[idx] = n
+			y[idx] = f
 		}
 
 	}
@@ -333,7 +342,7 @@ func linRegYData(lrX, lrY []float64, subzero bool) []float64 {
 func freqDistXLabels() []string {
 	var x []string
 	for i := 0; i < maxBallNum; i++ {
-		x = append(x, fmt.Sprintf("%d", i+1))
+		x = append(x, strconv.Itoa(i+1))
 	}
 	return x
 }
