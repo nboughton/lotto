@@ -82,6 +82,8 @@ $(function () {
       }
     }
   }
+
+  var msg = "The 'bonus', or last ball in each of these sets is treated as a separate entity from the first 6, however some calculation is done to ensure that no duplicate numbers turn up in any of the sets."
   //******************************************************* HANDLERS */
   /// Pickadate.js
   $.getJSON("/api/range", function (d) {
@@ -112,7 +114,7 @@ $(function () {
   $(sel.querySubmit).click(function (e) {
     switch ($(sel.queryType).val()) {
       case "num-results":
-        drawResultsNumbers()
+        drawResultsNumbers(msg)
         break
       case "graph-results-freqdist-bar":
         drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
@@ -221,5 +223,5 @@ $(function () {
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
   //drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
-  drawResultsNumbers("The 'bonus', or last ball in each of these sets is treated as a separate entity from the first 6, however some calculation is done to ensure that no duplicate numbers turn up in any of the sets.")
+  drawResultsNumbers(msg)
 })
