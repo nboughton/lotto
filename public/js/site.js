@@ -83,7 +83,12 @@ $(function () {
     }
   }
 
-  var msg = "The 'bonus', or last ball in each of these sets is treated as a separate entity from the first 6, however some calculation is done to ensure that no duplicate numbers turn up in any of the sets."
+  var msg = "The bonus ball in each of these sets is treated as a separate " +
+    "entity from the first 6, however some deduplication is done to ensure that no duplicate " +
+    "numbers turn up in any of the sets. Where a duplicate would appear the next number in the " +
+    "relevant dataset is selected. Furthermore this analysis is purely for eductional " +
+    "use only. No conclusions should be drawn from this other than that is produces some " +
+    "interesting graphs."
   //******************************************************* HANDLERS */
   /// Pickadate.js
   $.getJSON("/api/range", function (d) {
