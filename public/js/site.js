@@ -180,6 +180,11 @@ $(function () {
       el.append('<h4 id="' + s + '" class="centered"></h4>')
       printArray(d.frequent, s)
 
+      s = sel.resultsNum.replace('#', 'least')
+      el.append("<h3>Least Frequent Numbers</h3>")
+      el.append('<h4 id="' + s + '" class="centered"></h4>')
+      printArray(d.least, s)
+
       s = sel.resultsNum.replace('#', 'avg')
       el.append("<h3>Mean Average Results</h3>")
       el.append('<h4 id="' + s + '" class="centered"></h4>')
@@ -216,5 +221,5 @@ $(function () {
   //******************************************************* WHAT DO */
   // Draw a frequency distribution
   //drawResultsGraph("results/freqdist/bar", layouts.freqdist.bar)
-  drawResultsNumbers()
+  drawResultsNumbers("The 'bonus', or last ball in each of these sets is treated as a separate entity from the first 6, however some calculation is done to ensure that no duplicate numbers turn up in any of the sets.")
 })

@@ -78,6 +78,7 @@ func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
 // NumbersData contains tidbits of information regarding numbers
 type NumbersData struct {
 	Frequent []int    `json:"frequent"`
+	Least    []int    `json:"least"`
 	Ranges   []string `json:"ranges"`
 	MeanAvg  []int    `json:"meanAvg"`
 	Random   []int    `json:"random"`
@@ -97,32 +98,83 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		return
 	}
 
-	bSort, bbSort, resFreq := make(ballSortByFreq, maxBallNum+1), make(ballSortByFreq, maxBallNum+1), []int{}
+	// Treat the bonus ball as a separate entity as it is selected in isolation from
+	// the first six. Hence bSort and bbSort.
+	bSort, bbSort, mostFreq, leastFreq := make(ballSortByFreq, maxBallNum+1), make(ballSortByFreq, maxBallNum+1), []int{}, []int{}
 	for row := range db.getResults(p) {
 		for ball := 0; ball < balls; ball++ {
 			n := row.Num[ball]
 			if ball < 6 {
+				// Collate total frequncies for first 6
 				bSort[n].num = n
 				bSort[n].freq++
 			} else {
+				// Collate frequencies for bonus ball separately
 				bbSort[n].num = n
 				bbSort[n].freq++
 			}
 		}
 
 	}
+
+	// Sort both lists
 	sort.Sort(sort.Reverse(bSort))
 	sort.Sort(bbSort)
 
+	// Pick out most frequent first 6
 	for _, b := range bSort[:6] {
-		resFreq = append(resFreq, b.num)
+		mostFreq = append(mostFreq, b.num)
 	}
-	sort.Ints(resFreq)
 
-	resFreq = append(resFreq, bbSort[len(bbSort)-1].num)
+	// Pick out least frequent last six, ignoring any 0s
+	for i := len(bSort) - 1; i > 0; i-- {
+		if len(leastFreq) == 6 {
+			break
+		}
+		if bSort[i].num != 0 {
+			leastFreq = append(leastFreq, bSort[i].num)
+		}
+	}
 
-	w.WriteJSON(NumbersData{MeanAvg: resAvg, Ranges: resRange, Frequent: resFreq, Random: drawRandomSet()})
+	// Sort the results, this is largely cosmetic.
+	sort.Ints(mostFreq)
+	sort.Ints(leastFreq)
 
+	// Add the bonus ball for most frequent, don't duplicate numbers
+	for i := len(bbSort) - 1; i > 0; i-- {
+		if bbSort[i].num != 0 && !containsInt(mostFreq, bbSort[i].num) {
+			mostFreq = append(mostFreq, bbSort[i].num)
+			break
+		}
+	}
+
+	// Add the bonus ball for least frequent, skipping any 0's and
+	// ensuring no duplicate numbers
+	for _, b := range bbSort {
+		if b.num != 0 && !containsInt(leastFreq, b.num) {
+			leastFreq = append(leastFreq, b.num)
+			break
+		}
+	}
+
+	w.WriteJSON(NumbersData{
+		MeanAvg:  resAvg,
+		Ranges:   resRange,
+		Frequent: mostFreq,
+		Least:    leastFreq,
+		Random:   drawRandomSet(),
+	})
+
+}
+
+func containsInt(a []int, t int) bool {
+	for _, n := range a {
+		if n == t {
+			return true
+		}
+	}
+
+	return false
 }
 
 func handlerListSets(w traffic.ResponseWriter, r *traffic.Request) {
