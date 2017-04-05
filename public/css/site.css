@@ -20,6 +20,7 @@ body {
 #results-numbers {
 	padding: 10px;
 	text-align: center;
+	align-self: center;
 }
 
 #query {
@@ -36,6 +37,9 @@ body {
 #results {
   display: flex;
 	flex-flow: column;
+	align-self: center;
+	justify-content: center;
+
 }
 
 .centered {
