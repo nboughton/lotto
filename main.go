@@ -29,10 +29,10 @@ func init() {
 	router.Get("/api/graph/results/raw/scatter3d", handlerResultsScatter3D)
 	router.Get("/api/graph/ms/freqdist/:type", handlerMSFreqDist)
 
-	// Update every 24 hours
+	// Update at 21:30 every night
 	go func() {
 		for t := range time.NewTicker(time.Minute).C {
-			if t.Hour() == 0 && t.Minute() == 0 {
+			if t.Hour() == 21 && t.Minute() == 30 {
 				db.updateDB()
 			}
 		}
