@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-	//"log"
 	"sort"
 	"strconv"
 	"strings"
 
-	//"github.com/gonum/matrix/mat64"
 	"github.com/gonum/stat"
 )
 
@@ -162,7 +160,7 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []datase
 				data[ball].Name = label(ball)
 			}
 
-			n, _ := strconv.Atoi(data[ball].Y[row.Num[ball]-1])
+			n, _ := strconv.Atoi(data[ball].Y[row.Num[ball]-1]) // I don't care about this error because it actually eliminates useless 0 values
 			data[ball].Y[row.Num[ball]-1] = strconv.Itoa(n + 1)
 		}
 		i++
