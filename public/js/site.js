@@ -187,10 +187,15 @@ $(function () {
       el.append('<h4 id="' + s + '" class="centered"></h4>')
       printArray(d.least, s)
 
-      s = sel.resultsNum.replace('#', 'avg')
-      el.append("<h3>Mean Average Results</h3>")
+      s = sel.resultsNum.replace('#', 'mean-avg')
+      el.append("<h3>Mean Results</h3>")
       el.append('<h4 id="' + s + '" class="centered"></h4>')
       printArray(d.meanAvg, s)
+
+      s = sel.resultsNum.replace('#', 'mode-avg')
+      el.append("<h3>Mode Results</h3>")
+      el.append('<h4 id="' + s + '" class="centered"></h4>')
+      printArray(d.modeAvg, s)
 
       s = sel.resultsNum.replace('#', 'random')
       el.append("<h3>Random Set</h3>")

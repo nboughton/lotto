@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gonum/stat"
 	"github.com/pilu/traffic"
 )
 
@@ -15,17 +16,6 @@ type PageData struct {
 	Sets       []int
 	Start, End string
 }
-
-type numFreq struct {
-	num  int
-	freq int
-}
-
-type ballSortByFreq []numFreq
-
-func (b ballSortByFreq) Len() int           { return len(b) }
-func (b ballSortByFreq) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b ballSortByFreq) Less(i, j int) bool { return b[i].freq < b[j].freq }
 
 func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 	s, e, err := db.getDataRange()
@@ -77,12 +67,24 @@ func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
 
 // NumbersData contains tidbits of information regarding numbers
 type NumbersData struct {
-	Frequent []int    `json:"frequent"`
-	Least    []int    `json:"least"`
-	Ranges   []string `json:"ranges"`
-	MeanAvg  []int    `json:"meanAvg"`
-	Random   []int    `json:"random"`
+	Frequent []int     `json:"frequent"`
+	Least    []int     `json:"least"`
+	Ranges   []string  `json:"ranges"`
+	MeanAvg  []int     `json:"meanAvg"`
+	ModeAvg  []float64 `json:"modeAvg"`
+	Random   []int     `json:"random"`
 }
+
+type numFreq struct {
+	num  int
+	freq int
+}
+
+type ballSortByFreq []numFreq
+
+func (b ballSortByFreq) Len() int           { return len(b) }
+func (b ballSortByFreq) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b ballSortByFreq) Less(i, j int) bool { return b[i].freq < b[j].freq }
 
 func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 	p := params(r)
@@ -100,7 +102,12 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 
 	// Treat the bonus ball as a separate entity as it is selected in isolation from
 	// the first six. Hence bSort and bbSort.
-	bSort, bbSort, mostFreq, leastFreq := make(ballSortByFreq, maxBallNum+1), make(ballSortByFreq, maxBallNum+1), []int{}, []int{}
+	var (
+		bSort               = make(ballSortByFreq, maxBallNum+1)
+		bbSort              = make(ballSortByFreq, maxBallNum+1)
+		modes               = make([][]float64, balls)
+		mostFreq, leastFreq []int
+	)
 	for row := range db.getResults(p) {
 		for ball := 0; ball < balls; ball++ {
 			n := row.Num[ball]
@@ -113,6 +120,8 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 				bbSort[n].num = n
 				bbSort[n].freq++
 			}
+			// Collate raw numbers for mode
+			modes[ball] = append(modes[ball], float64(n))
 		}
 
 	}
@@ -157,8 +166,14 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 	}
 
+	m := make([]float64, balls)
+	for i, set := range modes {
+		m[i], _ = stat.Mode(set, nil)
+	}
+
 	w.WriteJSON(NumbersData{
 		MeanAvg:  resAvg,
+		ModeAvg:  m,
 		Ranges:   resRange,
 		Frequent: mostFreq,
 		Least:    leastFreq,
