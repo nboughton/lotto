@@ -300,19 +300,19 @@ func regressionSet(data []dataset, t string) []dataset {
 		switch t {
 		case regressionLinear:
 			r[i].Y = linRegYData(rX, rY, false)
-			/*
-				case regressionPoly:
-					r[i].Y = polRegYData(rX, set.Y, false) // Not currently working because I suck at maths
-			*/
+
+		case regressionPoly:
+			r[i].Y = polRegYData(rX, rY, false) // Not currently working because I suck at maths
+
 		}
 	}
 
 	return r
 }
 
-func polRegYData(prX, prY []float64, subzero bool) []float64 {
+func polRegYData(prX, prY []float64, subzero bool) []string {
 	// @TODO: polynomial regression sets for non-linear best fits
-	y := make([]float64, len(prX))
+	y := make([]string, len(prX))
 	//a, b := stat.LinearRegression(prX, prY, nil, false)
 	//r2 := stat.RSquared(prX, prY, nil, a, b)
 	//log.Println(r2)
