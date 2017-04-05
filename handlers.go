@@ -157,8 +157,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 	}
 
-	// Add the bonus ball for least frequent, skipping any 0's and
-	// ensuring no duplicate numbers
+	// Add the bonus ball for least frequent, ensuring no duplicate numbers
 	for _, b := range bbSort {
 		if b.num != 0 && !containsInt(leastFreq, b.num) {
 			leastFreq = append(leastFreq, b.num)
@@ -166,6 +165,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 	}
 
+	// Create Mode sets
 	m := make([]float64, balls)
 	for i, set := range modes {
 		m[i], _ = stat.Mode(set, nil)
