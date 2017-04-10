@@ -184,6 +184,7 @@ $(function () {
       el.empty()
       el.append("<table id='" + sel.resultsNum.replace("#", "") + "'></table>")
       $(sel.resultsNum).append("<thead><tr><td>Type</td><td>Ball 1</td><td>Ball 2</td><td>Ball 3</td><td>Ball 4</td><td>Ball 5</td><td>Ball 6</td><td>Bonus</td></tr></thead>")
+      $(sel.resultsNum).append("<tr><td>Latest</td>" + printNumRow(d.last) + "</tr>")
       $(sel.resultsNum).append("<tr><td>Most Frequent</td>" + printNumRow(d.frequent) + "</tr>")
       $(sel.resultsNum).append("<tr><td>Least Frequent</td>" + printNumRow(d.least) + "</tr>")
       $(sel.resultsNum).append("<tr><td>Mean</td>" + printNumRow(d.meanAvg) + "</tr>")

@@ -73,6 +73,7 @@ type NumbersData struct {
 	MeanAvg  []int     `json:"meanAvg"`
 	ModeAvg  []float64 `json:"modeAvg"`
 	Random   []int     `json:"random"`
+	Last     []int     `json:"last"`
 }
 
 type numFreq struct {
@@ -178,6 +179,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		Frequent: mostFreq,
 		Least:    leastFreq,
 		Random:   drawRandomSet(),
+		//Last:     db.getLastDraw(),
 	})
 
 }

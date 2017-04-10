@@ -145,6 +145,26 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	return c
 }
 
+func (db *AppDB) getLastDraw() []int {
+	var r []int
+	q := qGen.NewQuery().
+		Select("num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
+		From("results").
+		Order("DATE(date)").
+		Append("DESC LIMIT 1")
+	stmt, err := db.Prepare(q.SQL)
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6])
+	if err != nil {
+		log.Println(err)
+	}
+
+	return r
+}
+
 func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
 	r := make(map[string]int)
 
