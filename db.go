@@ -173,7 +173,7 @@ func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
 }
 
 func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
-	r := make([]int, 7)
+	r := make([]int, balls)
 	q := qGen.NewQuery()
 
 	qSelect := []string{}

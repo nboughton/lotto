@@ -124,7 +124,6 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 			// Collate raw numbers for mode
 			modes[ball] = append(modes[ball], float64(n))
 		}
-		//last = row.Num
 	}
 
 	// Sort both lists
