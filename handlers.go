@@ -124,7 +124,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 			// Collate raw numbers for mode
 			modes[ball] = append(modes[ball], float64(n))
 		}
-
+		//last = row.Num
 	}
 
 	// Sort both lists
@@ -172,6 +172,11 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		m[i], _ = stat.Mode(set, nil)
 	}
 
+	last, err := db.getLastDraw()
+	if err != nil {
+		log.Println(err)
+	}
+
 	w.WriteJSON(NumbersData{
 		MeanAvg:  resAvg,
 		ModeAvg:  m,
@@ -179,7 +184,7 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		Frequent: mostFreq,
 		Least:    leastFreq,
 		Random:   drawRandomSet(),
-		//Last:     db.getLastDraw(),
+		Last:     last,
 	})
 
 }

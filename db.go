@@ -128,6 +128,7 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 		if err != nil {
 			log.Println(err.Error())
 		}
+		defer rows.Close()
 
 		for rows.Next() {
 			var r dbRow
@@ -145,24 +146,20 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	return c
 }
 
-func (db *AppDB) getLastDraw() []int {
-	var r []int
+// Hangs for no apparent reason.
+func (db *AppDB) getLastDraw() ([]int, error) {
+	r := make([]int, balls)
 	q := qGen.NewQuery().
 		Select("num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
 		From("results").
-		Order("DATE(date)").
-		Append("DESC LIMIT 1")
-	stmt, err := db.Prepare(q.SQL)
-	if err != nil {
-		log.Println(err)
+		Append("WHERE id = (SELECT MAX(id) FROM results)")
+	stmt, _ := db.Prepare(q.SQL)
+
+	if err := stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
+		return r, err
 	}
 
-	err = stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6])
-	if err != nil {
-		log.Println(err)
-	}
-
-	return r
+	return r, nil
 }
 
 func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
@@ -237,6 +234,7 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 	if err != nil {
 		return r, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m string
@@ -260,6 +258,7 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	if err != nil {
 		return r, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var s int
@@ -271,12 +270,12 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 }
 
 func (db *AppDB) getRowCount() (int, error) {
-	var rows int
-	if err := db.QueryRow(qGen.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&rows); err != nil {
-		return rows, err
+	var c int
+	if err := db.QueryRow(qGen.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&c); err != nil {
+		return c, err
 	}
 
-	return rows, nil
+	return c, nil
 }
 
 func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
