@@ -130,18 +130,16 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 	sort.Sort(sort.Reverse(bSort))
 	sort.Sort(bbSort)
 
-	// Pick out most frequent first 6
-	for _, b := range bSort[:6] {
-		mostFreq = append(mostFreq, b.num)
-	}
-
-	// Pick out least frequent last six, ignoring any 0s
-	for i := len(bSort) - 1; i > 0; i-- {
-		if len(leastFreq) == 6 {
-			break
+	// mostFreq = first 6 and leastFreq = last non-zero 6
+	for i, j := 0, len(bSort)-1; i < j; i, j = i+1, j-1 {
+		if bSort[i].num != 0 && len(mostFreq) < 6 {
+			mostFreq = append(mostFreq, bSort[i].num)
 		}
-		if bSort[i].num != 0 {
-			leastFreq = append(leastFreq, bSort[i].num)
+		if bSort[j].num != 0 && len(leastFreq) < 6 {
+			leastFreq = append(leastFreq, bSort[j].num)
+		}
+		if len(mostFreq) == 6 && len(leastFreq) == 6 {
+			break
 		}
 	}
 
@@ -149,18 +147,15 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 	sort.Ints(mostFreq)
 	sort.Ints(leastFreq)
 
-	// Add the bonus ball for most frequent, don't duplicate numbers
-	for i := len(bbSort) - 1; i > 0; i-- {
-		if bbSort[i].num != 0 && !containsInt(mostFreq, bbSort[i].num) {
+	// Add the bonus ball for most/least frequent, don't duplicate numbers
+	for i, j := len(bbSort)-1, 0; i > j; i, j = i-1, j+1 {
+		if bbSort[i].num != 0 && len(mostFreq) < balls && !containsInt(mostFreq, bbSort[i].num) {
 			mostFreq = append(mostFreq, bbSort[i].num)
-			break
 		}
-	}
-
-	// Add the bonus ball for least frequent, ensuring no duplicate numbers
-	for _, b := range bbSort {
-		if b.num != 0 && !containsInt(leastFreq, b.num) {
-			leastFreq = append(leastFreq, b.num)
+		if bbSort[j].num != 0 && len(leastFreq) < balls && !containsInt(leastFreq, bbSort[j].num) {
+			leastFreq = append(leastFreq, bbSort[j].num)
+		}
+		if len(mostFreq) == balls && len(leastFreq) == balls {
 			break
 		}
 	}
