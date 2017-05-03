@@ -106,9 +106,7 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	c := make(chan dbRow)
 
 	go func() {
-		q := qGen.NewQuery().
-			Select("date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
-			From("results")
+		q := qGen.NewQuery().Select("results", "date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus")
 
 		applyFilters(q, p)
 		stmt, _ := db.Prepare(q.Order("DATE(date)").SQL)
@@ -138,9 +136,9 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 func (db *AppDB) getLastDraw() ([]int, error) {
 	r := make([]int, balls)
 	q := qGen.NewQuery().
-		Select("num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
-		From("results").
-		Append("WHERE id = (SELECT MAX(id) FROM results)")
+		Select("results", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
+		Order("DATE(date)").
+		Append("DESC LIMIT 1")
 	stmt, _ := db.Prepare(q.SQL)
 
 	if err := stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
@@ -170,7 +168,7 @@ func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
 	}
 	qSelect = append(qSelect, "SUM(bonus)/COUNT(bonus)")
 
-	q.Select(qSelect...).From("results")
+	q.Select("results", qSelect...)
 
 	applyFilters(q, p)
 	stmt, _ := db.Prepare(q.SQL)
@@ -191,7 +189,7 @@ func (db *AppDB) getResultsAverageRanges(p queryParams) ([]string, error) {
 	}
 	qSelect = append(qSelect, "MIN(bonus)", "MAX(bonus)")
 
-	q.Select(qSelect...).From("results")
+	q.Select("results", qSelect...)
 
 	applyFilters(q, p)
 	stmt, _ := db.Prepare(q.SQL)
@@ -212,9 +210,7 @@ func (db *AppDB) getResultsAverageRanges(p queryParams) ([]string, error) {
 
 func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 	r := []string{}
-	q := qGen.NewQuery().
-		Select("DISTINCT(ball_machine)").
-		From("results")
+	q := qGen.NewQuery().Select("results", "DISTINCT(ball_machine)")
 
 	p.Machine = "all" // Ensure queryParams are right for this
 	applyFilters(q, p)
@@ -236,9 +232,7 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 
 func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	r := []int{}
-	q := qGen.NewQuery().
-		Select("DISTINCT(ball_set)").
-		From("results")
+	q := qGen.NewQuery().Select("results", "DISTINCT(ball_set)")
 
 	p.Set = 0 // Ensure queryParams are right for this
 	applyFilters(q, p)
@@ -260,7 +254,7 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 
 func (db *AppDB) getRowCount() (int, error) {
 	var c int
-	if err := db.QueryRow(qGen.NewQuery().Select("COUNT(*)").From("results").SQL).Scan(&c); err != nil {
+	if err := db.QueryRow(qGen.NewQuery().Select("results", "COUNT(*)").SQL).Scan(&c); err != nil {
 		return c, err
 	}
 
@@ -269,9 +263,7 @@ func (db *AppDB) getRowCount() (int, error) {
 
 func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 	var first, last string
-	q := qGen.NewQuery().
-		Select("MIN(date)", "MAX(date)").
-		From("results")
+	q := qGen.NewQuery().Select("results", "MIN(date)", "MAX(date)")
 	stmt, _ := db.Prepare(q.SQL)
 
 	if err := stmt.QueryRow().Scan(&first, &last); err != nil {
@@ -291,7 +283,7 @@ func (db *AppDB) updateDB() error {
 	}
 
 	// Prepare queries
-	qSel := qGen.NewQuery().Select("COUNT(*)").From("results").Where("date = ?")
+	qSel := qGen.NewQuery().Select("results", "COUNT(*)").Where("date = ?")
 	sel, err := tx.Prepare(qSel.SQL)
 	if err != nil {
 		return err

@@ -17,6 +17,28 @@ type PageData struct {
 	Start, End string
 }
 
+// NumbersData contains tidbits of information regarding numbers
+type NumbersData struct {
+	Frequent []int     `json:"frequent"`
+	Least    []int     `json:"least"`
+	Ranges   []string  `json:"ranges"`
+	MeanAvg  []int     `json:"meanAvg"`
+	ModeAvg  []float64 `json:"modeAvg"`
+	Random   []int     `json:"random"`
+	Last     []int     `json:"last"`
+}
+
+type numFreq struct {
+	num  int
+	freq int
+}
+
+type ballSortByFreq []numFreq
+
+func (b ballSortByFreq) Len() int           { return len(b) }
+func (b ballSortByFreq) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b ballSortByFreq) Less(i, j int) bool { return b[i].freq < b[j].freq }
+
 func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 	s, e, err := db.getDataRange()
 	if err != nil {
@@ -65,99 +87,25 @@ func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
 	w.WriteJSON(graphResultsTimeSeries(db.getResults(params(r)), true, r.Param("type")))
 }
 
-// NumbersData contains tidbits of information regarding numbers
-type NumbersData struct {
-	Frequent []int     `json:"frequent"`
-	Least    []int     `json:"least"`
-	Ranges   []string  `json:"ranges"`
-	MeanAvg  []int     `json:"meanAvg"`
-	ModeAvg  []float64 `json:"modeAvg"`
-	Random   []int     `json:"random"`
-	Last     []int     `json:"last"`
-}
-
-type numFreq struct {
-	num  int
-	freq int
-}
-
-type ballSortByFreq []numFreq
-
-func (b ballSortByFreq) Len() int           { return len(b) }
-func (b ballSortByFreq) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b ballSortByFreq) Less(i, j int) bool { return b[i].freq < b[j].freq }
-
 func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
-	p := params(r)
+	var (
+		p                     = params(r)
+		sBalls, sBonus, modes = getSortedResultsByFreq(p)
+		most, least           = getMostAndleast(sBalls, sBonus)
+	)
+
+	// Average results by totals
 	resAvg, err := db.getResultsAverage(p)
 	if err != nil {
 		w.WriteJSON(err.Error())
 		return
 	}
 
+	// Average range of each sorted ball field
 	resRange, err := db.getResultsAverageRanges(p)
 	if err != nil {
 		w.WriteJSON(err.Error())
 		return
-	}
-
-	// Treat the bonus ball as a separate entity as it is selected in isolation from
-	// the first six. Hence bSort and bbSort.
-	var (
-		bSort               = make(ballSortByFreq, maxBallNum+1)
-		bbSort              = make(ballSortByFreq, maxBallNum+1)
-		modes               = make([][]float64, balls)
-		mostFreq, leastFreq []int
-	)
-	for row := range db.getResults(p) {
-		for ball := 0; ball < balls; ball++ {
-			n := row.Num[ball]
-			if ball < 6 {
-				// Collate total frequncies for first 6
-				bSort[n].num = n
-				bSort[n].freq++
-			} else {
-				// Collate frequencies for bonus ball separately
-				bbSort[n].num = n
-				bbSort[n].freq++
-			}
-			// Collate raw numbers for mode
-			modes[ball] = append(modes[ball], float64(n))
-		}
-	}
-
-	// Sort both lists
-	sort.Sort(sort.Reverse(bSort))
-	sort.Sort(bbSort)
-
-	// mostFreq = first 6 and leastFreq = last non-zero 6
-	for i, j := 0, len(bSort)-1; i < j; i, j = i+1, j-1 {
-		if bSort[i].num != 0 && len(mostFreq) < 6 {
-			mostFreq = append(mostFreq, bSort[i].num)
-		}
-		if bSort[j].num != 0 && len(leastFreq) < 6 {
-			leastFreq = append(leastFreq, bSort[j].num)
-		}
-		if len(mostFreq) == 6 && len(leastFreq) == 6 {
-			break
-		}
-	}
-
-	// Sort the results, this is largely cosmetic.
-	sort.Ints(mostFreq)
-	sort.Ints(leastFreq)
-
-	// Add the bonus ball for most/least frequent, don't duplicate numbers
-	for i, j := len(bbSort)-1, 0; i > j; i, j = i-1, j+1 {
-		if bbSort[i].num != 0 && len(mostFreq) < balls && !containsInt(mostFreq, bbSort[i].num) {
-			mostFreq = append(mostFreq, bbSort[i].num)
-		}
-		if bbSort[j].num != 0 && len(leastFreq) < balls && !containsInt(leastFreq, bbSort[j].num) {
-			leastFreq = append(leastFreq, bbSort[j].num)
-		}
-		if len(mostFreq) == balls && len(leastFreq) == balls {
-			break
-		}
 	}
 
 	// Create Mode sets
@@ -175,12 +123,75 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		MeanAvg:  resAvg,
 		ModeAvg:  m,
 		Ranges:   resRange,
-		Frequent: mostFreq,
-		Least:    leastFreq,
+		Frequent: most,
+		Least:    least,
 		Random:   drawRandomSet(),
 		Last:     last,
 	})
 
+}
+
+func getMostAndleast(sBalls, sBonus ballSortByFreq) (most, least []int) {
+	// most = first 6 and least = last non-zero 6
+	for i, j := 0, len(sBalls)-1; i < j; i, j = i+1, j-1 {
+		if sBalls[i].num != 0 && len(most) < 6 {
+			most = append(most, sBalls[i].num)
+		}
+		if sBalls[j].num != 0 && len(least) < 6 {
+			least = append(least, sBalls[j].num)
+		}
+		if len(most) == 6 && len(least) == 6 {
+			break
+		}
+	}
+
+	// Sort the results, this is largely cosmetic.
+	sort.Ints(most)
+	sort.Ints(least)
+
+	// Add the bonus ball for most/least frequent, don't duplicate numbers
+	for i, j := len(sBonus)-1, 0; i > j; i, j = i-1, j+1 {
+		if sBonus[i].num != 0 && len(most) < balls && !containsInt(most, sBonus[i].num) {
+			most = append(most, sBonus[i].num)
+		}
+		if sBonus[j].num != 0 && len(least) < balls && !containsInt(least, sBonus[j].num) {
+			least = append(least, sBonus[j].num)
+		}
+		if len(most) == balls && len(least) == balls {
+			break
+		}
+	}
+	return most, least
+}
+
+// Returns sorted ball results for query p by frequency as well as collated numbers for mode checking
+func getSortedResultsByFreq(p queryParams) (ballSortByFreq, ballSortByFreq, [][]float64) {
+	var (
+		sBalls = make(ballSortByFreq, maxBallNum+1)
+		sBonus = make(ballSortByFreq, maxBallNum+1)
+		modes  = make([][]float64, balls)
+	)
+	for row := range db.getResults(p) {
+		for ball := 0; ball < balls; ball++ {
+			n := row.Num[ball]
+			if ball < 6 {
+				// Collate total frequncies for first 6
+				sBalls[n].num = n
+				sBalls[n].freq++
+			} else {
+				// Collate frequencies for bonus ball separately
+				sBonus[n].num = n
+				sBonus[n].freq++
+			}
+			// Collate raw numbers for mode
+			modes[ball] = append(modes[ball], float64(n))
+		}
+	}
+
+	// Sort both lists
+	sort.Sort(sort.Reverse(sBalls))
+	sort.Sort(sBonus)
+	return sBalls, sBonus, modes
 }
 
 func containsInt(a []int, t int) bool {
