@@ -91,7 +91,7 @@ func connectDB(path string) *AppDB {
 // Apply filters for queries, always run this before executing a query as it edits the
 // query in place by pointer
 func applyFilters(q *qGen.Query, p queryParams) {
-	q.Where("date BETWEEN DATE(?) AND DATE(?)", p.Start, p.End) // I always constrain results by date
+	q.Where("date BETWEEN DATE(?) AND DATE(?, '+1 day')", p.Start, p.End) // I always constrain results by date
 
 	if p.Machine != "all" && p.Set != 0 {
 		q.Where("ball_machine = ? AND ball_set = ?", p.Machine, p.Set)
