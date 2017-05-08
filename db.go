@@ -94,11 +94,11 @@ func applyFilters(q *qGen.Query, p queryParams) {
 	q.Where("date BETWEEN DATE(?) AND DATE(?, '+1 day')", p.Start, p.End) // I always constrain results by date
 
 	if p.Machine != "all" && p.Set != 0 {
-		q.Where("ball_machine = ? AND ball_set = ?", p.Machine, p.Set)
+		q.Append("AND ball_machine = ? AND ball_set = ?", p.Machine, p.Set)
 	} else if p.Machine != "all" && p.Set == 0 {
-		q.Where("ball_machine = ?", p.Machine)
+		q.Append("AND ball_machine = ?", p.Machine)
 	} else if p.Machine == "all" && p.Set != 0 {
-		q.Where("ball_set = ?", p.Set)
+		q.Append("AND ball_set = ?", p.Set)
 	}
 }
 
