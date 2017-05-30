@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"sort"
+	//"sort"
 	"strconv"
-	"strings"
-
-	"github.com/gonum/stat"
-	pt "github.com/nboughton/go-plotlytypes"
+	//"strings"
+	//"github.com/gonum/stat"
+	//pt "github.com/nboughton/go-plotlytypes"
 )
 
 var (
@@ -33,6 +32,35 @@ const (
 	graphTypeLine    = "line"
 )
 
+type graphDataset struct {
+	Label string   `json:"label"`
+	Data  []string `json:"data"`
+}
+
+type graphData struct {
+	Labels   []string       `json:"labels"`
+	Datasets []graphDataset `json:"datasets"`
+}
+
+func lineGraph(records <-chan dbRow) graphData {
+	var d graphData
+	d.Datasets = make([]graphDataset, balls)
+
+	for row := range records {
+		for ball := 0; ball < balls; ball++ {
+			if d.Datasets[ball].Label == "" {
+				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
+			}
+
+			d.Datasets[ball].Data = append(d.Datasets[ball].Data, strconv.Itoa(row.Num[ball]))
+		}
+		d.Labels = append(d.Labels, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatYYYYMMDD), row.Machine, row.Set))
+	}
+
+	return d
+}
+
+/*
 func graphResultsTimeSeries(records <-chan dbRow, bestFit bool, t string) []pt.Dataset {
 	data := make([]pt.Dataset, balls)
 
@@ -122,7 +150,7 @@ func graphResultsFreqDist(records <-chan dbRow, bestFit bool, t string) []pt.Dat
 	if bestFit && t != graphTypeBar {
 		data = append(data, regressionSet(data, regressionPoly)...)
 	}
-	*/
+	//
 
 	return data
 }
@@ -298,3 +326,4 @@ func label(ball int) string {
 
 	return "Bonus"
 }
+*/

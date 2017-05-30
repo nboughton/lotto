@@ -2,32 +2,28 @@ package main
 
 import (
 	"flag"
+	"log"
+	"net/http"
 	"time"
 
-	"github.com/pilu/traffic"
+	"fmt"
+	"github.com/gorilla/mux"
 )
 
+type config struct {
+	Port int
+}
+
 var (
-	router *traffic.Router
-	db     = connectDB("results.db")
+	cfg config
+	db  = connectDB("results.db")
 )
 
 func init() {
 	p := flag.Int("p", 3002, "Set the port the application listens on")
 	flag.Parse()
 
-	traffic.SetPort(*p)
-
-	router = traffic.New()
-	router.Get("/", handlerRoot)
-	router.Get("/api/range", handlerDataRange)
-	router.Get("/api/sets", handlerListSets)
-	router.Get("/api/machines", handlerListMachines)
-	router.Get("/api/numbers", handlerNumbers)
-	router.Get("/api/graph/results/freqdist/:type", handlerResultsFreqDist)
-	router.Get("/api/graph/results/timeseries/:type", handlerResultsTimeSeries)
-	router.Get("/api/graph/results/raw/scatter3d", handlerResultsScatter3D)
-	router.Get("/api/graph/ms/freqdist/:type", handlerMSFreqDist)
+	cfg.Port = *p
 
 	// Update at 21:30 every night
 	go func() {
@@ -40,5 +36,20 @@ func init() {
 }
 
 func main() {
-	router.Run()
+	r := mux.NewRouter()
+
+	//r.HandleFunc("/api/range", handlerDataRange).Methods("GET")
+	r.HandleFunc("/api/sets", handlerListSets).Methods("GET")
+	r.HandleFunc("/api/machines", handlerListMachines).Methods("GET")
+	r.HandleFunc("/api/query", handlerQuery).Methods("GET")
+	/*
+		r.HandleFunc("/api/numbers", handlerNumbers).Methods("GET")
+		r.HandleFunc("/api/graph/results/freqdist/{type}", handlerResultsFreqDist).Methods("GET")
+		r.HandleFunc("/api/graph/results/timeseries/{type}", handlerResultsTimeSeries).Methods("GET")
+		r.HandleFunc("/api/graph/results/raw/scatter3d", handlerResultsScatter3D).Methods("GET")
+		r.HandleFunc("/api/graph/ms/freqdist/{type}", handlerMSFreqDist).Methods("GET")
+	*/
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), r))
 }

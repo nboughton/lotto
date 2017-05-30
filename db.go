@@ -43,8 +43,8 @@ type dbRow struct {
 
 type queryParams struct {
 	Type, Machine string
-	Set           int
-	Start, End    string
+	Set, Query    int
+	Start, End    time.Time
 }
 
 func connectDB(path string) *AppDB {

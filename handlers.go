@@ -2,19 +2,19 @@ package main
 
 import (
 	"log"
-	"sort"
+	"net/http"
+	//"sort"
 	"strconv"
 	"time"
-
-	"github.com/gonum/stat"
-	"github.com/pilu/traffic"
+	//"github.com/gonum/stat"
+	//"github.com/gorilla/mux"
 )
 
 // PageData is used by the index template to populate things and stuff
 type PageData struct {
 	Machines   []string
 	Sets       []int
-	Start, End string
+	Start, End time.Time
 }
 
 // NumbersData contains tidbits of information regarding numbers
@@ -39,7 +39,60 @@ func (b ballSortByFreq) Len() int           { return len(b) }
 func (b ballSortByFreq) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b ballSortByFreq) Less(i, j int) bool { return b[i].freq < b[j].freq }
 
-func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
+func handlerQuery(w http.ResponseWriter, r *http.Request) {
+	p := params(r)
+	switch p.Query {
+	case 1: // Create a LineChart using the old numbers code
+		JSON{Status: http.StatusOK, Data: lineGraph(db.getResults(p))}.write(w)
+	}
+}
+
+func handlerListSets(w http.ResponseWriter, r *http.Request) {
+	res, err := db.getSetList(params(r))
+	if err != nil {
+		JSON{Status: http.StatusInternalServerError, Data: err}.write(w)
+	} else {
+		JSON{Status: http.StatusOK, Data: res}.write(w)
+	}
+}
+
+func handlerListMachines(w http.ResponseWriter, r *http.Request) {
+	res, err := db.getMachineList(params(r))
+	if err != nil {
+		JSON{Status: http.StatusInternalServerError, Data: err}.write(w)
+	} else {
+		JSON{Status: http.StatusOK, Data: res}.write(w)
+	}
+}
+
+func handlerDataRange(w http.ResponseWriter, r *http.Request) {
+	f, l, err := db.getDataRange()
+	if err != nil {
+		log.Println("handlerDataRange:", err.Error())
+	}
+
+	JSON{Status: http.StatusOK, Data: map[string]int64{"first": f.Unix(), "last": l.Unix()}}.write(w)
+}
+
+func params(r *http.Request) queryParams {
+	var (
+		p        = r.URL.Query()
+		query, _ = strconv.Atoi(p["query"][0])
+		set, _   = strconv.Atoi(p["set"][0])
+		start, _ = time.Parse(time.RFC3339, p["start"][0])
+		end, _   = time.Parse(time.RFC3339, p["end"][0])
+	)
+	return queryParams{
+		Query:   query,
+		Start:   start,
+		End:     end,
+		Set:     set,
+		Machine: p["machine"][0],
+	}
+}
+
+/*
+func handlerRoot(w http.ResponseWriter, r *http.Request) {
 	s, e, err := db.getDataRange()
 	if err != nil {
 		log.Println(err)
@@ -47,8 +100,8 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 
 	s, _ = time.Parse(formatYYYYMMDD, "2015-10-10") // Because reasons.
 	q := queryParams{
-		Start:   s.Format(formatYYYYMMDD),
-		End:     e.Format(formatYYYYMMDD),
+		Start:   s,
+		End:     e,
 		Machine: "all",
 		Set:     0,
 	}
@@ -63,31 +116,34 @@ func handlerRoot(w traffic.ResponseWriter, r *traffic.Request) {
 		log.Println(err)
 	}
 
-	w.Render("index", &PageData{machines, sets, q.Start, q.End})
+	JSON{Status: http.StatusOK, Data: PageData{machines, sets, q.Start, q.End}}.write(w)
 }
 
-func handlerResultsScatter3D(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphResultsRawScatter3D(db.getResults(params(r))))
+func handlerResultsScatter3D(w http.ResponseWriter, r *http.Request) {
+	JSON{Status: http.StatusOK, Data: graphResultsRawScatter3D(db.getResults(params(r)))}.write(w)
 }
 
-func handlerResultsFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphResultsFreqDist(db.getResults(params(r)), true, r.Param("type")))
+func handlerResultsFreqDist(w http.ResponseWriter, r *http.Request) {
+	p := mux.Vars(r)
+	JSON{Status: http.StatusOK, Data: graphResultsFreqDist(db.getResults(params(r)), true, p["type"])}.write(w)
 }
 
-func handlerMSFreqDist(w traffic.ResponseWriter, r *traffic.Request) {
-	switch r.Param("type") {
+func handlerMSFreqDist(w http.ResponseWriter, r *http.Request) {
+	p := mux.Vars(r)
+	switch p["type"] {
 	case "bubble":
-		w.WriteJSON(graphMSFreqDistBubble(db.getMachineSetCombinations(params(r))))
+		JSON{Status: http.StatusOK, Data: graphMSFreqDistBubble(db.getMachineSetCombinations(params(r)))}.write(w)
 	case "scatter3d":
-		w.WriteJSON(graphMSFreqDistScatter3D(db.getMachineSetCombinations(params(r))))
+		JSON{Status: http.StatusOK, Data: graphMSFreqDistScatter3D(db.getMachineSetCombinations(params(r)))}.write(w)
 	}
 }
 
-func handlerResultsTimeSeries(w traffic.ResponseWriter, r *traffic.Request) {
-	w.WriteJSON(graphResultsTimeSeries(db.getResults(params(r)), true, r.Param("type")))
+func handlerResultsTimeSeries(w http.ResponseWriter, r *http.Request) {
+	p := mux.Vars(r)
+	JSON{Status: http.StatusOK, Data: graphResultsTimeSeries(db.getResults(params(r)), true, p["type"])}.write(w)
 }
 
-func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
+func handlerNumbers(w http.ResponseWriter, r *http.Request) {
 	var (
 		p                     = params(r)
 		sBalls, sBonus, modes = getSortedResultsByFreq(p)
@@ -97,14 +153,14 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 	// Average results by totals
 	resAvg, err := db.getResultsAverage(p)
 	if err != nil {
-		w.WriteJSON(err.Error())
+		JSON{Status: http.StatusInternalServerError, Data: err.Error()}.write(w)
 		return
 	}
 
 	// Average range of each sorted ball field
 	resRange, err := db.getResultsAverageRanges(p)
 	if err != nil {
-		w.WriteJSON(err.Error())
+		JSON{Status: http.StatusInternalServerError, Data: err.Error()}.write(w)
 		return
 	}
 
@@ -119,15 +175,18 @@ func handlerNumbers(w traffic.ResponseWriter, r *traffic.Request) {
 		log.Println(err)
 	}
 
-	w.WriteJSON(NumbersData{
-		MeanAvg:  resAvg,
-		ModeAvg:  m,
-		Ranges:   resRange,
-		Frequent: most,
-		Least:    least,
-		Random:   drawRandomSet(),
-		Last:     last,
-	})
+	JSON{
+		Status: http.StatusOK,
+		Data: NumbersData{
+			MeanAvg:  resAvg,
+			ModeAvg:  m,
+			Ranges:   resRange,
+			Frequent: most,
+			Least:    least,
+			Random:   drawRandomSet(),
+			Last:     last,
+		},
+	}.write(w)
 
 }
 
@@ -203,40 +262,4 @@ func containsInt(a []int, t int) bool {
 
 	return false
 }
-
-func handlerListSets(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getSetList(params(r))
-	if err != nil {
-		w.WriteJSON(err)
-	} else {
-		w.WriteJSON(res)
-	}
-}
-
-func handlerListMachines(w traffic.ResponseWriter, r *traffic.Request) {
-	res, err := db.getMachineList(params(r))
-	if err != nil {
-		w.WriteJSON(err)
-	} else {
-		w.WriteJSON(res)
-	}
-}
-
-func handlerDataRange(w traffic.ResponseWriter, r *traffic.Request) {
-	f, l, err := db.getDataRange()
-	if err != nil {
-		log.Println("handlerDataRange:", err.Error())
-	}
-
-	w.WriteJSON(map[string]int64{"first": f.Unix(), "last": l.Unix()})
-}
-
-func params(r *traffic.Request) queryParams {
-	set, _ := strconv.Atoi(r.Param("set"))
-	return queryParams{
-		Start:   r.Param("start"),
-		End:     r.Param("end"),
-		Set:     set,
-		Machine: r.Param("machine"),
-	}
-}
+*/
