@@ -12,7 +12,13 @@
         </p>
       </div>
       <b-field>
+        <p class="control">
+          <button class="button is-static">FROM</button>
+        </p>
         <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
+        <p class="control">
+          <button class="button is-static">TO</button>
+        </p>
         <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
         <b-select v-model="params.set" expanded>
           <option disabled value="">Please select one</option>
