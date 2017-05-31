@@ -1,28 +1,30 @@
 <template>
   <div id="app" class="section">
+    <div class="heading">
+      <p class="title">
+        UK Lottery Data
+      </p>
+    </div>
     <div class="box">
-      <b-field grouped>
-        <b-field label="From">
-          <Datepicker v-model="params.start" v-on:selected="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
-        </b-field>
-        <b-field label="To">
-          <Datepicker v-model="params.end" v-on:selected="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
-        </b-field>
-        <b-field label="Set">
-          <b-select v-model="params.set" expanded>
-            <option value="0" selected>All</option>
-            <option v-for="s in sets" :value="s">{{ s }}</option>
-          </b-select>
-        </b-field>
-        <b-field label="Machine">
-          <b-select v-model="params.machine" expanded>
-            <option value="all" selected>All</option>
-            <option v-for="m in machines" :value="m">{{ m }}</option>
-          </b-select>
-        </b-field>
-        <b-field>
-          <button class="button" position="bottom" @click="runQuery">Submit</button>
-        </b-field>
+      <div class="heading">
+        <p class="subtitle">
+          Parameters
+        </p>
+      </div>
+      <b-field>
+        <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
+        <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
+        <b-select v-model="params.set" expanded>
+          <option value="0" selected>All Sets</option>
+          <option v-for="s in sets" :value="s">Set: {{ s }}</option>
+        </b-select>
+        <b-select v-model="params.machine" expanded>
+          <option value="all" selected>All Machines</option>
+          <option v-for="m in machines" :value="m">Machine: {{ m }}</option>
+        </b-select>
+        <p class="control">
+          <button class="button" @click="runQuery">Submit</button>
+        </p>
       </b-field>
     </div>
     <div class="box">
