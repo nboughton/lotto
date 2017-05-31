@@ -38,7 +38,7 @@ func init() {
 func main() {
 	r := mux.NewRouter()
 
-	//r.HandleFunc("/api/range", handlerDataRange).Methods("GET")
+	r.HandleFunc("/api/range", handlerDataRange).Methods("GET")
 	r.HandleFunc("/api/sets", handlerListSets).Methods("GET")
 	r.HandleFunc("/api/machines", handlerListMachines).Methods("GET")
 	r.HandleFunc("/api/query", handlerQuery).Methods("GET")

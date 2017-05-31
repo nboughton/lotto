@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	qGen "github.com/nboughton/go-sqgenlite"
 )
@@ -132,7 +131,6 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	return c
 }
 
-// Hangs for no apparent reason.
 func (db *AppDB) getLastDraw() ([]int, error) {
 	r, q := make([]int, balls), qGen.NewQuery().
 		Select("results", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
@@ -142,56 +140,6 @@ func (db *AppDB) getLastDraw() ([]int, error) {
 
 	if err := stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
 		return r, err
-	}
-
-	return r, nil
-}
-
-func (db *AppDB) getMachineSetCombinations(p queryParams) map[string]int {
-	r := make(map[string]int)
-
-	for row := range db.getResults(p) {
-		r[fmt.Sprintf("%s:%d", row.Machine, row.Set)]++
-	}
-
-	return r
-}
-
-func (db *AppDB) getResultsAverage(p queryParams) ([]int, error) {
-	r, q, fields := make([]int, balls), qGen.NewQuery(), []string{}
-	for i := 1; i <= 6; i++ {
-		fields = append(fields, fmt.Sprintf("SUM(num_%d)/COUNT(num_%d)", i, i))
-	}
-	q.Select("results", append(fields, "SUM(bonus)/COUNT(bonus)")...)
-
-	applyFilters(q, p)
-	stmt, _ := db.Prepare(q.SQL)
-	if err := stmt.QueryRow(q.Args...).Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-		return r, err
-	}
-
-	return r, nil
-}
-
-func (db *AppDB) getResultsAverageRanges(p queryParams) ([]string, error) {
-	r, q, fields := []string{}, qGen.NewQuery(), []string{}
-	for i := 1; i <= 6; i++ {
-		fields = append(fields, fmt.Sprintf("MIN(num_%d)", i), fmt.Sprintf("MAX(num_%d)", i))
-	}
-	q.Select("results", append(fields, "MIN(bonus)", "MAX(bonus)")...)
-
-	applyFilters(q, p)
-	stmt, _ := db.Prepare(q.SQL)
-
-	rI := make([]int, 14)
-	if err := stmt.QueryRow(q.Args...).Scan(&rI[0], &rI[1], &rI[2], &rI[3], &rI[4], &rI[5], &rI[6], &rI[7], &rI[8], &rI[9], &rI[10], &rI[11], &rI[12], &rI[13]); err != nil {
-		return r, err
-	}
-
-	for i := 1; i < len(rI); i++ {
-		if i%2 != 0 {
-			r = append(r, fmt.Sprintf("%d-%d", rI[i-1], rI[i]))
-		}
 	}
 
 	return r, nil

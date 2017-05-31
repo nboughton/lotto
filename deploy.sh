@@ -9,7 +9,7 @@ ssh server "/var/www/utils/stop lotto.nboughton.uk"
 
 # Rsync to live
 echo "Syncing new release to server"
-rsync -aWv --delete --exclude-from=exclude.rsync . server:/var/www/sites/lotto.nboughton.uk
+rsync -aWvL --delete --exclude-from=exclude.rsync . server:/var/www/sites/lotto.nboughton.uk
 
 # Start service
 echo "Restarting service"
