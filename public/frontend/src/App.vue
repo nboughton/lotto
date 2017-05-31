@@ -15,11 +15,13 @@
         <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
         <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
         <b-select v-model="params.set" expanded>
-          <option value="all" selected>All Sets</option>
+          <option disabled value="">Please select one</option>
+          <option value="0">All Sets</option>
           <option v-for="s in sets" :value="s">Set: {{ s }}</option>
         </b-select>
         <b-select v-model="params.machine" expanded>
-          <option value="all" selected>All Machines</option>
+          <option disabled value="">Please select one</option>
+          <option value="all">All Machines</option>
           <option v-for="m in machines" :value="m">Machine: {{ m }}</option>
         </b-select>
         <p class="control">
@@ -118,7 +120,7 @@ export default {
         start: new Date(2015, 9, 10),
         end: new Date(),
         machine: "all",
-        set: 0
+        set: "0"
       },
       flags: {
         dates: {
