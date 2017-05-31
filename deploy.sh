@@ -1,16 +1,25 @@
 #!/bin/bash
-# Rebuild code
-echo "Re-compiling code"
+srcdir=$(readlink -f $(dirname 0))
+utildir="/var/www/utils"
+user="nboughton"
+host="server"
+site="lotto.nboughton.uk"
+
+## Rebuild existing code
+echo"Rebuilding all code"
+cd $srcdir
 go build -o site.app
+cd $srcdir/public/vue-webpack
+npm run build
 
-# Stop currently running service
-echo "Stopping service"
-ssh server "/var/www/utils/stop lotto.nboughton.uk"
+## Stop service
+echo"Stopping Service"
+ssh ${host} "$utildir/stop $site"
 
-# Rsync to live
-echo "Syncing new release to server"
-rsync -aWvL --delete --exclude-from=exclude.rsync . server:/var/www/sites/lotto.nboughton.uk
+## Upload new code
+echo"Rsyncing"
+rsync -aWvL --delete --exclude-from=${srcdir}/exclude.rsync ${srcdir}/ ${host}:/var/www/sites/${site}
 
-# Start service
-echo "Restarting service"
-ssh server "/var/www/utils/start lotto.nboughton.uk"
+## Start service
+echo"Restarting service"
+ssh ${host} "$utildir/start $site"
