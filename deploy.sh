@@ -1,7 +1,6 @@
 #!/bin/bash
 srcdir=$(readlink -f $(dirname 0))
 utildir="/var/www/utils"
-user="nboughton"
 host="server"
 site="lotto.nboughton.uk"
 
