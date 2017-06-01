@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-var (
+var ( // Whilst I don't use these here they're a useful reference.
 	colors = []string{
 		"rgba(31,119,180,1)",
 		"rgba(255,127,14,1)",
@@ -36,6 +36,8 @@ type graphData struct {
 	Datasets []graphDataset `json:"datasets"`
 }
 
+var formatTSLabel = "06/01/02"
+
 func graphTimeSeries(records <-chan dbRow) graphData {
 	var d graphData
 	d.Datasets = make([]graphDataset, balls)
@@ -49,7 +51,7 @@ func graphTimeSeries(records <-chan dbRow) graphData {
 
 			d.Datasets[ball].Data = append(d.Datasets[ball].Data, strconv.Itoa(row.Num[ball]))
 		}
-		d.Labels = append(d.Labels, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatYYYYMMDD), row.Machine, row.Set))
+		d.Labels = append(d.Labels, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 	}
 
 	return d
