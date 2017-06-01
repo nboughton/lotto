@@ -5,12 +5,7 @@
         UK Lottery Data
       </p>
     </div>
-    <div class="box">
-      <div class="heading">
-        <p class="subtitle">
-          Parameters
-        </p>
-      </div>
+    <div class="container">
       <b-field>
         <p class="control">
           <button class="button is-static">FROM</button>
@@ -38,14 +33,6 @@
           <button class="button" @click="runQuery">Submit</button>
         </p>
       </b-field>
-    </div>
-
-    <div class="box">
-      <div class="heading">
-        <p class="subtitle">
-          Data
-        </p>
-      </div>
       <b-table :data="tables.main.data" :bordered="tables.main.cfg.isBordered" :striped="tables.main.cfg.isStriped" :narrowed="tables.main.cfg.isNarrowed"
         :checkable="tables.main.cfg.isCheckable" :paginated="tables.main.cfg.isPaginated">
         <template scope="props">
@@ -82,16 +69,12 @@
           </b-table-column>
         </template>
       </b-table>
-    </div>
 
-    <div class="box">
       <div class="heading">
         <p class="subtitle">Frequency Distribution</p>
       </div>
       <BarChart :chart-data="charts.freqDist.data" :options="charts.freqDist.options" :height="200"></BarChart>
-    </div>
 
-    <div class="box">
       <div class="heading">
         <p class="subtitle">Results Over Time</p>
       </div>
