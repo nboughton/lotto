@@ -47,7 +47,7 @@ func createMainTableData(p queryParams) []TableRow {
 
 	return []TableRow{
 		TableRow{
-			Label: "Last Draw",
+			Label: "Most Recent",
 			Num:   last,
 		},
 		TableRow{
