@@ -15,11 +15,15 @@
         <p class="control">
           <button class="button is-static">FROM</button>
         </p>
-        <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
+        <p class="control">
+          <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
+        </p>
         <p class="control">
           <button class="button is-static">TO</button>
         </p>
-        <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input"></Datepicker>
+        <p class="control">
+          <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
+        </p>
         <b-select v-model="params.set" expanded>
           <option disabled value="">Please select one</option>
           <option value="0">All Sets</option>
@@ -256,8 +260,8 @@
 </script>
 
 <style lang="scss">
-  @import "~bulmaswatch/yeti/_variables.scss";
+  @import "~bulmaswatch/sandstone/_variables.scss";
   @import "~bulma";
   @import "~buefy/src/scss/buefy";
-  @import "~bulmaswatch/yeti/_overrides.scss";
+  @import "~bulmaswatch/sandstone/_overrides.scss";
 </style>
