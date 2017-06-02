@@ -36,7 +36,7 @@ func params(r *http.Request) queryParams {
 
 func createMainTableData(p queryParams) []TableRow {
 	var (
-		sBalls, sBonus, byPosition                                 = getSortedResultsByFreq(p)
+		sBalls, sBonus, byPosition                = getSortedResultsByFreq(p)
 		mostOverall, leastOverall, mostByPosition = getMostAndleast(sBalls, sBonus, byPosition)
 	)
 
@@ -46,26 +46,11 @@ func createMainTableData(p queryParams) []TableRow {
 	}
 
 	return []TableRow{
-		TableRow{
-			Label: "Most Recent",
-			Num:   last,
-		},
-		TableRow{
-			Label: "Most Frequent (overall)",
-			Num:   mostOverall,
-		},
-		TableRow{
-			Label: "Most Frequent (position)",
-			Num:   mostByPosition,
-		},
-		TableRow{
-			Label: "Least Frequent (overall)",
-			Num:   leastOverall,
-		},
-		TableRow{
-			Label: "Random Set",
-			Num:   drawRandomSet(),
-		},
+		TableRow{Label: "Most Recent", Num: last},
+		TableRow{Label: "Most Frequent (overall)", Num: mostOverall},
+		TableRow{Label: "Most Frequent (position)", Num: mostByPosition},
+		TableRow{Label: "Least Frequent (overall)", Num: leastOverall},
+		TableRow{Label: "Random Set", Num: drawRandomSet()},
 	}
 }
 
