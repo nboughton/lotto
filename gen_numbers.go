@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+func init() {
+	// Set rand seed
+	rand.Seed(time.Now().UnixNano())
+}
+
 func drawRandomSet() []int {
 	var (
 		pool    []int
@@ -31,7 +36,6 @@ func drawRandomSet() []int {
 }
 
 func drawBall(p, r []int) ([]int, []int) {
-	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(len(p))
 	// Append the new result
 	r = append(r, p[n])
