@@ -2,19 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-)
-
-var ( // Whilst I don't use these here they're a useful reference.
-	colors = []string{
-		"rgba(31,119,180,1)",
-		"rgba(255,127,14,1)",
-		"rgba(44,160,44,1)",
-		"rgba(214,39,40,1)",
-		"rgba(148,103,189,1)",
-		"rgba(140,86,75,1)",
-		"rgba(227,119,194,1)",
-	}
 )
 
 const (
@@ -26,9 +13,9 @@ const (
 )
 
 type graphDataset struct {
-	Label string   `json:"label"`
-	Type  string   `json:"type"`
-	Data  []string `json:"data"`
+	Label string    `json:"label"`
+	Type  string    `json:"type"`
+	Data  []float64 `json:"data"`
 }
 
 type graphData struct {
@@ -49,7 +36,7 @@ func graphTimeSeries(records <-chan dbRow) graphData {
 				d.Datasets[ball].Type = graphTypeLine
 			}
 
-			d.Datasets[ball].Data = append(d.Datasets[ball].Data, strconv.Itoa(row.Num[ball]))
+			d.Datasets[ball].Data = append(d.Datasets[ball].Data, float64(row.Num[ball]))
 		}
 		d.Labels = append(d.Labels, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 	}
@@ -70,11 +57,10 @@ func graphFreqDist(records <-chan dbRow) graphData {
 			if d.Datasets[ball].Label == "" { // Set Label and create Data
 				d.Datasets[ball].Label = label(ball)
 				d.Datasets[ball].Type = graphTypeBar
-				d.Datasets[ball].Data = make([]string, maxBallNum)
+				d.Datasets[ball].Data = make([]float64, maxBallNum)
 			}
 
-			n, _ := strconv.Atoi(d.Datasets[ball].Data[row.Num[ball]-1])
-			d.Datasets[ball].Data[row.Num[ball]-1] = strconv.Itoa(n + 1)
+			d.Datasets[ball].Data[row.Num[ball]-1]++
 		}
 	}
 
