@@ -191,8 +191,7 @@
     },
 
     mounted() {
-      this.getSets()
-      this.getMachines()
+      this.adjustFieldData()
       this.runQuery()
     },
 
