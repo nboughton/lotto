@@ -67,6 +67,20 @@ func graphFreqDist(records <-chan dbRow) graphData {
 	return d
 }
 
+func graphMachineSetDist(records <-chan dbRow) graphData {
+	var (
+		d graphData
+		m = make(map[string]int)
+	)
+
+	for row := range records {
+		v := fmt.Sprintf("%s:%d", row.Machine, row.Set)
+		m[v]++
+	}
+
+	return d
+}
+
 func label(ball int) string {
 	if ball < 6 {
 		return fmt.Sprintf("Ball %d", ball+1)

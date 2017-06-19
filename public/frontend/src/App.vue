@@ -1,84 +1,92 @@
 <template>
   <div id="app" class="section">
     <div class="container">
-      <div class="heading">
-        <p class="title">
-          UK Lottery Data
-        </p>
+      <div class="block">
+        <div class="heading">
+          <p class="title">
+            UK Lottery Data
+          </p>
+        </div>
+        <b-field>
+          <p class="control">
+            <button class="button is-static">FROM</button>
+          </p>
+          <p class="control">
+            <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
+          </p>
+          <p class="control">
+            <button class="button is-static">TO</button>
+          </p>
+          <p class="control">
+            <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
+          </p>
+          <b-select v-model="params.set" expanded>
+            <option disabled value="">Please select one</option>
+            <option value="0">All Sets</option>
+            <option v-for="s in sets" :value="s">Set: {{ s }}</option>
+          </b-select>
+          <b-select v-model="params.machine" expanded>
+            <option disabled value="">Please select one</option>
+            <option value="all">All Machines</option>
+            <option v-for="m in machines" :value="m">Machine: {{ m }}</option>
+          </b-select>
+          <p class="control">
+            <button class="button" @click="runQuery">Submit</button>
+          </p>
+        </b-field>
       </div>
-      <b-field>
-        <p class="control">
-          <button class="button is-static">FROM</button>
-        </p>
-        <p class="control">
-          <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
-        </p>
-        <p class="control">
-          <button class="button is-static">TO</button>
-        </p>
-        <p class="control">
-          <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
-        </p>
-        <b-select v-model="params.set" expanded>
-          <option disabled value="">Please select one</option>
-          <option value="0">All Sets</option>
-          <option v-for="s in sets" :value="s">Set: {{ s }}</option>
-        </b-select>
-        <b-select v-model="params.machine" expanded>
-          <option disabled value="">Please select one</option>
-          <option value="all">All Machines</option>
-          <option v-for="m in machines" :value="m">Machine: {{ m }}</option>
-        </b-select>
-        <p class="control">
-          <button class="button" @click="runQuery">Submit</button>
-        </p>
-      </b-field>
-      <b-table :data="tables.main.data" :bordered="tables.main.cfg.isBordered" :striped="tables.main.cfg.isStriped" :narrowed="tables.main.cfg.isNarrowed"
-        :checkable="tables.main.cfg.isCheckable" :paginated="tables.main.cfg.isPaginated">
-        <template scope="props">
-          <b-table-column label="">
-            {{ props.row.label}}
-          </b-table-column>
+      <div class="block">
+        <b-table :data="tables.main.data" :bordered="tables.main.cfg.isBordered" :striped="tables.main.cfg.isStriped" :narrowed="tables.main.cfg.isNarrowed"
+          :checkable="tables.main.cfg.isCheckable" :paginated="tables.main.cfg.isPaginated">
+          <template scope="props">
+            <b-table-column label="">
+              {{ props.row.label}}
+            </b-table-column>
 
-          <b-table-column label="Ball 1">
-            {{ props.row.num[0] }}
-          </b-table-column>
+            <b-table-column label="Ball 1">
+              {{ props.row.num[0] }}
+            </b-table-column>
 
-          <b-table-column label="Ball 2">
-            {{ props.row.num[1] }}
-          </b-table-column>
+            <b-table-column label="Ball 2">
+              {{ props.row.num[1] }}
+            </b-table-column>
 
-          <b-table-column label="Ball 3">
-            {{ props.row.num[2] }}
-          </b-table-column>
+            <b-table-column label="Ball 3">
+              {{ props.row.num[2] }}
+            </b-table-column>
 
-          <b-table-column label="Ball 4">
-            {{ props.row.num[3] }}
-          </b-table-column>
+            <b-table-column label="Ball 4">
+              {{ props.row.num[3] }}
+            </b-table-column>
 
-          <b-table-column label="Ball 5">
-            {{ props.row.num[4] }}
-          </b-table-column>
+            <b-table-column label="Ball 5">
+              {{ props.row.num[4] }}
+            </b-table-column>
 
-          <b-table-column label="Ball 6">
-            {{ props.row.num[5] }}
-          </b-table-column>
+            <b-table-column label="Ball 6">
+              {{ props.row.num[5] }}
+            </b-table-column>
 
-          <b-table-column label="Bonus">
-            {{ props.row.num[6] }}
-          </b-table-column>
-        </template>
-      </b-table>
-
-      <div class="heading">
-        <p class="subtitle">Frequency Distribution</p>
+            <b-table-column label="Bonus">
+              {{ props.row.num[6] }}
+            </b-table-column>
+          </template>
+        </b-table>
       </div>
-      <BarChart :chart-data="charts.freqDist.data" :options="charts.freqDist.options" :height="200"></BarChart>
 
-      <div class="heading">
-        <p class="subtitle">Results Over Time</p>
+      <div class="block">
+        <div class="heading">
+          <p class="subtitle">Frequency Distribution</p>
+        </div>
+        <BarChart :chart-data="charts.freqDist.data" :options="charts.freqDist.options" :height="200"></BarChart>
       </div>
-      <LineChart :chart-data="charts.timeSeries.data" :options="charts.timeSeries.options" :height="200"></LineChart>
+
+      <div class="block">
+        <div class="heading">
+          <p class="subtitle">Results Over Time</p>
+        </div>
+        <LineChart :chart-data="charts.timeSeries.data" :options="charts.timeSeries.options" :height="200"></LineChart>
+      </div>
     </div>
 
     <footer class="footer">
