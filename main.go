@@ -38,9 +38,9 @@ func init() {
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("api/sets", handlerListSets).Methods("GET")
-	r.HandleFunc("api/machines", handlerListMachines).Methods("GET")
-	r.HandleFunc("api/query", handlerQuery).Methods("GET")
+	r.HandleFunc("/api/sets", handlerListSets).Methods("GET")
+	r.HandleFunc("/api/machines", handlerListMachines).Methods("GET")
+	r.HandleFunc("/api/query", handlerQuery).Methods("GET")
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), r))
