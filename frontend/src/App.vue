@@ -87,8 +87,7 @@
         <LineChart :chart-data="charts.timeSeries.data" :options="charts.timeSeries.options" :height="200"></LineChart>
       </div>
     </div>
-    <div class="content has-text-centered">
-      <p>&copy; N.Boughton, 2017</p>
+    <div class="content">
       <p>
         <a href="https://github.com/nboughton/lotto">source code</a>
       </p>
