@@ -9,29 +9,29 @@
         </div>
         <b-field>
           <p class="control">
-            <button class="button is-static">FROM</button>
+            <button class="button is-static is-small">FROM</button>
           </p>
           <p class="control">
-            <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
+            <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons is-small"></Datepicker>
           </p>
           <p class="control">
             <button class="button is-static">TO</button>
           </p>
           <p class="control">
-            <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons"></Datepicker>
+            <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons is-small"></Datepicker>
           </p>
-          <b-select v-model="params.set" expanded>
+          <b-select v-model="params.set" expanded size="is-small">
             <option disabled value="">Please select one</option>
             <option value="0">All Sets</option>
             <option v-for="s in sets" :value="s" :key="s">Set: {{ s }}</option>
           </b-select>
-          <b-select v-model="params.machine" expanded>
+          <b-select v-model="params.machine" expanded size="is-small">
             <option disabled value="">Please select one</option>
             <option value="all">All Machines</option>
             <option v-for="m in machines" :value="m" :key="m">Machine: {{ m }}</option>
           </b-select>
           <p class="control">
-            <button class="button" @click="runQuery">Submit</button>
+            <button class="button is-small" @click="runQuery">Submit</button>
           </p>
         </b-field>
       </div>
@@ -117,6 +117,8 @@ var colors = [
   "rgba(227,119,194,1)",
 ]
 
+var reqPrefix = "/api/lotto/" // set to "/" if running app standalone
+
 export default {
   name: 'app',
 
@@ -199,7 +201,7 @@ export default {
 
   methods: {
     runQuery() {
-      this.$http.get("api/query", { params: this.query }).then(resp => { return resp.json() }).then(d => {
+      this.$http.get(reqPrefix + "query", { params: this.query }).then(resp => { return resp.json() }).then(d => {
         for (var ball = 0; ball < d.data.timeSeries.datasets.length; ball++) {
           // Line chart
           d.data["timeSeries"].datasets[ball].backgroundColor = colors[ball]
@@ -221,12 +223,12 @@ export default {
       })
     },
     getSets() {
-      this.$http.get("api/sets", { params: this.query }).then(resp => { return resp.json() }).then(sets => {
+      this.$http.get(reqPrefix + "sets", { params: this.query }).then(resp => { return resp.json() }).then(sets => {
         this.sets = sets.data
       })
     },
     getMachines() {
-      this.$http.get("api/machines", { params: this.query }).then(resp => { return resp.json() }).then(machines => {
+      this.$http.get(reqPrefix + "machines", { params: this.query }).then(resp => { return resp.json() }).then(machines => {
         this.machines = machines.data
       })
     },
@@ -246,8 +248,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import "~bulmaswatch/sandstone/_variables.scss";
+@import "~bulmaswatch/lux/_variables.scss";
 @import "~bulma";
 @import "~buefy/src/scss/buefy";
-@import "~bulmaswatch/sandstone/_overrides.scss";
+@import "~bulmaswatch/lux/_overrides.scss";
 </style>
