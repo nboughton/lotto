@@ -15,7 +15,7 @@
             <Datepicker v-model="params.start" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons is-small"></Datepicker>
           </p>
           <p class="control">
-            <button class="button is-static">TO</button>
+            <button class="button is-static is-small">TO</button>
           </p>
           <p class="control">
             <Datepicker v-model="params.end" v-on:input="adjustFieldData" :disabled="flags.dates" input-class="input has-addons is-small"></Datepicker>
