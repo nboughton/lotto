@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+
+	jweb "github.com/nboughton/go-utils/json/web"
 )
 
 // PageData is used by the index template to populate things and stuff
@@ -21,31 +23,30 @@ type TableRow struct {
 func handlerQuery(w http.ResponseWriter, r *http.Request) {
 	p := params(r)
 
-	JSON{
-		Status: http.StatusOK,
-		Data: PageData{
+	jweb.New(http.StatusOK,
+		PageData{
 			MainTable:  createMainTableData(p),
 			TimeSeries: graphTimeSeries(db.getResults(p)),
 			FreqDist:   graphFreqDist(db.getResults(p)),
 		},
-	}.write(w)
+	).Write(w)
 }
 
 func handlerListSets(w http.ResponseWriter, r *http.Request) {
 	res, err := db.getSetList(params(r))
 	if err != nil {
-		JSON{Status: http.StatusInternalServerError, Data: err}.write(w)
+		jweb.New(http.StatusInternalServerError, err).Write(w)
 	} else {
-		JSON{Status: http.StatusOK, Data: res}.write(w)
+		jweb.New(http.StatusOK, res).Write(w)
 	}
 }
 
 func handlerListMachines(w http.ResponseWriter, r *http.Request) {
 	res, err := db.getMachineList(params(r))
 	if err != nil {
-		JSON{Status: http.StatusInternalServerError, Data: err}.write(w)
+		jweb.New(http.StatusInternalServerError, err).Write(w)
 	} else {
-		JSON{Status: http.StatusOK, Data: res}.write(w)
+		jweb.New(http.StatusOK, res).Write(w)
 	}
 }
 
@@ -55,5 +56,5 @@ func handlerDataRange(w http.ResponseWriter, r *http.Request) {
 		log.Println("handlerDataRange:", err.Error())
 	}
 
-	JSON{Status: http.StatusOK, Data: map[string]int64{"first": f.Unix(), "last": l.Unix()}}.write(w)
+	jweb.New(http.StatusOK, map[string]int64{"first": f.Unix(), "last": l.Unix()}).Write(w)
 }
