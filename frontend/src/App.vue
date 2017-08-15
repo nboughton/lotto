@@ -117,8 +117,6 @@ var colors = [
   "rgba(227,119,194,1)",
 ]
 
-var reqPrefix = "/api/lotto/" // set to "/" if running app standalone
-
 export default {
   name: 'app',
 
@@ -201,7 +199,7 @@ export default {
 
   methods: {
     runQuery() {
-      this.$http.get(reqPrefix + "query", { params: this.query }).then(resp => { return resp.json() }).then(d => {
+      this.$http.get("query", { params: this.query }).then(resp => { return resp.json() }).then(d => {
         for (var ball = 0; ball < d.data.timeSeries.datasets.length; ball++) {
           // Line chart
           d.data["timeSeries"].datasets[ball].backgroundColor = colors[ball]
@@ -223,12 +221,12 @@ export default {
       })
     },
     getSets() {
-      this.$http.get(reqPrefix + "sets", { params: this.query }).then(resp => { return resp.json() }).then(sets => {
+      this.$http.get("sets", { params: this.query }).then(resp => { return resp.json() }).then(sets => {
         this.sets = sets.data
       })
     },
     getMachines() {
-      this.$http.get(reqPrefix + "machines", { params: this.query }).then(resp => { return resp.json() }).then(machines => {
+      this.$http.get("machines", { params: this.query }).then(resp => { return resp.json() }).then(machines => {
         this.machines = machines.data
       })
     },
