@@ -138,11 +138,9 @@ func (db *AppDB) getLastDraw() ([]int, error) {
 		Append("DESC LIMIT 1")
 	stmt, _ := db.Prepare(q.SQL)
 
-	if err := stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6]); err != nil {
-		return r, err
-	}
+	err := stmt.QueryRow().Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6])
 
-	return r, nil
+	return r, err
 }
 
 func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
@@ -189,11 +187,8 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 
 func (db *AppDB) getRowCount() (int, error) {
 	var c int
-	if err := db.QueryRow(qGen.NewQuery().Select("results", "COUNT(*)").SQL).Scan(&c); err != nil {
-		return c, err
-	}
-
-	return c, nil
+	err := db.QueryRow(qGen.NewQuery().Select("results", "COUNT(*)").SQL).Scan(&c)
+	return c, err
 }
 
 func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
