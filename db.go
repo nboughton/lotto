@@ -185,9 +185,8 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	return r, nil
 }
 
-func (db *AppDB) getRowCount() (int, error) {
-	var c int
-	err := db.QueryRow(qGen.NewQuery().Select("results", "COUNT(*)").SQL).Scan(&c)
+func (db *AppDB) getRowCount() (c int, err error) {
+	err = db.QueryRow(qGen.NewQuery().Select("results", "COUNT(*)").SQL).Scan(&c)
 	return c, err
 }
 
