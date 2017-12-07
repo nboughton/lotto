@@ -14,17 +14,11 @@ import (
 	"github.com/nboughton/lotto/handler"
 )
 
-type config struct {
-	Port int
-	Log  bool
-}
-
 func main() {
 	p := flag.Int("p", 3002, "Set the port the application listens on")
 	l := flag.Bool("l", true, "Log requests to STDOUT")
 	flag.Parse()
 
-	c := config{*p, *l}
 	e := &handler.Env{DB: db.Connect("./results.db")}
 
 	// Update at 21:30 every night
@@ -43,17 +37,17 @@ func main() {
 	r.Handle("/query", handler.Query(e)).Methods("GET")
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 
-	if c.Log {
+	if *l {
 		log.Fatal(
 			http.ListenAndServe(
-				fmt.Sprintf(":%d", c.Port),
+				fmt.Sprintf(":%d", *p),
 				handlers.LoggingHandler(os.Stdout, r),
 			),
 		)
 	} else {
 		log.Fatal(
 			http.ListenAndServe(
-				fmt.Sprintf(":%d", c.Port),
+				fmt.Sprintf(":%d", *p),
 				r,
 			),
 		)
