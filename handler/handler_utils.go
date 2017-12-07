@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"log"
@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/nboughton/lotto/db"
 )
 
 type numFreq struct {
@@ -19,14 +21,14 @@ func (b sortByFreq) Len() int           { return len(b) }
 func (b sortByFreq) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b sortByFreq) Less(i, j int) bool { return b[i].freq < b[j].freq }
 
-func params(r *http.Request) queryParams {
+func params(r *http.Request) db.QueryParams {
 	var (
 		p        = r.URL.Query()
 		set, _   = strconv.Atoi(p["set"][0])
 		start, _ = time.Parse(time.RFC3339, p["start"][0])
 		end, _   = time.Parse(time.RFC3339, p["end"][0])
 	)
-	return queryParams{
+	return db.QueryParams{
 		Start:   start,
 		End:     end,
 		Set:     set,
@@ -34,13 +36,13 @@ func params(r *http.Request) queryParams {
 	}
 }
 
-func createMainTableData(p queryParams) []TableRow {
+func createMainTableData(e *Env, p db.QueryParams) []TableRow {
 	var (
-		sBalls, sBonus, byPosition                = getSortedResultsByFreq(p)
+		sBalls, sBonus, byPosition                = getSortedResultsByFreq(e, p)
 		mostOverall, leastOverall, mostByPosition = getMostAndleast(sBalls, sBonus, byPosition)
 	)
 
-	last, err := db.getLastDraw()
+	last, err := e.DB.LastDraw()
 	if err != nil {
 		log.Println(err)
 	}
@@ -74,19 +76,19 @@ func getMostAndleast(sBalls, sBonus sortByFreq, byPosition []sortByFreq) (mostOv
 
 	// Add the bonus ball for mostOverall/leastOverall frequent, don't duplicate numbers
 	for i, j := len(sBonus)-1, 0; i > j; i, j = i-1, j+1 {
-		if sBonus[i].num != 0 && len(mostOverall) < balls && !containsInt(mostOverall, sBonus[i].num) {
+		if sBonus[i].num != 0 && len(mostOverall) < db.BALLS && !containsInt(mostOverall, sBonus[i].num) {
 			mostOverall = append(mostOverall, sBonus[i].num)
 		}
-		if sBonus[j].num != 0 && len(leastOverall) < balls && !containsInt(leastOverall, sBonus[j].num) {
+		if sBonus[j].num != 0 && len(leastOverall) < db.BALLS && !containsInt(leastOverall, sBonus[j].num) {
 			leastOverall = append(leastOverall, sBonus[j].num)
 		}
-		if len(mostOverall) == balls && len(leastOverall) == balls {
+		if len(mostOverall) == db.BALLS && len(leastOverall) == db.BALLS {
 			break
 		}
 	}
 
 	// get most and least byPosition set
-	mostByPosition = make([]int, balls)
+	mostByPosition = make([]int, db.BALLS)
 
 	for i := range byPosition {
 		mostByPosition[i] = byPosition[i][0].num
@@ -98,20 +100,20 @@ func getMostAndleast(sBalls, sBonus sortByFreq, byPosition []sortByFreq) (mostOv
 }
 
 // Returns sorted ball results for query p by frequency as well as collated numbers for mode checking
-func getSortedResultsByFreq(p queryParams) (sortByFreq, sortByFreq, []sortByFreq) {
+func getSortedResultsByFreq(e *Env, p db.QueryParams) (sortByFreq, sortByFreq, []sortByFreq) {
 	var (
-		sBalls     = make(sortByFreq, maxBallNum+1)
-		sBonus     = make(sortByFreq, maxBallNum+1)
-		byPosition = make([]sortByFreq, balls)
+		sBalls     = make(sortByFreq, db.MAXBALLNUM+1)
+		sBonus     = make(sortByFreq, db.MAXBALLNUM+1)
+		byPosition = make([]sortByFreq, db.BALLS)
 	)
 
 	// Set up byPosition arrays of numbers
 	for i := range byPosition {
-		byPosition[i] = make(sortByFreq, maxBallNum+1)
+		byPosition[i] = make(sortByFreq, db.MAXBALLNUM+1)
 	}
 
-	for row := range db.getResults(p) {
-		for ball := 0; ball < balls; ball++ {
+	for row := range e.DB.Results(p) {
+		for ball := 0; ball < db.BALLS; ball++ {
 			n := row.Num[ball]
 			if ball < 6 {
 				// Collate total frequncies for first 6

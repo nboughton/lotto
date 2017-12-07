@@ -1,11 +1,11 @@
-package main
+package db
 
 import (
 	"database/sql"
 	"log"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Import for sqlite db driver
 	qGen "github.com/nboughton/go-sqgenlite"
 )
 
@@ -28,25 +28,35 @@ var (
 	formatYYYYMMDD = "2006-01-02"
 )
 
+// Exported constants
+const (
+	MAXBALLNUM = 59
+	BALLS      = 7
+)
+
 // AppDB is a wrapper for *sql.DB so I can extend it by adding my own methods
 type AppDB struct {
 	*sql.DB
 }
 
-type dbRow struct {
+// Record wraps a single record from the database
+type Record struct {
 	Date    time.Time `json:"date"`
 	Machine string    `json:"machine"`
 	Set     int       `json:"set"`
 	Num     []int     `json:"num"`
 }
 
-type queryParams struct {
+// QueryParams wrap the parameters used to make a query. Should probably consider removing this
+// as singletons are an anti-pattern
+type QueryParams struct {
 	Type, Machine string
 	Set, Query    int
 	Start, End    time.Time
 }
 
-func connectDB(path string) *AppDB {
+// Connect returns a DB connection wrapper
+func Connect(path string) *AppDB {
 	// Connect to the database
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
@@ -71,16 +81,16 @@ func connectDB(path string) *AppDB {
 
 	// Check if I have any data yet, otherwise populate the db
 	log.Println("Checking database")
-	if rows, _ := aDB.getRowCount(); rows == 0 {
+	if rows, _ := aDB.RowCount(); rows == 0 {
 		log.Println("No data, scraping site")
-		if err := aDB.populateDB(); err != nil {
+		if err := aDB.Populate(); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
 
 	// run update
 	log.Println("Updating database")
-	if err := aDB.updateDB(); err != nil {
+	if err := aDB.Update(); err != nil {
 		log.Fatal(err.Error())
 	}
 
@@ -89,7 +99,7 @@ func connectDB(path string) *AppDB {
 
 // Apply filters for queries, always run this before executing a query as it edits the
 // query in place by pointer
-func applyFilters(q *qGen.Query, p queryParams) {
+func applyFilters(q *qGen.Query, p QueryParams) {
 	q.Where("date BETWEEN DATE(?) AND DATE(?, '+1 day')", p.Start, p.End) // I always constrain results by date
 
 	if p.Machine != "all" && p.Set != 0 {
@@ -101,8 +111,9 @@ func applyFilters(q *qGen.Query, p queryParams) {
 	}
 }
 
-func (db *AppDB) getResults(p queryParams) <-chan dbRow {
-	c := make(chan dbRow)
+// Results retrieves all records matching parameters in p
+func (db *AppDB) Results(p QueryParams) <-chan Record {
+	c := make(chan Record)
 
 	go func() {
 		q := qGen.NewQuery().Select("results", "date", "ball_machine", "ball_set", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus")
@@ -116,8 +127,8 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 		defer rows.Close()
 
 		for rows.Next() {
-			var r dbRow
-			r.Num = make([]int, balls)
+			var r Record
+			r.Num = make([]int, BALLS)
 			if err := rows.Scan(&r.Date, &r.Machine, &r.Set, &r.Num[0], &r.Num[1], &r.Num[2], &r.Num[3], &r.Num[4], &r.Num[5], &r.Num[6]); err != nil {
 				log.Println(err.Error())
 			}
@@ -131,8 +142,9 @@ func (db *AppDB) getResults(p queryParams) <-chan dbRow {
 	return c
 }
 
-func (db *AppDB) getLastDraw() ([]int, error) {
-	r, q := make([]int, balls), qGen.NewQuery().
+// LastDraw retrieves the most recent set of results
+func (db *AppDB) LastDraw() ([]int, error) {
+	r, q := make([]int, BALLS), qGen.NewQuery().
 		Select("results", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "bonus").
 		Order("DATE(date)").
 		Append("DESC LIMIT 1")
@@ -143,10 +155,11 @@ func (db *AppDB) getLastDraw() ([]int, error) {
 	return r, err
 }
 
-func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
+// Machines retrieves the available machines for the query parameters, constrained by date
+func (db *AppDB) Machines(p QueryParams) ([]string, error) {
 	r, q := []string{}, qGen.NewQuery().Select("results", "DISTINCT(ball_machine)")
 
-	p.Machine = "all" // Ensure queryParams are right for this
+	p.Machine = "all" // Ensure QueryParams are right for this
 	applyFilters(q, p)
 	stmt, _ := db.Prepare(q.Order("ball_machine").SQL)
 	rows, err := stmt.Query(q.Args...)
@@ -164,10 +177,11 @@ func (db *AppDB) getMachineList(p queryParams) ([]string, error) {
 	return r, nil
 }
 
-func (db *AppDB) getSetList(p queryParams) ([]int, error) {
+// Sets retrieves the available ball sets for the query parameters, constrained by date
+func (db *AppDB) Sets(p QueryParams) ([]int, error) {
 	r, q := []int{}, qGen.NewQuery().Select("results", "DISTINCT(ball_set)")
 
-	p.Set = 0 // Ensure queryParams are right for this
+	p.Set = 0 // Ensure QueryParams are right for this
 	applyFilters(q, p)
 	stmt, _ := db.Prepare(q.Order("ball_set").SQL)
 	rows, err := stmt.Query(q.Args...)
@@ -185,12 +199,14 @@ func (db *AppDB) getSetList(p queryParams) ([]int, error) {
 	return r, nil
 }
 
-func (db *AppDB) getRowCount() (c int, err error) {
+// RowCount retrieves a count(*) of all rows in the db
+func (db *AppDB) RowCount() (c int, err error) {
 	err = db.QueryRow(qGen.NewQuery().Select("results", "COUNT(*)").SQL).Scan(&c)
 	return c, err
 }
 
-func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
+// DataRange retrieves the first and last record dates
+func (db *AppDB) DataRange() (time.Time, time.Time, error) {
 	var first, last string
 	q := qGen.NewQuery().Select("results", "MIN(date)", "MAX(date)")
 	stmt, _ := db.Prepare(q.SQL)
@@ -204,7 +220,8 @@ func (db *AppDB) getDataRange() (time.Time, time.Time, error) {
 	return f, l, nil
 }
 
-func (db *AppDB) updateDB() error {
+// Update updates the database with the 4 most recent records
+func (db *AppDB) Update() error {
 	// Begin transaction
 	tx, err := db.Begin()
 	if err != nil {
@@ -225,7 +242,7 @@ func (db *AppDB) updateDB() error {
 	}
 
 	// Iterate scrape data
-	for d := range updateScraper() {
+	for d := range ScrapeMostRecent() {
 		// Check I don't already have this record
 		var i int
 
@@ -254,7 +271,8 @@ func (db *AppDB) updateDB() error {
 	return nil
 }
 
-func (db *AppDB) populateDB() error {
+// Populate retrieves and inserts the entire archive.
+func (db *AppDB) Populate() error {
 	// Begin transaction
 	tx, err := db.Begin()
 	if err != nil {
@@ -269,7 +287,7 @@ func (db *AppDB) populateDB() error {
 	}
 
 	// Iterate scrape data
-	for d := range archiveScraper() {
+	for d := range ScrapeFullArchive() {
 		// Set args
 		qIns.Args = []interface{}{d.Date, d.Set, d.Machine, d.Num[0], d.Num[1], d.Num[2], d.Num[3], d.Num[4], d.Num[5], d.Num[6]}
 

@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -17,8 +17,9 @@ var (
 	start      = 1994
 )
 
-func updateScraper() <-chan dbRow {
-	c := make(chan dbRow)
+// ScrapeMostRecent grabs just the most recent lotto results and passes them out.
+func ScrapeMostRecent() <-chan Record {
+	c := make(chan Record)
 
 	go func() {
 		// Grab the results page and then start traipsing through their awful HTML to find results links
@@ -32,7 +33,7 @@ func updateScraper() <-chan dbRow {
 				href, ok := s.Attr("href")
 
 				if ok && strings.Contains(href, "/lotto/results-") {
-					var row dbRow
+					var row Record
 
 					row.Date, err = time.Parse("02-01-2006", strings.Replace(href, "/lotto/results-", "", -1))
 					if err != nil {
@@ -73,11 +74,11 @@ func updateScraper() <-chan dbRow {
 	return c
 }
 
-// scraper is a special kind of evil. It will return a stream of data as it
+// ScrapeFullArchive scraper is a special kind of evil. It will return a stream of data as it
 // pulls all lotto result data from 1994 onwards including ball machine and
 // ball set used.
-func archiveScraper() <-chan dbRow {
-	c := make(chan dbRow)
+func ScrapeFullArchive() <-chan Record {
+	c := make(chan Record)
 
 	go func() {
 		// Iterate each year of the archives from start
@@ -92,7 +93,7 @@ func archiveScraper() <-chan dbRow {
 				// skip the first row th
 				if s.Children().First().Is("td") {
 					var (
-						row dbRow
+						row Record
 						d   = s.Children().First() // Date
 						n   = d.Next()             // Numbers
 					)
