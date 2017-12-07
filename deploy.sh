@@ -11,6 +11,7 @@ go build -o site.app
 
 cd $srcdir/frontend
 npm run build && sed -re 's:=/:=:g' -i dist/index.html
+#npm run build
 
 ## Stop service
 echo "Stopping Service"
