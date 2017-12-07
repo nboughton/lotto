@@ -10,6 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "buefy": "^0.3.2",
     "bulmaswatch": "^0.4.4",
     "chart.js": "^2.7.1",

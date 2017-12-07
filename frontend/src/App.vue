@@ -97,15 +97,16 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import Buefy from 'buefy'
-import VueResource from 'vue-resource'
-import Datepicker from 'vuejs-datepicker'
-import LineChart from '@/components/LineChart'
-import BarChart from '@/components/BarChart'
+import Vue from "vue";
+import Buefy from "buefy";
+import VueResource from "vue-resource";
+import axios from "axios";
+import Datepicker from "vuejs-datepicker";
+import LineChart from "@/components/LineChart";
+import BarChart from "@/components/BarChart";
 
-Vue.use(Buefy)
-Vue.use(VueResource)
+Vue.use(Buefy);
+Vue.use(VueResource);
 
 var colors = [
   "rgba(31,119,180,1)",
@@ -114,11 +115,11 @@ var colors = [
   "rgba(214,39,40,1)",
   "rgba(148,103,189,1)",
   "rgba(140,86,75,1)",
-  "rgba(227,119,194,1)",
-]
+  "rgba(227,119,194,1)"
+];
 
 export default {
-  name: 'app',
+  name: "app",
 
   data() {
     return {
@@ -144,7 +145,7 @@ export default {
             isStriped: true,
             isNarrowed: true,
             isCheckable: false,
-            isPaginated: false,
+            isPaginated: false
           }
         }
       },
@@ -164,76 +165,95 @@ export default {
               mode: "index"
             },
             scales: {
-              xAxes: [{
-                stacked: true,
-                barPercentage: 1,
-              }],
-              yAxes: [{
-                stacked: true
-              }]
+              xAxes: [
+                {
+                  stacked: true,
+                  barPercentage: 1
+                }
+              ],
+              yAxes: [
+                {
+                  stacked: true
+                }
+              ]
             }
           }
         }
       }
-    }
+    };
   },
 
   computed: {
     query() {
-      var start = this.params.start.toJSON()
-      var end = this.params.end.toJSON()
+      var start = this.params.start.toJSON();
+      var end = this.params.end.toJSON();
 
       return {
         start: start,
         end: end,
         machine: this.params.machine,
         set: this.params.set
-      }
+      };
     }
   },
 
   mounted() {
-    this.adjustFieldData()
-    this.runQuery()
+    this.adjustFieldData();
+    this.runQuery();
   },
 
   methods: {
     runQuery() {
-      this.$http.get("query", { params: this.query }).then(resp => { return resp.json() }).then(d => {
-        for (var ball = 0; ball < d.data.timeSeries.datasets.length; ball++) {
-          // Line chart
-          d.data["timeSeries"].datasets[ball].backgroundColor = colors[ball]
-          d.data["timeSeries"].datasets[ball].borderColor = colors[ball]
-          d.data["timeSeries"].datasets[ball].borderWidth = 0.3
-          d.data["timeSeries"].datasets[ball].pointRadius = 3
-          d.data["timeSeries"].datasets[ball].fill = false
-          d.data["timeSeries"].datasets[ball].showLines = false
+      this.$http
+        .get("query", { params: this.query })
+        .then(resp => {
+          return resp.json();
+        })
+        .then(d => {
+          for (var ball = 0; ball < d.data.timeSeries.datasets.length; ball++) {
+            // Line chart
+            d.data["timeSeries"].datasets[ball].backgroundColor = colors[ball];
+            d.data["timeSeries"].datasets[ball].borderColor = colors[ball];
+            d.data["timeSeries"].datasets[ball].borderWidth = 0.3;
+            d.data["timeSeries"].datasets[ball].pointRadius = 3;
+            d.data["timeSeries"].datasets[ball].fill = false;
+            d.data["timeSeries"].datasets[ball].showLines = false;
 
-          // Bar chart
-          d.data["freqDist"].datasets[ball].backgroundColor = colors[ball]
-          d.data["freqDist"].datasets[ball].borderColor = colors[ball]
-          d.data["freqDist"].datasets[ball].borderWidth = 0.3
-        }
+            // Bar chart
+            d.data["freqDist"].datasets[ball].backgroundColor = colors[ball];
+            d.data["freqDist"].datasets[ball].borderColor = colors[ball];
+            d.data["freqDist"].datasets[ball].borderWidth = 0.3;
+          }
 
-        this.tables.main.data = d.data.mainTable
-        this.charts.timeSeries.data = d.data.timeSeries
-        this.charts.freqDist.data = d.data.freqDist
-      })
+          this.tables.main.data = d.data.mainTable;
+          this.charts.timeSeries.data = d.data.timeSeries;
+          this.charts.freqDist.data = d.data.freqDist;
+        });
     },
     getSets() {
-      this.$http.get("sets", { params: this.query }).then(resp => { return resp.json() }).then(sets => {
-        this.sets = sets.data
-      })
+      this.$http
+        .get("sets", { params: this.query })
+        .then(resp => {
+          return resp.json();
+        })
+        .then(sets => {
+          this.sets = sets.data;
+        });
     },
     getMachines() {
-      this.$http.get("machines", { params: this.query }).then(resp => { return resp.json() }).then(machines => {
-        this.machines = machines.data
-      })
+      this.$http
+        .get("machines", { params: this.query })
+        .then(resp => {
+          return resp.json();
+        })
+        .then(machines => {
+          this.machines = machines.data;
+        });
     },
     adjustFieldData() {
-      this.getSets()
-      this.getMachines()
-    },
+      this.getSets();
+      this.getMachines();
+    }
   },
 
   components: {
@@ -241,8 +261,7 @@ export default {
     LineChart,
     BarChart
   }
-}
-
+};
 </script>
 
 <style lang="scss">
