@@ -10,8 +10,8 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/nboughton/lotto/db"
 	"github.com/nboughton/lotto/handler"
+	"github.com/nboughton/stalotto/db"
 )
 
 func main() {
@@ -20,6 +20,7 @@ func main() {
 	flag.Parse()
 
 	e := &handler.Env{DB: db.Connect("./results.db")}
+	e.DB.Update()
 
 	// Update at 21:30 every night
 	go func() {

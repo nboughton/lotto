@@ -3,7 +3,7 @@ package graph
 import (
 	"fmt"
 
-	"github.com/nboughton/lotto/db"
+	"github.com/nboughton/stalotto/lotto"
 )
 
 const (
@@ -28,19 +28,25 @@ type Data struct {
 var formatTSLabel = "06/01/02"
 
 // TimeSeries creates a Data struct for a time series graph
-func TimeSeries(records <-chan db.Record) Data {
+func TimeSeries(records <-chan lotto.Result) Data {
 	var d Data
-	d.Datasets = make([]Dataset, db.BALLS)
+	d.Datasets = make([]Dataset, lotto.BALLS+1)
 
 	for row := range records {
-		for ball := 0; ball < db.BALLS; ball++ {
+		for ball := 0; ball < lotto.BALLS; ball++ {
 			if d.Datasets[ball].Label == "" {
-				d.Datasets[ball].Label = label(ball)
+				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
 				d.Datasets[ball].Type = typeLine
 			}
 
-			d.Datasets[ball].Data = append(d.Datasets[ball].Data, float64(row.Num[ball]))
+			d.Datasets[ball].Data = append(d.Datasets[ball].Data, float64(row.Balls[ball]))
 		}
+
+		if d.Datasets[lotto.BALLS].Label == "" {
+			d.Datasets[lotto.BALLS].Label = "Bonus"
+		}
+
+		d.Datasets[lotto.BALLS].Data = append(d.Datasets[lotto.BALLS].Data, float64(row.Bonus))
 		d.Labels = append(d.Labels, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 	}
 
@@ -48,31 +54,41 @@ func TimeSeries(records <-chan db.Record) Data {
 }
 
 // FreqDist creates a Data struct for a frequency distribution graph
-func FreqDist(records <-chan db.Record) Data {
+func FreqDist(records <-chan lotto.Result) Data {
 	var d Data
-	d.Datasets = make([]Dataset, db.BALLS)
+	d.Datasets = make([]Dataset, lotto.BALLS+1)
 	// Populate Labels
-	for i := 0; i < db.MAXBALLNUM; i++ {
+	for i := 0; i < lotto.MAXBALLVAL; i++ {
 		d.Labels = append(d.Labels, fmt.Sprintf("%d", i+1))
 	}
 
 	for row := range records {
-		for ball := 0; ball < db.BALLS; ball++ {
+		for ball := 0; ball < lotto.BALLS; ball++ {
 			if d.Datasets[ball].Label == "" { // Set Label and create Data
-				d.Datasets[ball].Label = label(ball)
+				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
 				d.Datasets[ball].Type = typeBar
-				d.Datasets[ball].Data = make([]float64, db.MAXBALLNUM)
+				d.Datasets[ball].Data = make([]float64, lotto.MAXBALLVAL)
 			}
 
-			d.Datasets[ball].Data[row.Num[ball]-1]++
+			d.Datasets[ball].Data[row.Balls[ball]-1]++
 		}
+
+		if d.Datasets[lotto.BALLS].Label == "" {
+			d.Datasets[lotto.BALLS].Label = "Bonus"
+			d.Datasets[lotto.BALLS].Type = typeBar
+			d.Datasets[lotto.BALLS].Data = make([]float64, lotto.MAXBALLVAL)
+		}
+
+		d.Datasets[lotto.BALLS].Data[row.Bonus-1]++
+		// = append(d.Datasets[lotto.BALLS].Data, float64(row.Bonus))
 	}
 
 	return d
 }
 
 // MachineSetDist creates a dataset appropriate for a machine/set distribution bubble graph
-func MachineSetDist(records <-chan db.Record) Data {
+/*
+func MachineSetDist(records <-chan lotto.Result) Data {
 	var (
 		d Data
 		m = make(map[string]int)
@@ -85,6 +101,7 @@ func MachineSetDist(records <-chan db.Record) Data {
 
 	return d
 }
+*/
 
 func label(ball int) string {
 	if ball < 6 {
