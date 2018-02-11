@@ -59,9 +59,10 @@ func ListSets(e *Env) http.HandlerFunc {
 		res, err := e.DB.Sets(p.Start, p.End, p.Machines)
 		if err != nil {
 			jweb.New(http.StatusInternalServerError, err).Write(w)
-		} else {
-			jweb.New(http.StatusOK, res).Write(w)
+			return
 		}
+
+		jweb.New(http.StatusOK, res).Write(w)
 	})
 }
 
@@ -72,9 +73,10 @@ func ListMachines(e *Env) http.HandlerFunc {
 		res, err := e.DB.Machines(p.Start, p.End, p.Sets)
 		if err != nil {
 			jweb.New(http.StatusInternalServerError, err).Write(w)
-		} else {
-			jweb.New(http.StatusOK, res).Write(w)
+			return
 		}
+
+		jweb.New(http.StatusOK, res).Write(w)
 	})
 }
 
@@ -138,9 +140,9 @@ func createMainTableData(e *Env, p queryParams) []TableRow {
 	sort.Ints(least)
 	least = append(least, bonus.Prune().Asc().Balls()[0])
 
-	last := set[len(set)-1].Balls
+	last := set[0].Balls
 	sort.Ints(last)
-	last = append(last, set[len(set)-1].Bonus)
+	last = append(last, set[0].Bonus)
 
 	numbers := []int{}
 	for i := 1; i <= lotto.MAXBALLVAL; i++ {
