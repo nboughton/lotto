@@ -56,7 +56,7 @@ func ListSets(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := params(r)
 
-		res, err := e.DB.Sets(p.Start, p.End, p.Sets)
+		res, err := e.DB.Sets(p.Start, p.End, p.Machines)
 		if err != nil {
 			jweb.New(http.StatusInternalServerError, err).Write(w)
 		} else {
@@ -69,7 +69,7 @@ func ListSets(e *Env) http.HandlerFunc {
 func ListMachines(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := params(r)
-		res, err := e.DB.Machines(p.Start, p.End, p.Machines)
+		res, err := e.DB.Machines(p.Start, p.End, p.Sets)
 		if err != nil {
 			jweb.New(http.StatusInternalServerError, err).Write(w)
 		} else {
