@@ -36,11 +36,16 @@ func Query(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := params(r)
 
+		set := lotto.ResultSet{}
+		for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets) {
+			set = append(set, res)
+		}
+
 		jweb.New(http.StatusOK,
 			PageData{
 				MainTable:  createMainTableData(e, p),
-				TimeSeries: graph.TimeSeries(e.DB.Results(p.Start, p.End, p.Machines, p.Sets)),
-				FreqDist:   graph.FreqDist(e.DB.Results(p.Start, p.End, p.Machines, p.Sets)),
+				TimeSeries: graph.TimeSeries(set),
+				FreqDist:   graph.FreqDist(set),
 			},
 		).Write(w)
 	})
@@ -125,13 +130,13 @@ func createMainTableData(e *Env, p queryParams) []TableRow {
 	}
 	balls, bonus := set.ByDrawFrequency()
 
-	most := balls.Desc()[:6]
+	most := balls.Prune().Desc().Balls()[:6]
 	sort.Ints(most)
-	most = append(most, bonus.Desc()[0])
+	most = append(most, bonus.Prune().Desc().Balls()[0])
 
-	least := balls.Asc()[:6]
+	least := balls.Prune().Asc().Balls()[:6]
 	sort.Ints(least)
-	least = append(least, bonus.Asc()[0])
+	least = append(least, bonus.Prune().Asc().Balls()[0])
 
 	last := set[len(set)-1].Balls
 	sort.Ints(last)

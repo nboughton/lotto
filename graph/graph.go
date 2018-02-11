@@ -28,11 +28,11 @@ type Data struct {
 var formatTSLabel = "06/01/02"
 
 // TimeSeries creates a Data struct for a time series graph
-func TimeSeries(records <-chan lotto.Result) Data {
+func TimeSeries(set lotto.ResultSet) Data {
 	var d Data
 	d.Datasets = make([]Dataset, lotto.BALLS+1)
 
-	for row := range records {
+	for _, row := range set {
 		for ball := 0; ball < lotto.BALLS; ball++ {
 			if d.Datasets[ball].Label == "" {
 				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
@@ -54,7 +54,7 @@ func TimeSeries(records <-chan lotto.Result) Data {
 }
 
 // FreqDist creates a Data struct for a frequency distribution graph
-func FreqDist(records <-chan lotto.Result) Data {
+func FreqDist(set lotto.ResultSet) Data {
 	var d Data
 	d.Datasets = make([]Dataset, lotto.BALLS+1)
 	// Populate Labels
@@ -62,7 +62,7 @@ func FreqDist(records <-chan lotto.Result) Data {
 		d.Labels = append(d.Labels, fmt.Sprintf("%d", i+1))
 	}
 
-	for row := range records {
+	for _, row := range set {
 		for ball := 0; ball < lotto.BALLS; ball++ {
 			if d.Datasets[ball].Label == "" { // Set Label and create Data
 				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
@@ -80,7 +80,6 @@ func FreqDist(records <-chan lotto.Result) Data {
 		}
 
 		d.Datasets[lotto.BALLS].Data[row.Bonus-1]++
-		// = append(d.Datasets[lotto.BALLS].Data, float64(row.Bonus))
 	}
 
 	return d
