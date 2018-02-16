@@ -2,3 +2,4 @@ lotto
 site.app
 *-shm
 *-wal
+vendor/
