@@ -102,20 +102,20 @@ type queryParams struct {
 func params(r *http.Request) queryParams {
 	p := r.URL.Query()
 
-	set, _ := strconv.Atoi(p["set"][0])
+	set, _ := strconv.Atoi(p.Get("set"))
 	sets := []int{}
 	if set != 0 {
 		sets = []int{set}
 	}
 
-	machine := p["machine"][0]
+	machine := p.Get("machine")
 	machines := []string{}
 	if machine != "all" {
 		machines = []string{machine}
 	}
 
-	start, _ := time.Parse(time.RFC3339, p["start"][0])
-	end, _ := time.Parse(time.RFC3339, p["end"][0])
+	start, _ := time.Parse(time.RFC3339, p.Get("start"))
+	end, _ := time.Parse(time.RFC3339, p.Get("end"))
 
 	return queryParams{
 		Start:    start,

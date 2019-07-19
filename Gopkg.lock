@@ -2,74 +2,92 @@
 
 
 [[projects]]
+  digest = "1:573fa46f8d413d4bc3f7cc5e86b2c43cb21559f4fb0a19d9874d228e28fdc07c"
   name = "github.com/PuerkitoBio/goquery"
   packages = ["."]
-  revision = "09540e565986583836b5fc792fe951ec5fd201dd"
-  version = "v1.3.0"
+  pruneopts = "UT"
+  revision = "2d2796f41742ece03e8086188fa4db16a3a0b458"
+  version = "v1.5.0"
 
 [[projects]]
-  branch = "master"
+  digest = "1:66b3310cf22cdc96c35ef84ede4f7b9b370971c4025f394c89a2638729653b11"
   name = "github.com/andybalholm/cascadia"
   packages = ["."]
-  revision = "349dd0209470eabd9514242c688c403c0926d266"
+  pruneopts = "UT"
+  revision = "901648c87902174f774fac311d7f176f8647bdaa"
+  version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/gorilla/context"
-  packages = ["."]
-  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-  version = "v1.1"
-
-[[projects]]
+  digest = "1:bf3f2edc757b0fcee5946f9c88c3531b3766cde4195f9c5956fc4a84b72b0699"
   name = "github.com/gorilla/handlers"
   packages = ["."]
-  revision = "90663712d74cb411cbef281bc1e08c19d1a76145"
-  version = "v1.3.0"
+  pruneopts = "UT"
+  revision = "415c4810185c26aa35ca0315470d77697000794b"
+  version = "v1.4.1"
 
 [[projects]]
+  digest = "1:cbec35fe4d5a4fba369a656a8cd65e244ea2c743007d8f6c1ccb132acf9d1296"
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
-  version = "v1.6.1"
+  pruneopts = "UT"
+  revision = "00bdffe0f3c77e27d2cf6f5c70232a2d3e4d9c15"
+  version = "v1.7.3"
 
 [[projects]]
+  digest = "1:79e87abf06b873987dee86598950f5b51732ac454d5a5cab6445a14330e6c9e3"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
-  revision = "6c771bb9887719704b210e87e934f08be014bdb1"
-  version = "v1.6.0"
+  pruneopts = "UT"
+  revision = "b612a2feea6aa87c6d052d9086572551df06497e"
+  version = "v1.11.0"
 
 [[projects]]
-  branch = "master"
+  digest = "1:db43b0572e907211b86fbe2307c3d5ce68e75a9c74e7e7c5826c26ff195b7caa"
   name = "github.com/nboughton/go-sqgenlite"
   packages = ["."]
-  revision = "fa2c5623d30244f88effe524c4952da156810110"
+  pruneopts = "UT"
+  revision = "673b19e3a5cd3fb9e70af778d1211bcaa005ee75"
+  version = "v0.1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:cc43d329f5917bf4242fae13c5c9782c5328b51e7e78e1ff0e5526c19b31ce68"
   name = "github.com/nboughton/go-utils"
   packages = ["json/web"]
-  revision = "5f9f354c194d02e036c772ca862b9a755e948ec4"
+  pruneopts = "UT"
+  revision = "d1fe1c39566f2b46b206e15cd93774ecc03ef42e"
 
 [[projects]]
   branch = "master"
+  digest = "1:d17438baf35b08cfe3cd0f0f4397d7074341ceb242e21bbb08421bb86164966e"
   name = "github.com/nboughton/stalotto"
   packages = [
     "db",
-    "lotto"
+    "lotto",
   ]
-  revision = "b9a1a4a12843c6f516d67097a070b23100c29795"
+  pruneopts = "UT"
+  revision = "bc2148d17453215140ac6032ac06aa90534576ac"
 
 [[projects]]
   branch = "master"
+  digest = "1:d7b978a787736537d0ad2f84c0e8b75b05c2febef0537198e28edf1cf2768afd"
   name = "golang.org/x/net"
   packages = [
     "html",
-    "html/atom"
+    "html/atom",
   ]
-  revision = "2e7f24ace30034db6c258ddb329e5236a68c27fa"
+  pruneopts = "UT"
+  revision = "da137c7871d730100384dbcf36e6f8fa493aef5b"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "23b4a3f80ff305cb23e91b1702154ad83180bbf2904b9bc560776c36877827c4"
+  input-imports = [
+    "github.com/gorilla/handlers",
+    "github.com/gorilla/mux",
+    "github.com/nboughton/go-utils/json/web",
+    "github.com/nboughton/stalotto/db",
+    "github.com/nboughton/stalotto/lotto",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
