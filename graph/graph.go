@@ -2,7 +2,6 @@ package graph
 
 import (
 	"fmt"
-	"strconv"
 
 	plotly "github.com/nboughton/go-plotlytypes"
 	"github.com/nboughton/stalotto/lotto"
@@ -53,9 +52,9 @@ func FreqDist(set lotto.ResultSet) Data {
 	var d Data
 	d.Datasets = make([]plotly.Dataset, lotto.BALLS+1)
 	// Populate Labels
-	var labels []string
+	var labels plotly.Axis
 	for i := 0; i < lotto.MAXBALLVAL; i++ {
-		labels = append(labels, fmt.Sprintf("%d", i+1))
+		labels.AppendStr(fmt.Sprintf("%d", i+1))
 	}
 
 	for _, row := range set {
@@ -63,7 +62,7 @@ func FreqDist(set lotto.ResultSet) Data {
 			if d.Datasets[ball].Name == "" { // Set Name and create Data
 				d.Datasets[ball].Name = fmt.Sprintf("Ball %d", ball+1)
 				d.Datasets[ball].Type = tBar
-				d.Datasets[ball].Y = make([]string, lotto.MAXBALLVAL)
+				d.Datasets[ball].Y = make(plotly.Axis, lotto.MAXBALLVAL)
 				d.Datasets[ball].X = labels
 			}
 
@@ -73,7 +72,7 @@ func FreqDist(set lotto.ResultSet) Data {
 		if d.Datasets[lotto.BALLS].Name == "" {
 			d.Datasets[lotto.BALLS].Name = "Bonus"
 			d.Datasets[lotto.BALLS].Type = tBar
-			d.Datasets[lotto.BALLS].Y = make([]string, lotto.MAXBALLVAL)
+			d.Datasets[lotto.BALLS].Y = make(plotly.Axis, lotto.MAXBALLVAL)
 		}
 
 		d.Datasets[lotto.BALLS].Y.AddInt(row.Bonus-1, 1)
@@ -98,14 +97,6 @@ func MachineSetDist(records <-chan lotto.Result) Data {
 	return d
 }
 */
-func addY(cur string, inc int) string {
-	a, err := strconv.Atoi(cur)
-	if err != nil {
-		return cur // effectively ignore errors for now
-	}
-
-	return strconv.Itoa(a + inc)
-}
 
 func label(ball int) string {
 	if ball < 6 {
