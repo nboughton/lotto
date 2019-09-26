@@ -33,16 +33,16 @@ func TimeSeries(set lotto.ResultSet) Data {
 				d.Datasets[ball].Type = tLine
 			}
 
-			d.Datasets[ball].Y = append(d.Datasets[ball].Y, strconv.Itoa(row.Balls[ball]))
-			d.Datasets[ball].X = append(d.Datasets[ball].X, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
+			d.Datasets[ball].Y.AppendInt(row.Balls[ball])
+			d.Datasets[ball].X.AppendStr(fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 		}
 
 		if d.Datasets[lotto.BALLS].Name == "" {
 			d.Datasets[lotto.BALLS].Name = "Bonus"
 		}
 
-		d.Datasets[lotto.BALLS].Y = append(d.Datasets[lotto.BALLS].Y, strconv.Itoa(row.Bonus))
-		d.Datasets[lotto.BALLS].X = append(d.Datasets[lotto.BALLS].X, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
+		d.Datasets[lotto.BALLS].Y.AppendInt(row.Bonus)
+		d.Datasets[lotto.BALLS].X.AppendStr(fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 	}
 
 	return d
@@ -67,7 +67,7 @@ func FreqDist(set lotto.ResultSet) Data {
 				d.Datasets[ball].X = labels
 			}
 
-			d.Datasets[ball].Y[row.Balls[ball]-1] = addY(d.Datasets[ball].Y[row.Balls[ball]-1], 1)
+			d.Datasets[ball].Y.AddInt(row.Balls[ball]-1, 1)
 		}
 
 		if d.Datasets[lotto.BALLS].Name == "" {
@@ -76,7 +76,7 @@ func FreqDist(set lotto.ResultSet) Data {
 			d.Datasets[lotto.BALLS].Y = make([]string, lotto.MAXBALLVAL)
 		}
 
-		d.Datasets[lotto.BALLS].Y[row.Bonus-1] = addY(d.Datasets[lotto.BALLS].Y[row.Bonus-1], 1)
+		d.Datasets[lotto.BALLS].Y.AddInt(row.Bonus-1, 1)
 	}
 
 	return d
