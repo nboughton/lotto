@@ -3,3 +3,4 @@ site.app
 *-shm
 *-wal
 vendor/
+*.tar.gz
