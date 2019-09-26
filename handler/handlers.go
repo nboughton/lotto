@@ -1,17 +1,23 @@
 package handler
 
 import (
-	"log"
+	"encoding/json"
 	"net/http"
 	"sort"
-	"strconv"
 	"time"
 
-	jweb "github.com/nboughton/go-utils/json/web"
 	"github.com/nboughton/lotto/graph"
 	"github.com/nboughton/stalotto/db"
 	"github.com/nboughton/stalotto/lotto"
 )
+
+var jsonH = struct {
+	key string
+	val string
+}{
+	"Content-Type",
+	"application/json; charset=utf-8",
+}
 
 // Env allows for persistent data to be passed into route handlers, such as DB handles etc
 type Env struct {
@@ -31,52 +37,88 @@ type TableRow struct {
 	Num   []int  `json:"num"`
 }
 
+type request struct {
+	Start    time.Time
+	End      time.Time
+	Sets     []int
+	Machines []string
+}
+
 // Query handles the main page query and returns all relevant data for the page.
 func Query(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := params(r)
+		if r.Body == nil {
+			http.Error(w, "No request body", 400)
+			return
+		}
+
+		var p request
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+			http.Error(w, "Malformed JSON request", 500)
+			return
+		}
 
 		set := lotto.ResultSet{}
 		for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets) {
 			set = append(set, res)
 		}
 
-		jweb.New(http.StatusOK,
-			PageData{
-				MainTable:  createMainTableData(e, p),
-				TimeSeries: graph.TimeSeries(set),
-				FreqDist:   graph.FreqDist(set),
-			},
-		).Write(w)
+		w.Header().Set(jsonH.key, jsonH.val)
+		json.NewEncoder(w).Encode(PageData{
+			MainTable:  createMainTableData(e, p),
+			TimeSeries: graph.TimeSeries(set),
+			FreqDist:   graph.FreqDist(set),
+		})
 	})
 }
 
 // ListSets returns a list of available ball sets
 func ListSets(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := params(r)
-
-		res, err := e.DB.Sets(p.Start, p.End, p.Machines)
-		if err != nil {
-			jweb.New(http.StatusInternalServerError, err).Write(w)
+		if r.Body == nil {
+			http.Error(w, "No request body", 400)
 			return
 		}
 
-		jweb.New(http.StatusOK, res).Write(w)
+		var p request
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+			http.Error(w, "Malformed JSON request", 500)
+			return
+		}
+
+		res, err := e.DB.Sets(p.Start, p.End, p.Machines)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.Header().Set(jsonH.key, jsonH.val)
+		json.NewEncoder(w).Encode(res)
 	})
 }
 
 // ListMachines returns a list of available lotto machines
 func ListMachines(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := params(r)
-		res, err := e.DB.Machines(p.Start, p.End, p.Sets)
-		if err != nil {
-			jweb.New(http.StatusInternalServerError, err).Write(w)
+		if r.Body == nil {
+			http.Error(w, "No request body", 400)
 			return
 		}
 
-		jweb.New(http.StatusOK, res).Write(w)
+		var p request
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+			http.Error(w, "Malformed JSON request", 500)
+			return
+		}
+
+		res, err := e.DB.Machines(p.Start, p.End, p.Sets)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.Header().Set(jsonH.key, jsonH.val)
+		json.NewEncoder(w).Encode(res)
 	})
 }
 
@@ -85,47 +127,24 @@ func DataRange(e *Env) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f, l, err := e.DB.DataRange()
 		if err != nil {
-			log.Println("handlerDataRange:", err.Error())
+			http.Error(w, err.Error(), 500)
+			return
 		}
 
-		jweb.New(http.StatusOK, map[string]int64{"first": f.Unix(), "last": l.Unix()}).Write(w)
+		res := struct {
+			First int64
+			Last  int64
+		}{
+			f.Unix(),
+			l.Unix(),
+		}
+
+		w.Header().Set(jsonH.key, jsonH.val)
+		json.NewEncoder(w).Encode(res)
 	})
 }
 
-type queryParams struct {
-	Start    time.Time
-	End      time.Time
-	Sets     []int
-	Machines []string
-}
-
-func params(r *http.Request) queryParams {
-	p := r.URL.Query()
-
-	set, _ := strconv.Atoi(p.Get("set"))
-	sets := []int{}
-	if set != 0 {
-		sets = []int{set}
-	}
-
-	machine := p.Get("machine")
-	machines := []string{}
-	if machine != "all" {
-		machines = []string{machine}
-	}
-
-	start, _ := time.Parse(time.RFC3339, p.Get("start"))
-	end, _ := time.Parse(time.RFC3339, p.Get("end"))
-
-	return queryParams{
-		Start:    start,
-		End:      end,
-		Sets:     sets,
-		Machines: machines,
-	}
-}
-
-func createMainTableData(e *Env, p queryParams) []TableRow {
+func createMainTableData(e *Env, p request) []TableRow {
 	set := lotto.ResultSet{}
 	for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets) {
 		set = append(set, res)

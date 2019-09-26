@@ -1,4 +1,4 @@
 import Vue from 'vue'
-import plotly from '../assets/plotly'
+import plotly from 'plotly.js'
 
 Vue.prototype.$plotly = plotly
