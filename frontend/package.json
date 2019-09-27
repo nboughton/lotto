@@ -2,7 +2,7 @@
   "name": "lotto",
   "version": "0.0.1",
   "description": "Frontend for lottery data analyisis microsite",
-  "productName": "lotto-frontend",
+  "productName": "UK Lotto Stats",
   "cordovaId": "org.cordova.quasar.app",
   "author": "Nick Boughton <nicholasboughton@gmail.com>",
   "private": true,

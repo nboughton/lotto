@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	p := flag.Int("p", 3002, "Set the port the application listens on")
+	p := flag.Int("p", 8000, "Set the port the application listens on")
 	l := flag.Bool("l", true, "Log requests to STDOUT")
 	flag.Parse()
 
