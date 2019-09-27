@@ -32,6 +32,8 @@ github.com/nboughton/stalotto v1.0.0 h1:cSNqJX/t99kU5FgU6Sh5DaTai3xMj5zps9H0wSZl
 github.com/nboughton/stalotto v1.0.0/go.mod h1:90AF+hr5XxDhsMQ1jtSG9HYq0K2R/aGs+MASCfvevzY=
 github.com/nboughton/stalotto v1.0.1 h1:6XHinIfwl/Es34h06MlS8LRlnsdB3nLGwDH3BQFXTLY=
 github.com/nboughton/stalotto v1.0.1/go.mod h1:UZEzZsbp19g7Tgxz8y9OLxP9EushAKWuNZ7lAX86LvY=
+github.com/nboughton/stalotto v1.0.2 h1:EDaqfR4ukwEJ56+Y8NmcXPEBc2tF59lcOd+9NtFXuY0=
+github.com/nboughton/stalotto v1.0.2/go.mod h1:UZEzZsbp19g7Tgxz8y9OLxP9EushAKWuNZ7lAX86LvY=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
