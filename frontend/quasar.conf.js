@@ -73,13 +73,6 @@ module.exports = function (ctx) {
             formatter: require('eslint').CLIEngine.getFormatter('stylish')
           }
         })
-        /*,
-          {
-            test: /\.js$/,
-            use: [
-              'ify-loader'
-            ]
-          }*/
       }
     },
 

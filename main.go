@@ -20,6 +20,7 @@ func main() {
 	flag.Parse()
 
 	e := &handler.Env{DB: db.Connect("./results.db")}
+	log.Println("Checking for updates")
 	e.DB.Update()
 
 	// Update at 21:30 every night

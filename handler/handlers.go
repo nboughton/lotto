@@ -132,8 +132,8 @@ func DataRange(e *Env) http.HandlerFunc {
 		}
 
 		res := struct {
-			First int64
-			Last  int64
+			First int64 `json:"first"`
+			Last  int64 `json:"last"`
 		}{
 			f.Unix(),
 			l.Unix(),

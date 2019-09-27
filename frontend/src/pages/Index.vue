@@ -1,7 +1,14 @@
 <template>
   <q-page class="q-pa-lg">
     <q-form class="row no-wrap fullwidth items-baseline" @submit="onSubmit">
-      <q-input class="col" label="From" v-model="form.from" mask="date" :rules="['date']">
+      <q-input
+        class="col"
+        label="From"
+        v-model="form.from"
+        mask="date"
+        :rules="['date']"
+        @change="updateOpts()"
+      >
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
@@ -11,7 +18,14 @@
         </template>
       </q-input>
 
-      <q-input class="col" label="To" v-model="form.to" mask="date" :rules="['date']">
+      <q-input
+        class="col"
+        label="To"
+        v-model="form.to"
+        mask="date"
+        :rules="['date']"
+        @change="updateOpts()"
+      >
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
@@ -27,18 +41,30 @@
         multiple
         v-model="form.machinesSelected"
         :options="form.machines"
+        @change="updateOpts()"
+        hint="'all' overrides any other selection"
       />
 
-      <q-select class="col" label="Sets" multiple v-model="form.setsSelected" :options="form.sets" />
+      <q-select
+        class="col"
+        label="Sets"
+        multiple
+        v-model="form.setsSelected"
+        :options="form.sets"
+        @change="updateOpts()"
+        hint="'all' overrides any other selection"
+      />
 
-      <q-btn class="col" label="Submit" small flat color="primary" type="submit" />
+      <q-btn class="col-shrink q-ml-sm" label="Submit" small flat color="primary" type="submit" />
     </q-form>
 
     <q-table :data="qData.mainTable" :columns="table.columns" hide-bottom row-key="name" flat />
 
+    <div class="text-h4 q-pt-lg">Time Series Data</div>
     <plotly :data="qData.timeSeries" />
 
-    <plotly :data="qData.freqDist" />
+    <div class="text-h4 q-pt-lg">Draw Frequency Data</div>
+    <plotly :data="qData.freqDist" :layout="layout.freq" />
   </q-page>
 </template>
 
@@ -56,7 +82,7 @@ export default {
   data() {
     return {
       form: {
-        from: "2015/10/01",
+        from: "2015/10/10",
         to: date.formatDate(new Date(), "YYYY/MM/DD"),
         sets: [],
         machines: [],
@@ -64,6 +90,12 @@ export default {
         machinesSelected: ["all"]
       },
       qData: {},
+      layout: {
+        freq: {
+          title: "Draw Frequency",
+          barmode: "stack"
+        }
+      },
       table: {
         columns: [
           {
@@ -75,37 +107,37 @@ export default {
           {
             name: "b1",
             align: "left",
-            label: "1",
+            label: "Ball 1",
             field: row => row.num[0]
           },
           {
             name: "b2",
             align: "left",
-            label: "2",
+            label: "Ball 2",
             field: row => row.num[1]
           },
           {
             name: "b3",
             align: "left",
-            label: "3",
+            label: "Ball 3",
             field: row => row.num[2]
           },
           {
             name: "b4",
             align: "left",
-            label: "4",
+            label: "Ball 4",
             field: row => row.num[3]
           },
           {
             name: "b5",
             align: "left",
-            label: "5",
+            label: "Ball 5",
             field: row => row.num[4]
           },
           {
             name: "b6",
             align: "left",
-            label: "6",
+            label: "Ball 6",
             field: row => row.num[5]
           },
           {
@@ -163,10 +195,7 @@ export default {
     onSubmit() {
       this.$axios
         .post("/query", this.params)
-        .then(res => {
-          console.log(res.data);
-          this.qData = res.data;
-        })
+        .then(res => (this.qData = res.data))
         .catch(err => alert(err));
     },
     updateOpts() {
