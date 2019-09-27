@@ -38,10 +38,10 @@ type TableRow struct {
 }
 
 type request struct {
-	Start    time.Time
-	End      time.Time
-	Sets     []int
-	Machines []string
+	Start    time.Time `json:"start"`
+	End      time.Time `json:"end"`
+	Sets     []int     `json:"sets"`
+	Machines []string  `json:"machines"`
 }
 
 // Query handles the main page query and returns all relevant data for the page.

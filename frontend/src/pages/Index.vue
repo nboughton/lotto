@@ -34,15 +34,24 @@
       <q-btn class="col" label="Submit" small flat color="primary" type="submit" />
     </q-form>
 
-    <q-table :data="qData.mainTable" :columns="table.columns" row-key="name" flat />
+    <q-table :data="qData.mainTable" :columns="table.columns" hide-bottom row-key="name" flat />
+
+    <plotly :data="qData.timeSeries" />
+
+    <plotly :data="qData.freqDist" />
   </q-page>
 </template>
 
 <script>
 import { date } from "quasar";
+import { Plotly } from "vue-plotly";
 
 export default {
   name: "PageIndex",
+
+  components: {
+    Plotly
+  },
 
   data() {
     return {
@@ -54,7 +63,7 @@ export default {
         setsSelected: ["all"],
         machinesSelected: ["all"]
       },
-      qData: [],
+      qData: {},
       table: {
         columns: [
           {

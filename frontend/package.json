@@ -14,7 +14,8 @@
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
     "plotly.js": "^1.49.5",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "vue-plotly": "^1.0.1"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",
