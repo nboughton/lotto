@@ -59,7 +59,7 @@ func Query(e *Env) http.HandlerFunc {
 		}
 
 		set := lotto.ResultSet{}
-		for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets) {
+		for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets, false) {
 			set = append(set, res)
 		}
 
