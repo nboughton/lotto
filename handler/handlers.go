@@ -146,7 +146,7 @@ func DataRange(e *Env) http.HandlerFunc {
 
 func createMainTableData(e *Env, p request) []TableRow {
 	set := lotto.ResultSet{}
-	for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets) {
+	for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets, false) {
 		set = append(set, res)
 	}
 	balls, bonus := set.ByDrawFrequency()
