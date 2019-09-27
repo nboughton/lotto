@@ -40,11 +40,6 @@
 
 <script>
 import { date } from "quasar";
-import axios from "axios";
-
-const host = axios.create({
-  baseURL: "http://localhost:3002/"
-});
 
 export default {
   name: "PageIndex",
@@ -52,8 +47,8 @@ export default {
   data() {
     return {
       form: {
-        from: "2015-10-01",
-        to: date.formatDate(new Date(), "YYYY-MM-DD"),
+        from: "2015/10/01",
+        to: date.formatDate(new Date(), "YYYY/MM/DD"),
         sets: [],
         machines: [],
         setsSelected: ["all"],
@@ -71,37 +66,37 @@ export default {
           {
             name: "b1",
             align: "left",
-            label: "Ball 1",
+            label: "1",
             field: row => row.num[0]
           },
           {
             name: "b2",
             align: "left",
-            label: "Ball 2",
+            label: "2",
             field: row => row.num[1]
           },
           {
             name: "b3",
             align: "left",
-            label: "Ball 3",
+            label: "3",
             field: row => row.num[2]
           },
           {
             name: "b4",
             align: "left",
-            label: "Ball 4",
+            label: "4",
             field: row => row.num[3]
           },
           {
             name: "b5",
             align: "left",
-            label: "Ball 5",
+            label: "5",
             field: row => row.num[4]
           },
           {
             name: "b6",
             align: "left",
-            label: "Ball 6",
+            label: "6",
             field: row => row.num[5]
           },
           {
@@ -152,11 +147,12 @@ export default {
 
   created() {
     this.updateOpts();
+    this.onSubmit();
   },
 
   methods: {
     onSubmit() {
-      host
+      this.$axios
         .post("/query", this.params)
         .then(res => {
           console.log(res.data);
@@ -165,7 +161,7 @@ export default {
         .catch(err => alert(err));
     },
     updateOpts() {
-      host
+      this.$axios
         .post("/sets", this.params)
         .then(res => {
           this.form.sets = res.data;
@@ -173,7 +169,7 @@ export default {
         })
         .catch(err => alert(err));
 
-      host
+      this.$axios
         .post("/machines", this.params)
         .then(res => {
           this.form.machines = res.data;
