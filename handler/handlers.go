@@ -163,15 +163,15 @@ func createMainTableData(e *Env, p request) []TableRow {
 	sort.Ints(last)
 	last = append(last, set[0].Bonus)
 
-	numbers := []int{}
-	for i := 1; i <= lotto.MAXBALLVAL; i++ {
-		numbers = append(numbers, i)
-	}
+	nSet := balls.Prune().Desc().Balls()
+	numbers := nSet[:len(nSet)/2]
+	bonuses := bonus.Prune().Desc().Balls()[:10]
+	rand := append(lotto.Draw(numbers, lotto.BALLS+1), lotto.Draw(bonuses, 1)...)
 
 	return []TableRow{
 		TableRow{Label: "Most Recent", Num: last},
 		TableRow{Label: "Most Frequent (overall)", Num: most},
 		TableRow{Label: "Least Frequent (overall)", Num: least},
-		TableRow{Label: "Random Set", Num: lotto.Draw(numbers, lotto.BALLS+1)},
+		TableRow{Label: "Dip (least drawn 50% removed)", Num: rand},
 	}
 }
