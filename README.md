@@ -9,6 +9,9 @@ Building locally requires the following build tools:
  - Quasar
 
 Use your package manager to install Go and NPM/Yarn and then install @quasar/cli for the node build.
+Once installed you should be able to run build.sh from the project root and then ./site.app
+
+Then open a browser to localhost:8000
 
 Or if you have Docker you can run the most recent stable build with:
 
