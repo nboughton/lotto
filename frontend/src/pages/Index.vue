@@ -55,7 +55,7 @@
         hint="'all' overrides any other selection"
       />
 
-      <q-btn class="col-shrink q-ml-sm" label="Submit" small flat color="primary" type="submit" />
+      <q-btn class="col-shrink q-ml-sm" label="Update" small flat color="primary" type="submit" />
     </q-form>
 
     <q-table :data="qData.mainTable" :columns="table.columns" hide-bottom row-key="name" flat />
