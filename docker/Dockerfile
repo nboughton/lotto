@@ -1,6 +1,6 @@
 FROM golang:latest AS go-build
 
-RUN apt update && apt upgrade -y && apt install -y libsqlite3-dev
+RUN apt update && apt upgrade -y && apt install -y libsqlite3-dev ca-certificates
 
 WORKDIR /go
 
@@ -25,6 +25,8 @@ FROM debian:latest
 LABEL maintainer="Nick Boughton"
 
 WORKDIR /www/
+
+COPY --from=go-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY --from=go-build /go/site.app /go/src/github.com/nboughton/lotto/results.db ./
 

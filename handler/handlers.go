@@ -62,6 +62,10 @@ func Query(e *Env) http.HandlerFunc {
 		for res := range e.DB.Results(p.Start, p.End, p.Machines, p.Sets, false) {
 			set = append(set, res)
 		}
+		if len(set) == 0 {
+			http.Error(w, "No results returned", 500)
+			return
+		}
 
 		w.Header().Set(jsonH.key, jsonH.val)
 		json.NewEncoder(w).Encode(PageData{
