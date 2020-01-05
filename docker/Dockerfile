@@ -18,7 +18,7 @@ RUN git clone https://github.com/nboughton/lotto .
 
 WORKDIR /build/frontend
 
-RUN npm install && npm install -g @quasar/cli && quasar b
+RUN npm install -g @quasar/cli && npm install && quasar b
 
 FROM debian:latest
 
