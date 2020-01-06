@@ -170,12 +170,8 @@ func createMainTableData(e *Env, p request) []TableRow {
 	nSet := balls.Prune().Desc().Balls()
 	numbers := nSet[:len(nSet)/2]
 
-	bSet, trim := bonus.Prune().Desc().Balls(), 10
-	if len(bSet) <= trim {
-		trim = len(bSet) - 1
-	}
-	bonuses := bonus.Prune().Desc().Balls()[:trim]
-
+	bSet := bonus.Prune().Desc().Balls()
+	bonuses := bSet[:len(bSet)/2]
 	rand := append(lotto.Draw(numbers, lotto.BALLS+1), lotto.Draw(bonuses, 1)...)
 
 	return []TableRow{
