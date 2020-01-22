@@ -89,7 +89,10 @@ export default {
         setsSelected: ["all"],
         machinesSelected: ["all"]
       },
-      qData: {},
+      qData: {
+        timeSeries: {},
+        freqDist: {}
+      },
       layout: {
         freq: {
           title: "Draw Frequency",
