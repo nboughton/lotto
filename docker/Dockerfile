@@ -10,7 +10,7 @@ RUN go build -o site.app github.com/nboughton/lotto
 
 FROM node:latest AS node-build
 
-RUN apt update && apt upgrade -y && apt install -y git
+#RUN apt update && apt upgrade -y && apt install -y git
 
 WORKDIR /build
 

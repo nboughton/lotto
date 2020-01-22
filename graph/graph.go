@@ -74,6 +74,7 @@ func FreqDist(set lotto.ResultSet) Data {
 			if d.Datasets[ball].Name == "" { // Set Name and create Data
 				d.Datasets[ball].Name = fmt.Sprintf("Ball %d", ball+1)
 				d.Datasets[ball].Type = tBar
+				d.Datasets[ball].Mode = "stack"
 				d.Datasets[ball].Y = make(plotly.Axis, lotto.MAXBALLVAL)
 				d.Datasets[ball].X = labels
 			}
@@ -87,6 +88,7 @@ func FreqDist(set lotto.ResultSet) Data {
 		if d.Datasets[lotto.BALLS].Name == "" {
 			d.Datasets[lotto.BALLS].Name = "Bonus"
 			d.Datasets[lotto.BALLS].Type = tBar
+			d.Datasets[lotto.BALLS].Mode = "stack"
 			d.Datasets[lotto.BALLS].Y = make(plotly.Axis, lotto.MAXBALLVAL)
 			d.Datasets[lotto.BALLS].X = labels
 		}
