@@ -11,7 +11,7 @@ import (
 	"github.com/nboughton/stalotto/lotto"
 )
 
-var jsonH = struct {
+var hdr = struct {
 	key string
 	val string
 }{
@@ -67,7 +67,7 @@ func Query(e *Env) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set(jsonH.key, jsonH.val)
+		w.Header().Set(hdr.key, hdr.val)
 		json.NewEncoder(w).Encode(PageData{
 			MainTable:  createMainTableData(e, p),
 			TimeSeries: graph.TimeSeries(set),
@@ -96,7 +96,7 @@ func ListSets(e *Env) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set(jsonH.key, jsonH.val)
+		w.Header().Set(hdr.key, hdr.val)
 		json.NewEncoder(w).Encode(res)
 	})
 }
@@ -121,7 +121,7 @@ func ListMachines(e *Env) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set(jsonH.key, jsonH.val)
+		w.Header().Set(hdr.key, hdr.val)
 		json.NewEncoder(w).Encode(res)
 	})
 }
@@ -143,7 +143,7 @@ func DataRange(e *Env) http.HandlerFunc {
 			l.Unix(),
 		}
 
-		w.Header().Set(jsonH.key, jsonH.val)
+		w.Header().Set(hdr.key, hdr.val)
 		json.NewEncoder(w).Encode(res)
 	})
 }
