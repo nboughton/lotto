@@ -198,7 +198,11 @@ export default {
     onSubmit() {
       this.$axios
         .post("/query", this.params)
-        .then(res => (this.qData = res.data))
+        .then(res => {
+          this.$set(this.qData, "freqDist", res.data.freqDist);
+          this.$set(this.qData, "timeSeries", res.data.timeSeries);
+          this.$set(this.qData, "mainTable", res.data.mainTable);
+        })
         .catch(err => alert(err));
     },
     updateOpts() {
