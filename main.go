@@ -15,11 +15,12 @@ import (
 )
 
 func main() {
-	p := flag.Int("p", 3002, "Set the port the application listens on")
+	p := flag.Int("p", 8000, "Set the port the application listens on")
 	l := flag.Bool("l", true, "Log requests to STDOUT")
 	flag.Parse()
 
 	e := &handler.Env{DB: db.Connect("./results.db")}
+	log.Println("Checking for updates")
 	e.DB.Update()
 
 	// Update at 21:30 every night
@@ -31,13 +32,14 @@ func main() {
 		}
 	}()
 
+	log.Println("Configuring router")
 	r := mux.NewRouter()
-
-	r.Handle("/sets", handler.ListSets(e)).Methods("GET")
-	r.Handle("/machines", handler.ListMachines(e)).Methods("GET")
-	r.Handle("/query", handler.Query(e)).Methods("GET")
+	r.Handle("/sets", handler.ListSets(e)).Methods("POST")
+	r.Handle("/machines", handler.ListMachines(e)).Methods("POST")
+	r.Handle("/query", handler.Query(e)).Methods("POST")
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 
+	log.Println("Starting server")
 	if *l {
 		log.Fatal(
 			http.ListenAndServe(

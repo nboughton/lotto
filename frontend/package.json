@@ -1,68 +1,37 @@
 {
-  "name": "frontend",
-  "version": "1.0.0",
-  "description": "A Vue.js project",
+  "name": "lotto",
+  "version": "0.0.1",
+  "description": "Frontend for lottery data analyisis microsite",
+  "productName": "UK Lotto Stats",
+  "cordovaId": "org.cordova.quasar.app",
   "author": "Nick Boughton <nicholasboughton@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "node build/dev-server.js",
-    "start": "node build/dev-server.js",
-    "build": "node build/build.js"
+    "lint": "eslint --ext .js,.vue src",
+    "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "axios": "^0.19.0",
-    "buefy": "^1.0.0",
-    "bulmaswatch": "^0.4.4",
-    "chart.js": "^2.7.1",
-    "vue": "^2.5.9",
-    "vue-chartjs": "^2.8.7",
-    "vue-resource": "^1.5.1",
-    "vuejs-datepicker": "^0.7.16"
+    "@quasar/extras": "^1.0.0",
+    "axios": "^0.18.1",
+    "plotly.js": "^1.49.5",
+    "quasar": "^1.0.0",
+    "vue-plotly": "^1.0.1"
   },
   "devDependencies": {
-    "autoprefixer": "^6.7.2",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^6.2.10",
-    "babel-plugin-transform-runtime": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-2": "^6.22.0",
-    "babel-register": "^6.26.0",
-    "chalk": "^1.1.3",
-    "connect-history-api-fallback": "^1.6.0",
-    "copy-webpack-plugin": "^4.6.0",
-    "css-loader": "^3.2.0",
-    "eventsource-polyfill": "^0.9.6",
-    "express": "^4.17.1",
-    "extract-text-webpack-plugin": "^2.1.2",
-    "file-loader": "^0.11.2",
-    "friendly-errors-webpack-plugin": "^1.7.0",
-    "html-webpack-plugin": "^2.30.1",
-    "http-proxy-middleware": "^0.18.0",
-    "node-sass": "^4.12.0",
-    "opn": "^4.0.2",
-    "optimize-css-assets-webpack-plugin": "^5.0.3",
-    "ora": "^1.4.0",
-    "rimraf": "^2.7.1",
-    "sass-loader": "^6.0.7",
-    "semver": "^5.7.1",
-    "shelljs": "^0.7.8",
-    "url-loader": "^2.1.0",
-    "vue-loader": "^12.2.2",
-    "vue-style-loader": "^3.1.2",
-    "vue-template-compiler": "^2.6.10",
-    "webpack": "^2.7.0",
-    "webpack-bundle-analyzer": "^3.5.0",
-    "webpack-dev-middleware": "^1.12.2",
-    "webpack-hot-middleware": "^2.25.0",
-    "webpack-merge": "^4.2.2"
+    "@quasar/app": "^1.0.0",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.10.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-vue": "^5.0.0",
+    "ify-loader": "^1.1.0"
   },
   "engines": {
-    "node": ">= 4.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 8.9.0",
+    "npm": ">= 5.6.0",
+    "yarn": ">= 1.6.0"
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
+    "last 1 version, not dead, ie >= 11"
   ]
 }

@@ -1,17 +1,18 @@
 #!/bin/bash
-
 ## Rebuild existing code
-echo "Rebuilding"
-go build -v -o site.app
+echo "Building quasar frontend: public/"
+cd frontend
+quasar b
 if [ $? -ne 0 ]; then
-  echo "BUILD ERROR"
+  echo "Build error!"
   exit 1
 fi
 
-cd frontend
-npm run build
+cd ..
+
+echo "Building Go binary: site.app"
+go build -o site.app
 if [ $? -ne 0 ]; then
-  echo "BUILD ERROR"
+  echo "Build error!"
   exit 1
 fi
-cd ..

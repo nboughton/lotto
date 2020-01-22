@@ -3,51 +3,57 @@ package graph
 import (
 	"fmt"
 
+	plotly "github.com/nboughton/go-plotlytypes"
 	"github.com/nboughton/stalotto/lotto"
 )
 
 const (
-	typeScatter = "scatter"
-	typeBar     = "bar"
-	typeLine    = "line"
+	tScatter = "scatter"
+	tBar     = "bar"
+	tLine    = "line"
 )
-
-// Dataset wraps an individual dataset that can be exported to json
-type Dataset struct {
-	Label string    `json:"label"`
-	Type  string    `json:"type"`
-	Data  []float64 `json:"data"`
-}
 
 // Data groups datasets together to exported and turned into a nice graph
 type Data struct {
-	Labels   []string  `json:"labels"`
-	Datasets []Dataset `json:"datasets"`
+	Datasets []plotly.Dataset `json:"data"`
 }
 
-var formatTSLabel = "06/01/02"
+var (
+	formatTSLabel = "06/01/02"
+	line          = plotly.Line{
+		Width: 1.5,
+	}
+	marker = plotly.Marker{
+		Line: line,
+	}
+)
 
 // TimeSeries creates a Data struct for a time series graph
 func TimeSeries(set lotto.ResultSet) Data {
 	var d Data
-	d.Datasets = make([]Dataset, lotto.BALLS+1)
+	d.Datasets = make([]plotly.Dataset, lotto.BALLS+1)
 
 	for _, row := range set {
 		for ball := 0; ball < lotto.BALLS; ball++ {
-			if d.Datasets[ball].Label == "" {
-				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
-				d.Datasets[ball].Type = typeLine
+			if d.Datasets[ball].Name == "" {
+				d.Datasets[ball].Name = fmt.Sprintf("Ball %d", ball+1)
+				d.Datasets[ball].Type = tLine
+				d.Datasets[ball].Line = line
+				d.Datasets[ball].ConnectGaps = true
 			}
 
-			d.Datasets[ball].Data = append(d.Datasets[ball].Data, float64(row.Balls[ball]))
+			d.Datasets[ball].Y = d.Datasets[ball].Y.AppendInt(row.Balls[ball])
+			d.Datasets[ball].X = d.Datasets[ball].X.AppendStr(fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 		}
 
-		if d.Datasets[lotto.BALLS].Label == "" {
-			d.Datasets[lotto.BALLS].Label = "Bonus"
+		if d.Datasets[lotto.BALLS].Name == "" {
+			d.Datasets[lotto.BALLS].Name = "Bonus"
+			d.Datasets[lotto.BALLS].Type = tLine
+			d.Datasets[lotto.BALLS].Line = line
 		}
 
-		d.Datasets[lotto.BALLS].Data = append(d.Datasets[lotto.BALLS].Data, float64(row.Bonus))
-		d.Labels = append(d.Labels, fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
+		d.Datasets[lotto.BALLS].Y = d.Datasets[lotto.BALLS].Y.AppendInt(row.Bonus)
+		d.Datasets[lotto.BALLS].X = d.Datasets[lotto.BALLS].X.AppendStr(fmt.Sprintf("%s:%s:%d", row.Date.Format(formatTSLabel), row.Machine[:3], row.Set))
 	}
 
 	return d
@@ -56,30 +62,39 @@ func TimeSeries(set lotto.ResultSet) Data {
 // FreqDist creates a Data struct for a frequency distribution graph
 func FreqDist(set lotto.ResultSet) Data {
 	var d Data
-	d.Datasets = make([]Dataset, lotto.BALLS+1)
+	d.Datasets = make([]plotly.Dataset, lotto.BALLS+1)
 	// Populate Labels
+	var labels plotly.Axis
 	for i := 0; i < lotto.MAXBALLVAL; i++ {
-		d.Labels = append(d.Labels, fmt.Sprintf("%d", i+1))
+		labels = labels.AppendStr(fmt.Sprintf("%d", i+1))
 	}
 
 	for _, row := range set {
 		for ball := 0; ball < lotto.BALLS; ball++ {
-			if d.Datasets[ball].Label == "" { // Set Label and create Data
-				d.Datasets[ball].Label = fmt.Sprintf("Ball %d", ball+1)
-				d.Datasets[ball].Type = typeBar
-				d.Datasets[ball].Data = make([]float64, lotto.MAXBALLVAL)
+			if d.Datasets[ball].Name == "" { // Set Name and create Data
+				d.Datasets[ball].Name = fmt.Sprintf("Ball %d", ball+1)
+				d.Datasets[ball].Type = tBar
+				d.Datasets[ball].Y = make(plotly.Axis, lotto.MAXBALLVAL)
+				d.Datasets[ball].X = labels
 			}
 
-			d.Datasets[ball].Data[row.Balls[ball]-1]++
+			var err error
+			if d.Datasets[ball].Y, err = d.Datasets[ball].Y.AddInt(row.Balls[ball]-1, 1); err != nil {
+				fmt.Println(err)
+			}
 		}
 
-		if d.Datasets[lotto.BALLS].Label == "" {
-			d.Datasets[lotto.BALLS].Label = "Bonus"
-			d.Datasets[lotto.BALLS].Type = typeBar
-			d.Datasets[lotto.BALLS].Data = make([]float64, lotto.MAXBALLVAL)
+		if d.Datasets[lotto.BALLS].Name == "" {
+			d.Datasets[lotto.BALLS].Name = "Bonus"
+			d.Datasets[lotto.BALLS].Type = tBar
+			d.Datasets[lotto.BALLS].Y = make(plotly.Axis, lotto.MAXBALLVAL)
+			d.Datasets[lotto.BALLS].X = labels
 		}
 
-		d.Datasets[lotto.BALLS].Data[row.Bonus-1]++
+		var err error
+		if d.Datasets[lotto.BALLS].Y, err = d.Datasets[lotto.BALLS].Y.AddInt(row.Bonus-1, 1); err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	return d
