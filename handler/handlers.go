@@ -171,13 +171,8 @@ func createMainTableData(e *Env, p request) []TableRow {
 	numbers := nSet[:len(nSet)/2]
 
 	bSet := bonus.Prune().Desc().Balls()
-	bonuses, b := bSet[:len(bSet)/2], []int{}
-	if len(bonuses) > 2 {
-		b = lotto.Draw(bonuses, 1)
-	} else {
-		b = bonuses
-	}
-	rand := append(lotto.Draw(numbers, lotto.BALLS+1), b...)
+	bonuses := bSet[:len(bSet)/2]
+	rand := append(lotto.Draw(numbers, lotto.BALLS+1), lotto.Draw(bonuses, 1)...)
 
 	return []TableRow{
 		TableRow{Label: "Most Recent", Num: last},
