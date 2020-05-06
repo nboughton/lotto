@@ -64,7 +64,7 @@
     <plotly :data="qData.timeSeries" />
 
     <div class="text-h4 q-pt-lg">Draw Frequency Data</div>
-    <plotly :data="qData.freqDist" :layout="layout.freq" />
+    <plotly ref="plot" :data="qData.freqDist" :layout="layout.freq" />
   </q-page>
 </template>
 
@@ -221,6 +221,24 @@ export default {
           this.form.machines.unshift("all");
         })
         .catch(err => alert(err));
+    }
+  },
+
+  watch: {
+    "qData.freqDist": {
+      async handler(val) {
+        await this.$nextTick();
+        this.$refs.plot.schedule({ replot: false });
+      },
+      deep: true
+    },
+    "layout.freq": {
+      async handler(val) {
+        this.$refs.plot.innerLayout = val;
+        await this.$nextTick();
+        this.$refs.plot.schedule({ replot: false });
+      },
+      deep: true
     }
   }
 };
