@@ -11,14 +11,14 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@quasar/extras": "^1.7.0",
+    "@quasar/extras": "^1.8.2",
     "axios": "^0.18.1",
-    "plotly.js": "^1.54.1",
-    "quasar": "^1.10.5",
+    "plotly.js": "^1.54.6",
+    "quasar": "^1.12.11",
     "vue-plotly": "^1.1.0"
   },
   "devDependencies": {
-    "@quasar/app": "^1.8.5",
+    "@quasar/app": "^1.9.6",
     "@vue/eslint-config-standard": "^4.0.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^5.10.0",
