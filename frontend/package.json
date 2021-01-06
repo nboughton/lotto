@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.8.2",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "plotly.js": "^1.54.6",
     "quasar": "^1.12.11",
     "vue-plotly": "^1.1.0"
